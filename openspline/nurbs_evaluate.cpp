@@ -1,7 +1,5 @@
 #include "nurbs_evaluate.h"
 
-#include <iostream>
-using namespace std;
 
 namespace ospl {
 namespace nurbs {
@@ -121,3 +119,35 @@ void basisFunctions(int deg, int span, const std::vector<double> &knots, double 
 
 } // namespace nurbs
 } // namespace ospl
+
+// Explicit template function instantiations for glm vec2, vec3, dvec2
+// and dvec3 types; these are the only relevant types.
+template void ospl::nurbs::curvePoint<2, float>(double u, int degree, 
+	const std::vector<double> &knots,
+	const std::vector<glm::vec2> &controlPoints, glm::vec2 &point);
+template void ospl::nurbs::curvePoint<2, double>(double u, int degree,
+	const std::vector<double> &knots,
+	const std::vector<glm::dvec2> &controlPoints, glm::dvec2 &point);
+template void ospl::nurbs::curvePoint<3, float>(double u, int degree,
+	const std::vector<double> &knots,
+	const std::vector<glm::vec3> &controlPoints, glm::vec3 &point);
+template void ospl::nurbs::curvePoint<3, double>(double u, int degree,
+	const std::vector<double> &knots,
+	const std::vector<glm::dvec3> &controlPoints, glm::dvec3 &point);
+
+template void ospl::nurbs::rationalCurvePoint<2, float>(double u, int degree,
+	const std::vector<double> &knots, 
+	const std::vector<glm::vec2> &controlPoints,
+	const std::vector<float> &w, glm::vec2 &point);
+template void ospl::nurbs::rationalCurvePoint<2, double>(double u, int degree,
+	const std::vector<double> &knots,
+	const std::vector<glm::dvec2> &controlPoints,
+	const std::vector<double> &w, glm::dvec2 &point);
+template void ospl::nurbs::rationalCurvePoint<3, float>(double u, int degree,
+	const std::vector<double> &knots,
+	const std::vector<glm::vec3> &controlPoints,
+	const std::vector<float> &w, glm::vec3 &point);
+template void ospl::nurbs::rationalCurvePoint<3, double>(double u, int degree,
+	const std::vector<double> &knots,
+	const std::vector<glm::dvec3> &controlPoints,
+	const std::vector<double> &w, glm::dvec3 &point);

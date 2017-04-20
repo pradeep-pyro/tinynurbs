@@ -42,14 +42,14 @@ Evaluate point on a nonrational NURBS curve
 @param[in] controlPoints Control points of the curve.
 @param[in, out] point Resulting point on the curve at parameter u.
 */
-template <int nd, typename T>
+template <int dim, typename T>
 void curvePoint(double u, int degree, const std::vector<double> &knots,
-	const std::vector<glm::vec<nd, T>> &controlPoints, glm::vec<nd, T> &point) {
+	const std::vector<glm::vec<dim, T>> &controlPoints, glm::vec<dim, T> &point) {
 	// Initialize result to 0s
-	for (int i = 0; i < nd; i++) {
-		point[i] = 0.0;
+	for (int i = 0; i < dim; i++) {
+		point[i] = static_cast<T>(0.0);
 	}
-	
+
 	// Find span and non-zero basis functions
 	int span = findSpan(degree, knots, u);
 	std::vector<double> N;
@@ -57,7 +57,7 @@ void curvePoint(double u, int degree, const std::vector<double> &knots,
 
 	// Compute point: \sum_{j = 0}^{degree} N_j * C_j
 	for (int j = 0; j <= degree; j++) {
-		point += (T)N[j] * controlPoints[span - degree + j];
+		point += static_cast<T>(N[j]) * controlPoints[span - degree + j];
 	}
 }
 
@@ -92,19 +92,23 @@ Evaluate point on a rational NURBS curve
 @param[in] weights Weights corresponding to each control point.
 @param[in, out] point Resulting point on the curve.
 */
-template <int nd, typename T>
+template <int dim, typename T>
 void rationalCurvePoint(double u, int degree,
 	const std::vector<double> &knots,
-	const std::vector<glm::vec<nd, T>> &controlPoints,
-	const std::vector<T> &weights, glm::vec<nd, T> &point) {
-	
-	std::vector<glm::vec<nd + 1, T>> Cw;
+	const std::vector<glm::vec<dim, T>> &controlPoints,
+	const std::vector<T> &weights, glm::vec<dim, T> &point) {
+
+	typedef glm::vec<dim + 1, T> tvecnp1;
+
+	std::vector<tvecnp1> Cw;
 	Cw.reserve(controlPoints.size());
 	for (int i = 0; i < controlPoints.size(); i++) {
-		Cw.push_back(cartesianToHomogenous(controlPoints[i], weights[i]));
+		Cw.push_back(tvecnp1(
+					cartesianToHomogenous(controlPoints[i], weights[i])
+			        ));
 	}
 
-	glm::vec<nd + 1, T> pointw;
+	tvecnp1 pointw;
 	curvePoint(u, degree, knots, Cw, pointw);
 	point = homogenousToCartesian(pointw);
 }

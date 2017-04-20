@@ -2,7 +2,7 @@
 @file openspline/nurbs_curve.h
 @author Pradeep Kumar Jayaraman <pradeep.pyro@gmail.com>
 
-The NurbsCurve class represents an n-dimensional non-uniform rational curve.
+The NurbsCurve class represents an non-uniform rational B-spline curve.
 
 Use of this source code is governed by a BSD-style license that can be found in
 the LICENSE.txt file.
@@ -51,13 +51,13 @@ public:
 		isRational_ = true;
 	}
 	
-	vecnt pointAt(T u) {
+	vecnt pointAt(double u) {
 		vecnt pt;
 		if (!isRational_) {
-			nurbs::curvePoint(u, deg_, knots_, cp_, pt);
+			nurbs::curvePoint<nd, T>(u, deg_, knots_, cp_, pt);
 		}
 		else {
-			nurbs::rationalCurvePoint(u, deg_, knots_, cp_, w_, pt);
+			nurbs::rationalCurvePoint<nd, T>(u, deg_, knots_, cp_, w_, pt);
 		}
 		return pt;
 	}
@@ -88,7 +88,7 @@ public:
 			knots_.insert(knots_.begin(), deg_, startKnot);
 		}
 		if (!flag && isClamped0_) {
-			knots_.erase(knots.begin(), knots.begin() + deg_);
+			knots_.erase(knots_.begin(), knots_.begin() + deg_);
 		}
 		isClamped0_ = flag;
 	}
@@ -99,7 +99,7 @@ public:
 			knots_.insert(knots_.end(), deg_, endKnot);
 		}
 		if (!flag && isClamped1_) {
-			knots_.erase(knots.end() - deg_, knots.end());
+			knots_.erase(knots_.end() - deg_, knots_.end());
 		}
 		isClamped1_ = flag;
 	}
@@ -123,5 +123,10 @@ private:
 	bool isClosed_;
 };
 
+
+typedef NurbsCurve<2, float> NurbsCurve2f;
+typedef NurbsCurve<2, double> NurbsCurve2d;
+typedef NurbsCurve<3, float> NurbsCurve3f;
+typedef NurbsCurve<3, double> NurbsCurve3d;
 
 } // namespace ospl
