@@ -15,6 +15,8 @@ the LICENSE.txt file.
 
 #include "glm/glm.hpp"
 
+#include "util.h"
+
 namespace {
 
 bool close(double a, double b, double eps = std::numeric_limits<double>::epsilon()) {
@@ -29,10 +31,13 @@ namespace nurbs {
 
 int findSpan(int degree, const std::vector<double> &knots, double u);
 
-double basisFunction(int i, int p, const std::vector<double> &U, double u);
+double basisFunction(int i, int deg, const std::vector<double> &U, double u);
 
 void basisFunctions(int deg, int span, const std::vector<double> &knots,
 	double u, std::vector<double> &N);
+
+void derivativeBasisFunctions(int deg, int span, const std::vector<double> &knots,
+	double u, int nDers, std::vector<std::vector<double>> &Nk);
 
 /**
 Evaluate point on a nonrational NURBS curve
@@ -43,7 +48,7 @@ Evaluate point on a nonrational NURBS curve
 @param[in, out] point Resulting point on the curve at parameter u.
 */
 template <int dim, typename T>
-void curvePoint(double u, int degree, const std::vector<double> &knots,
+void curvePoint(double u, uint8_t degree, const std::vector<double> &knots,
 	const std::vector<glm::vec<dim, T>> &controlPoints, glm::vec<dim, T> &point) {
 	// Initialize result to 0s
 	for (int i = 0; i < dim; i++) {
@@ -62,29 +67,6 @@ void curvePoint(double u, int degree, const std::vector<double> &knots,
 }
 
 /**
-Convert an nd point in homogenous coordinates to an (n-1)d point in cartesian
-coordinates by perspective division
-@param[in] pt Point in homogenous coordinates
-@return Input point in cartesian coordinates
-*/
-template<int nd, typename T>
-glm::vec<nd - 1, T> homogenousToCartesian(glm::vec<nd, T> pt) {
-	return glm::vec<nd - 1, T>(pt / pt[pt.length()-1]);
-}
-
-/**
-Convert an nd point in cartesian coordinates to an (n+1)d point in homogenous
-coordinates
-@param[in] pt Point in cartesian coordinates
-@param[in] w Weight
-@return Input point in homogenous coordinates
-*/
-template<int nd, typename T>
-glm::vec<nd + 1, T> cartesianToHomogenous(glm::vec<nd, T> pt, T w) {
-	return glm::vec<nd + 1, T>(pt * w, w);
-}
-
-/**
 Evaluate point on a rational NURBS curve
 @param[in] u Parameter to evaluate the curve at.
 @param[in] knots Knot vector of the curve.
@@ -93,24 +75,53 @@ Evaluate point on a rational NURBS curve
 @param[in, out] point Resulting point on the curve.
 */
 template <int dim, typename T>
-void rationalCurvePoint(double u, int degree,
+void rationalCurvePoint(double u, uint8_t degree,
 	const std::vector<double> &knots,
 	const std::vector<glm::vec<dim, T>> &controlPoints,
 	const std::vector<T> &weights, glm::vec<dim, T> &point) {
 
 	typedef glm::vec<dim + 1, T> tvecnp1;
 
+	// Compute homogenous coordinates of control points
 	std::vector<tvecnp1> Cw;
 	Cw.reserve(controlPoints.size());
 	for (int i = 0; i < controlPoints.size(); i++) {
 		Cw.push_back(tvecnp1(
-					cartesianToHomogenous(controlPoints[i], weights[i])
-			        ));
+			util::cartesianToHomogenous(controlPoints[i], weights[i])
+		));
 	}
 
+	// Compute point using homogenous coordinates
 	tvecnp1 pointw;
 	curvePoint(u, degree, knots, Cw, pointw);
-	point = homogenousToCartesian(pointw);
+
+	// Convert back to cartesian coordinates
+	point = util::homogenousToCartesian(pointw);
+}
+
+template <int dim, typename T>
+void curveDerivatives(double u, uint8_t degree,
+	const std::vector<double> &knots,
+	const std::vector<glm::vec<dim, T>> &controlPoints,
+	int nDers, std::vector<glm::vec<dim, T>> &curveDers) {
+
+	curveDers.clear();
+	curveDers.resize(nDers + 1);
+	for (int k = degree + 1; k <= nDers; k++) {
+		curveDers[k] = glm::vec<dim, T>(0.0);
+	}
+	
+	int span = findSpan(degree, knots, u);
+	std::vector<std::vector<double>> nders;
+	derivativeBasisFunctions(degree, span, knots, u, nDers, nders);
+	int du = nDers < degree ? nDers : degree;
+	for (int k = 0; k <= du; k++) {
+		curveDers[k] = glm::vec<dim, T>(0.0);
+		for (int j = 0; j <= degree; j++) {
+			curveDers[k] += static_cast<T>(nders[k][j]) *
+				controlPoints[span - degree + j];
+		}
+	}
 }
 
 } // namespace nurbs

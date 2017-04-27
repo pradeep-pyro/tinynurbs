@@ -33,7 +33,7 @@ public:
 		deg_ = degree;
 		knots_ = knots;
 		cp_ = controlPoints;
-		isRational_ = false;
+		isRat_ = false;
 	}
 
 	NurbsCurve(unsigned int degree, const std::vector<double> &knots, 
@@ -48,18 +48,38 @@ public:
 		knots_ = knots;
 		cp_ = controlPoints;
 		w_ = weights;
-		isRational_ = true;
+		isRat_ = true;
 	}
 	
-	vecnt pointAt(double u) {
+	vecnt point(double u) {
 		vecnt pt;
-		if (!isRational_) {
+		if (!isRat_) {
 			nurbs::curvePoint<nd, T>(u, deg_, knots_, cp_, pt);
 		}
 		else {
 			nurbs::rationalCurvePoint<nd, T>(u, deg_, knots_, cp_, w_, pt);
 		}
 		return pt;
+	}
+
+	void pointAndDerivatives(double u, std::vector<vecnt> &ptder) {
+		if (!isRat_) {
+			nurbs::curveDerivatives<nd, T>(u, deg_, knots_, cp_, 1, ptder);
+		}
+		else {
+			//nurbs::curveDerivatives<nd, T>(u, deg_, knots_, cp_, w_, 1, ptder);
+		}
+	}
+
+	vecnt tangent(double u) {
+		std::vector<vecnt> tgt;
+		if (!isRat_) {
+			nurbs::curveDerivatives<nd, T>(u, deg_, knots_, cp_, 1, tgt);
+		}
+		else {
+			// nurbs::rationalCurvePoint<nd, T>(u, deg_, knots_, cp_, w_, pt);
+		}
+		return tgt[1];
 	}
 
 	vecnt controlPoint(int i) const {
@@ -79,29 +99,29 @@ public:
 	}
 
 	void setRational(bool isRational) {
-		isRational_ = isRational;
+		isRat_ = isRational;
 	}
 
 	void setClampedAtStart(bool flag) {
-		if (flag && !isClamped0_) {
+		if (flag && !isClamp0_) {
 			double startKnot = knots_[0];
 			knots_.insert(knots_.begin(), deg_, startKnot);
 		}
-		if (!flag && isClamped0_) {
+		if (!flag && isClamp0_) {
 			knots_.erase(knots_.begin(), knots_.begin() + deg_);
 		}
-		isClamped0_ = flag;
+		isClamp0_ = flag;
 	}
 
 	void setClampedAtEnd(bool flag) {
-		if (flag && !isClamped1_) {
+		if (flag && !isClamp1_) {
 			double endKnot = knots_[knots_.size() - 1];
 			knots_.insert(knots_.end(), deg_, endKnot);
 		}
-		if (!flag && isClamped1_) {
+		if (!flag && isClamp1_) {
 			knots_.erase(knots_.end() - deg_, knots_.end());
 		}
-		isClamped1_ = flag;
+		isClamp1_ = flag;
 	}
 
 	void setClosed(bool flag) {
@@ -118,12 +138,12 @@ private:
 	std::vector<double> knots_;
 	std::vector<vecnt> cp_;
 	std::vector<T> w_;
-	bool isRational_;
-	bool isClamped0_, isClamped1_;
+	bool isRat_;
+	bool isClamp0_, isClamp1_;
 	bool isClosed_;
 };
 
-
+// Typedefs for ease of use
 typedef NurbsCurve<2, float> NurbsCurve2f;
 typedef NurbsCurve<2, double> NurbsCurve2d;
 typedef NurbsCurve<3, float> NurbsCurve3f;

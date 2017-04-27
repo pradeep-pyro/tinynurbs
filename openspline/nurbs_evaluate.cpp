@@ -1,5 +1,5 @@
 #include "nurbs_evaluate.h"
-
+#include "array2.h"
 
 namespace ospl {
 namespace nurbs {
@@ -46,29 +46,34 @@ int findSpan(int degree, const std::vector<double> &knots, double u) {
 
 /**
 Compute a single B-spline basis function
+@param[in] i The ith basis function to compute.
+@param[in] deg Degree of the basis function.
+@param[in] knots Knot vector corresponding to the basis functions.
+@param[in] u Parameter to evaluate the basis functions at.
+@return The value of the ith basis function at u.
 */
 // 
-double basisFunction(int i, int p, const std::vector<double> &U, double u) {
+double basisFunction(int i, int deg, const std::vector<double> &U, double u) {
 	int m = U.size() - 1;
 	// Special case
-	if ((i == 0 && close(u, U[0])) || (i == m - p - 1 && close(u, U[m]))) {
+	if ((i == 0 && close(u, U[0])) || (i == m - deg - 1 && close(u, U[m]))) {
 		return 1.0;
 	}
 	// Local Property
-	if (u < U[i] || u >= U[i + p + 1]) {
+	if (u < U[i] || u >= U[i + deg + 1]) {
 		return 0.0;
 	}
 	// Initialize zeroth-degree functions
 	std::vector<double> N;
-	N.resize(p + 1);
-	for (int j = 0; j <= p; j++) {
+	N.resize(deg + 1);
+	for (int j = 0; j <= deg; j++) {
 		N[j] = (u >= U[i + j] && u < U[i + j + 1]) ? 1.0 : 0.0;
 	}
 	// Compute triangular table
-	for (int k = 1; k <= p; k++) {
+	for (int k = 1; k <= deg; k++) {
 		double saved = (close(N[0], 0.0)) ? 0.0
 			: ((u - U[i])*N[0]) / (U[i + k] - U[i]);
-		for (int j = 0; j < p - k + 1; j++) {
+		for (int j = 0; j < deg - k + 1; j++) {
 			double Uleft = U[i + j + 1];
 			double Uright = U[i + j + k + 1];
 			if (close(N[j + 1], 0.0)) {
@@ -117,37 +122,164 @@ void basisFunctions(int deg, int span, const std::vector<double> &knots, double 
 	}
 }
 
+/**
+// Compute all non-zero derivatives of B-spline basis functions
+@param[in] deg Degree of the basis function.
+@param[in] span Index obtained from findSpan() corresponding the u and knots.
+@param[in] knots Knot vector corresponding to the basis functions.
+@param[in] u Parameter to evaluate the basis functions at.
+@param[in] nDers Number of derivatives to compute (nDers <= deg)
+@param[in, out] N Values of (deg+1) non-zero basis functions.
+@param[in, out] Nk Values of non-zero derivatives of basis functions.
+*/
+void derivativeBasisFunctions(int deg, int span,
+	const std::vector<double>& knots, double u,
+	int nDers, std::vector<std::vector<double>> &ders) {
+
+	std::vector<double> left, right;
+	left.resize(deg + 1, 0.0);
+	right.resize(deg + 1, 0.0);
+	double saved = 0.0, temp = 0.0;
+	
+	array2<double> ndu(deg + 1, deg + 1);
+	ndu(0, 0) = 1.0;
+
+	for (int j = 1; j <= deg; j++) {
+		left[j] = u - knots[span + 1 - j];
+		right[j] = knots[span + j] - u;
+		saved = 0.0;
+
+		for (int r = 0; r < j; r++) {
+			// Lower triangle
+			ndu(j, r) = right[r + 1] + left[j - r];
+			temp = ndu(r, j - 1) / ndu(j, r);
+			// Upper triangle
+			ndu(r, j) = saved + right[r + 1] * temp;
+			saved = left[j - r] * temp;
+		}
+
+		ndu(j, j) = saved;
+	}
+	
+	ders.clear();
+	ders.resize(nDers + 1);
+	for (int i = 0; i < ders.size(); i++) {
+		ders[i].resize(deg + 1, 0.0);
+	}
+
+	for (int j = 0; j <= deg; j++) {
+		ders[0][j] = ndu(j, deg);
+	}
+
+	array2<double> a(2, deg+1);
+
+	for (int r = 0; r <= deg; r++) {
+		int s1 = 0;
+		int s2 = 1;
+		a(0, 0) = 1.0;
+
+		for (int k = 1; k <= nDers; k++) {
+			double d = 0.0;
+			int rk = r - k;
+			int pk = deg - k;
+			int j1 = 0;
+			int j2 = 0;
+
+			if (r >= k) {
+				a(s2, 0) = a(s1, 0) / ndu(pk + 1, rk);
+				d = a(s2, 0) * ndu(rk, pk);
+			}
+
+			if (rk >= -1) {
+				j1 = 1;
+			}
+			else {
+				j1 = -rk;
+			}
+
+			if (r - 1 <= pk) {
+				j2 = k - 1;
+			}
+			else {
+				j2 = deg - r;
+			}
+
+			for (int j = j1; j <= j2; j++) {
+				a(s2, j) = (a(s1, j) - a(s1, j - 1)) / ndu(pk + 1, rk + j);
+				d += a(s2, j) * ndu(rk + j, pk);
+			}
+
+			if (r <= pk) {
+				a(s2, k) = -a(s1, k - 1) / ndu(pk + 1, r);
+				d += a(s2, k) * ndu(r, pk);
+			}
+
+			
+			ders[k][r] = d;
+
+			int temp = s1;
+			s1 = s2;
+			s2 = temp;
+		}
+	}
+
+	double fac = static_cast<double>(deg);
+	for (int k = 1; k <= nDers; k++) {
+		for (int j = 0; j <= deg; j++) {
+			ders[k][j] *= fac;
+		}
+		fac *= static_cast<double>(deg - k);
+	}
+}
+
 } // namespace nurbs
 } // namespace ospl
 
 // Explicit template function instantiations for glm vec2, vec3, dvec2
 // and dvec3 types; these are the only relevant types.
-template void ospl::nurbs::curvePoint<2, float>(double u, int degree, 
+template void ospl::nurbs::curvePoint<2, float>(double u, uint8_t degree, 
 	const std::vector<double> &knots,
 	const std::vector<glm::vec2> &controlPoints, glm::vec2 &point);
-template void ospl::nurbs::curvePoint<2, double>(double u, int degree,
+template void ospl::nurbs::curvePoint<2, double>(double u, uint8_t degree,
 	const std::vector<double> &knots,
 	const std::vector<glm::dvec2> &controlPoints, glm::dvec2 &point);
-template void ospl::nurbs::curvePoint<3, float>(double u, int degree,
+template void ospl::nurbs::curvePoint<3, float>(double u, uint8_t degree,
 	const std::vector<double> &knots,
 	const std::vector<glm::vec3> &controlPoints, glm::vec3 &point);
-template void ospl::nurbs::curvePoint<3, double>(double u, int degree,
+template void ospl::nurbs::curvePoint<3, double>(double u, uint8_t degree,
 	const std::vector<double> &knots,
 	const std::vector<glm::dvec3> &controlPoints, glm::dvec3 &point);
 
-template void ospl::nurbs::rationalCurvePoint<2, float>(double u, int degree,
+template void ospl::nurbs::rationalCurvePoint<2, float>(double u, uint8_t degree,
 	const std::vector<double> &knots, 
 	const std::vector<glm::vec2> &controlPoints,
-	const std::vector<float> &w, glm::vec2 &point);
-template void ospl::nurbs::rationalCurvePoint<2, double>(double u, int degree,
+	const std::vector<float> &weights, glm::vec2 &point);
+template void ospl::nurbs::rationalCurvePoint<2, double>(double u, uint8_t degree,
 	const std::vector<double> &knots,
 	const std::vector<glm::dvec2> &controlPoints,
-	const std::vector<double> &w, glm::dvec2 &point);
-template void ospl::nurbs::rationalCurvePoint<3, float>(double u, int degree,
+	const std::vector<double> &weights, glm::dvec2 &point);
+template void ospl::nurbs::rationalCurvePoint<3, float>(double u, uint8_t degree,
 	const std::vector<double> &knots,
 	const std::vector<glm::vec3> &controlPoints,
-	const std::vector<float> &w, glm::vec3 &point);
-template void ospl::nurbs::rationalCurvePoint<3, double>(double u, int degree,
+	const std::vector<float> &weights, glm::vec3 &point);
+template void ospl::nurbs::rationalCurvePoint<3, double>(double u, uint8_t degree,
 	const std::vector<double> &knots,
 	const std::vector<glm::dvec3> &controlPoints,
-	const std::vector<double> &w, glm::dvec3 &point);
+	const std::vector<double> &weights, glm::dvec3 &point);
+
+template void ospl::nurbs::curveDerivatives<2, float>(double u, uint8_t degree,
+	const std::vector<double> &knots,
+	const std::vector<glm::vec2> &controlPoints,
+	int nDers, std::vector<glm::vec2> &ders);
+template void ospl::nurbs::curveDerivatives<2, double>(double u, uint8_t degree,
+	const std::vector<double> &knots,
+	const std::vector<glm::dvec2> &controlPoints,
+	int nDers, std::vector<glm::dvec2> &ders);
+template void ospl::nurbs::curveDerivatives<3, float>(double u, uint8_t degree,
+	const std::vector<double> &knots,
+	const std::vector<glm::vec3> &controlPoints,
+	int nDers, std::vector<glm::vec3> &ders);
+template void ospl::nurbs::curveDerivatives<3, double>(double u, uint8_t degree,
+	const std::vector<double> &knots,
+	const std::vector<glm::dvec3> &controlPoints,
+	int nDers, std::vector<glm::dvec3> &ders);
