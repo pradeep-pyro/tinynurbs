@@ -33,6 +33,8 @@ public:
 		knots_ = knots;
 		cp_ = controlPoints;
 		isRat_ = false;
+		isClamp0_ = false;
+		isClamp1_ = false;
 	}
 
 	NurbsCurve(unsigned int degree, const std::vector<double> &knots, 
@@ -53,24 +55,19 @@ public:
 		return pt;
 	}
 
-	void pointAndDerivatives(double u, std::vector<vecnt> &ptder) {
+	void pointAndDerivatives(double u, int nDers, std::vector<vecnt> &ptder) {
 		if (!isRat_) {
-			nurbsCurveDerivatives<nd, T>(u, deg_, knots_, cp_, 1, ptder);
+			nurbsCurveDerivatives<nd, T>(u, deg_, knots_, cp_, nDers, ptder);
 		}
 		else {
-			//nurbs::curveDerivatives<nd, T>(u, deg_, knots_, cp_, w_, 1, ptder);
+			//nurbsRationalCurveDerivatives<nd, T>(u, deg_, knots_, cp_, w_, 1, ptder);
 		}
 	}
 
 	vecnt tangent(double u) {
-		std::vector<vecnt> tgt;
-		if (!isRat_) {
-			nurbsCurveDerivatives<nd, T>(u, deg_, knots_, cp_, 1, tgt);
-		}
-		else {
-			// nurbs::rationalCurvePoint<nd, T>(u, deg_, knots_, cp_, w_, pt);
-		}
-		return tgt[1];
+		std::vector<vecnt> ders;
+		pointAndDerivatives(u, 1, ders);
+		return glm::normalize(ders[1]);
 	}
 
 	vecnt controlPoint(int i) const {
@@ -93,26 +90,38 @@ public:
 		isRat_ = isRational;
 	}
 
-	void setClampedAtStart(bool flag) {
-		if (flag && !isClamp0_) {
-			double startKnot = knots_[0];
-			knots_.insert(knots_.begin(), deg_, startKnot);
+	void clampStart() {
+		if (isClamp0_) {
+			return;
 		}
-		if (!flag && isClamp0_) {
-			knots_.erase(knots_.begin(), knots_.begin() + deg_);
-		}
-		isClamp0_ = flag;
+		double startKnot = knots_[0];
+		knots_.insert(knots_.begin(), deg_, startKnot);
+		isClamp0_ = true;
 	}
 
-	void setClampedAtEnd(bool flag) {
-		if (flag && !isClamp1_) {
-			double endKnot = knots_[knots_.size() - 1];
-			knots_.insert(knots_.end(), deg_, endKnot);
+	void unclampStart() {
+		if (!isClamp0_) {
+			return;
 		}
-		if (!flag && isClamp1_) {
-			knots_.erase(knots_.end() - deg_, knots_.end());
+		knots_.erase(knots_.begin(), knots_.begin() + deg_);
+		isClamp0_ = false;
+	}
+
+	void clampEnd() {
+		if (isClamp1_) {
+			return;
 		}
-		isClamp1_ = flag;
+		double endKnot = knots_[knots_.size() - 1];
+		knots_.insert(knots_.end(), deg_, endKnot);
+		isClamp1_ = true;
+	}
+
+	void unclampEnd() {
+		if (!isClamp1_) {
+			return;
+		}
+		knots_.erase(knots_.end() - deg_, knots_.end());
+		isClamp1_ = false;
 	}
 
 	void setClosed(bool flag) {
