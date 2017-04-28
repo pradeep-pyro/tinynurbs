@@ -24,11 +24,10 @@ public:
 	NurbsCurve() {};
 
 	NurbsCurve(unsigned int degree, const std::vector<double> &knots,
-		const std::vector<vecnt> &controlPoints) throw (std::logic_error) {
-		if (knots.size() != controlPoints.size() + degree + 1) {
-			throw std::logic_error("Mismatch between degree, knots and control \
-		points");
-			return;
+		const std::vector<vecnt> &controlPoints) {
+		if (!nurbs::isValidRelation(degree, knots.size(), 
+			controlPoints.size())) {
+			throw std::logic_error("nKnots != degree + nCtrlPts + 1");
 		}
 		deg_ = degree;
 		knots_ = knots;
@@ -39,14 +38,7 @@ public:
 	NurbsCurve(unsigned int degree, const std::vector<double> &knots, 
 		const std::vector<vecnt> &controlPoints, const std::vector<T> &weights)
 		throw (std::logic_error) {
-		if (knots.size() != controlPoints.size() + degree + 1) {
-			throw std::logic_error("Mismatch between degree, knots and control \
-				points");
-			return;
-		}
-		deg_ = degree;
-		knots_ = knots;
-		cp_ = controlPoints;
+		NurbsCurve(degree, knots, controlPoints);
 		w_ = weights;
 		isRat_ = true;
 	}

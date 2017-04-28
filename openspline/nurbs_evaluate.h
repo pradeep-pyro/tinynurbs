@@ -15,29 +15,27 @@ the LICENSE.txt file.
 
 #include "glm/glm.hpp"
 
+#include "bspline_basis.h"
 #include "util.h"
-
-namespace {
-
-bool close(double a, double b, double eps = std::numeric_limits<double>::epsilon()) {
-	return (std::abs(a - b) < eps) ? true : false;
-}
-
-} // namespace
-
 
 namespace ospl {
 namespace nurbs {
 
-int findSpan(int degree, const std::vector<double> &knots, double u);
+/**
+Checks if the relation between degree, number of knots, and
+number of control points is valid
+@param degree Degree of the NURBS curve
+@param nKnots Number of knot values
+@param nCtrlPts Number of control points
+@return Whether the relationship is valid
+*/
+bool isValidRelation(int degree, int nKnots, int nCtrlPts) {
+	if (nKnots != nCtrlPts + degree + 1) {
+		return false;
+	}
+	return true;
+}
 
-double basisFunction(int i, int deg, const std::vector<double> &U, double u);
-
-void basisFunctions(int deg, int span, const std::vector<double> &knots,
-	double u, std::vector<double> &N);
-
-void derivativeBasisFunctions(int deg, int span, const std::vector<double> &knots,
-	double u, int nDers, std::vector<std::vector<double>> &Nk);
 
 /**
 Evaluate point on a nonrational NURBS curve
