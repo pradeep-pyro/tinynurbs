@@ -19,7 +19,6 @@ the LICENSE.txt file.
 #include "util.h"
 
 namespace ospl {
-namespace nurbs {
 
 /**
 Checks if the relation between degree, number of knots, and
@@ -46,7 +45,7 @@ Evaluate point on a nonrational NURBS curve
 @param[in, out] point Resulting point on the curve at parameter u.
 */
 template <int dim, typename T>
-void curvePoint(double u, uint8_t degree, const std::vector<double> &knots,
+void nurbsCurvePoint(double u, uint8_t degree, const std::vector<double> &knots,
 	const std::vector<glm::vec<dim, T>> &controlPoints, glm::vec<dim, T> &point) {
 	// Initialize result to 0s
 	for (int i = 0; i < dim; i++) {
@@ -56,7 +55,7 @@ void curvePoint(double u, uint8_t degree, const std::vector<double> &knots,
 	// Find span and non-zero basis functions
 	int span = findSpan(degree, knots, u);
 	std::vector<double> N;
-	basisFunctions(degree, span, knots, u, N);
+	bsplineBasis(degree, span, knots, u, N);
 
 	// Compute point: \sum_{j = 0}^{degree} N_j * C_j
 	for (int j = 0; j <= degree; j++) {
@@ -73,7 +72,7 @@ Evaluate point on a rational NURBS curve
 @param[in, out] point Resulting point on the curve.
 */
 template <int dim, typename T>
-void rationalCurvePoint(double u, uint8_t degree,
+void nurbsRationalCurvePoint(double u, uint8_t degree,
 	const std::vector<double> &knots,
 	const std::vector<glm::vec<dim, T>> &controlPoints,
 	const std::vector<T> &weights, glm::vec<dim, T> &point) {
@@ -91,14 +90,14 @@ void rationalCurvePoint(double u, uint8_t degree,
 
 	// Compute point using homogenous coordinates
 	tvecnp1 pointw;
-	curvePoint(u, degree, knots, Cw, pointw);
+	nurbsCurvePoint(u, degree, knots, Cw, pointw);
 
 	// Convert back to cartesian coordinates
 	point = util::homogenousToCartesian(pointw);
 }
 
 template <int dim, typename T>
-void curveDerivatives(double u, uint8_t degree,
+void nurbsCurveDerivatives(double u, uint8_t degree,
 	const std::vector<double> &knots,
 	const std::vector<glm::vec<dim, T>> &controlPoints,
 	int nDers, std::vector<glm::vec<dim, T>> &curveDers) {
@@ -111,7 +110,7 @@ void curveDerivatives(double u, uint8_t degree,
 	
 	int span = findSpan(degree, knots, u);
 	std::vector<std::vector<double>> nders;
-	derivativeBasisFunctions(degree, span, knots, u, nDers, nders);
+	bsplineDerBasis(degree, span, knots, u, nDers, nders);
 	int du = nDers < degree ? nDers : degree;
 	for (int k = 0; k <= du; k++) {
 		curveDers[k] = glm::vec<dim, T>(0.0);
@@ -122,5 +121,4 @@ void curveDerivatives(double u, uint8_t degree,
 	}
 }
 
-} // namespace nurbs
 } // namespace ospl

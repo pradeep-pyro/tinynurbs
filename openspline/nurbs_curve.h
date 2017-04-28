@@ -25,7 +25,7 @@ public:
 
 	NurbsCurve(unsigned int degree, const std::vector<double> &knots,
 		const std::vector<vecnt> &controlPoints) {
-		if (!nurbs::isValidRelation(degree, knots.size(), 
+		if (!isValidRelation(degree, knots.size(), 
 			controlPoints.size())) {
 			throw std::logic_error("nKnots != degree + nCtrlPts + 1");
 		}
@@ -36,8 +36,7 @@ public:
 	}
 
 	NurbsCurve(unsigned int degree, const std::vector<double> &knots, 
-		const std::vector<vecnt> &controlPoints, const std::vector<T> &weights)
-		throw (std::logic_error) {
+		const std::vector<vecnt> &controlPoints, const std::vector<T> &weights) {
 		NurbsCurve(degree, knots, controlPoints);
 		w_ = weights;
 		isRat_ = true;
@@ -46,17 +45,17 @@ public:
 	vecnt point(double u) {
 		vecnt pt;
 		if (!isRat_) {
-			nurbs::curvePoint<nd, T>(u, deg_, knots_, cp_, pt);
+			nurbsCurvePoint<nd, T>(u, deg_, knots_, cp_, pt);
 		}
 		else {
-			nurbs::rationalCurvePoint<nd, T>(u, deg_, knots_, cp_, w_, pt);
+			nurbsRationalCurvePoint<nd, T>(u, deg_, knots_, cp_, w_, pt);
 		}
 		return pt;
 	}
 
 	void pointAndDerivatives(double u, std::vector<vecnt> &ptder) {
 		if (!isRat_) {
-			nurbs::curveDerivatives<nd, T>(u, deg_, knots_, cp_, 1, ptder);
+			nurbsCurveDerivatives<nd, T>(u, deg_, knots_, cp_, 1, ptder);
 		}
 		else {
 			//nurbs::curveDerivatives<nd, T>(u, deg_, knots_, cp_, w_, 1, ptder);
@@ -66,7 +65,7 @@ public:
 	vecnt tangent(double u) {
 		std::vector<vecnt> tgt;
 		if (!isRat_) {
-			nurbs::curveDerivatives<nd, T>(u, deg_, knots_, cp_, 1, tgt);
+			nurbsCurveDerivatives<nd, T>(u, deg_, knots_, cp_, 1, tgt);
 		}
 		else {
 			// nurbs::rationalCurvePoint<nd, T>(u, deg_, knots_, cp_, w_, pt);

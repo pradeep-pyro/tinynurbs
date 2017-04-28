@@ -6,7 +6,6 @@ bool close(double a, double b, double eps = std::numeric_limits<double>::epsilon
 }
 
 namespace ospl {
-namespace nurbs {
 
 /**
 Find the span of the given parameter in the knot vector.
@@ -57,7 +56,7 @@ Compute a single B-spline basis function
 @return The value of the ith basis function at u.
 */
 // 
-double basisFunction(int i, int deg, const std::vector<double> &U, double u) {
+double bsplineOneBasis(int i, int deg, const std::vector<double> &U, double u) {
 	int m = U.size() - 1;
 	// Special case
 	if ((i == 0 && close(u, U[0])) || (i == m - deg - 1 && close(u, U[m]))) {
@@ -102,7 +101,7 @@ double basisFunction(int i, int deg, const std::vector<double> &U, double u) {
 @param[in] u Parameter to evaluate the basis functions at.
 @param[in, out] N Values of (deg+1) non-zero basis functions.
 */
-void basisFunctions(int deg, int span, const std::vector<double> &knots, double u,
+void bsplineBasis(int deg, int span, const std::vector<double> &knots, double u,
 	std::vector<double> &N) {
 	N.clear();
 	N.resize(deg + 1, 0.0);
@@ -136,7 +135,7 @@ void basisFunctions(int deg, int span, const std::vector<double> &knots, double 
 @param[in, out] N Values of (deg+1) non-zero basis functions.
 @param[in, out] Nk Values of non-zero derivatives of basis functions.
 */
-void derivativeBasisFunctions(int deg, int span,
+void bsplineDerBasis(int deg, int span,
 	const std::vector<double>& knots, double u,
 	int nDers, std::vector<std::vector<double>> &ders) {
 
@@ -236,5 +235,4 @@ void derivativeBasisFunctions(int deg, int span,
 	}
 }
 
-} // namespace nurbs
 } // namespace ospl
