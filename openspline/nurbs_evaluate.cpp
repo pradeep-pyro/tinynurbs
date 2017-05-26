@@ -1,6 +1,14 @@
 #include "nurbs_evaluate.h"
 #include "array2.h"
 
+bool ospl::isValidRelation(unsigned int degree, size_t nKnots, size_t nCtrlPts) {
+	cout << "isValidRelation: degree = " << degree << " nKnots = " << nKnots << " nCtrlPts = " << nCtrlPts << endl;
+	if (nKnots != nCtrlPts + degree + 1) {
+		return false;
+	}
+	return true;
+}
+
 // Explicit template function instantiations for glm vec2, vec3, dvec2
 // and dvec3 types; these are the only relevant types.
 template void ospl::nurbsCurvePoint<2, float>(double u, uint8_t degree, 
@@ -49,3 +57,35 @@ template void ospl::nurbsCurveDerivatives<3, double>(double u, uint8_t degree,
 	const std::vector<double> &knots,
 	const std::vector<glm::dvec3> &controlPoints,
 	int nDers, std::vector<glm::dvec3> &ders);
+
+template void ospl::nurbsCurveRationalDerivatives<2, float>(double u, uint8_t degree,
+	const std::vector<double> &knots,
+	const std::vector<glm::vec2> &controlPoints,
+	const std::vector<float> weights,
+	int nDers, std::vector<glm::vec2> &curveDers);
+template void ospl::nurbsCurveRationalDerivatives<2, double>(double u, uint8_t degree,
+	const std::vector<double> &knots,
+	const std::vector<glm::dvec2> &controlPoints,
+	const std::vector<double> weights,
+	int nDers, std::vector<glm::dvec2> &curveDers);
+template void ospl::nurbsCurveRationalDerivatives<3, float>(double u, uint8_t degree,
+	const std::vector<double> &knots,
+	const std::vector<glm::vec3> &controlPoints,
+	const std::vector<float> weights,
+	int nDers, std::vector<glm::vec3> &curveDers);
+template void ospl::nurbsCurveRationalDerivatives<3, double>(double u, uint8_t degree,
+	const std::vector<double> &knots,
+	const std::vector<glm::dvec3> &controlPoints,
+	const std::vector<double> weights,
+	int nDers, std::vector<glm::dvec3> &curveDers);
+
+template void ospl::nurbsSurfacePoint<3, float>(double u, double v,
+	uint8_t degreeU, uint8_t degreeV,
+	const std::vector<double> &knotsU, const std::vector<double> &knotsV,
+	const std::vector<std::vector<glm::vec3>> &controlPoints,
+	glm::vec3 &point);
+template void ospl::nurbsSurfacePoint<3, double>(double u, double v,
+	uint8_t degreeU, uint8_t degreeV,
+	const std::vector<double> &knotsU, const std::vector<double> &knotsV,
+	const std::vector<std::vector<glm::dvec3>> &controlPoints,
+	glm::dvec3 &point);
