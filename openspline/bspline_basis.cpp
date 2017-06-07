@@ -15,9 +15,10 @@ Find the span of the given parameter in the knot vector.
 @return Span index into the knot vector such that (span - 1) < u <= span
 */
 int findSpan(int degree, const std::vector<double> &knots, double u) {
-	int n = knots.size() - degree - 2; // index of last control point
-
-									   // For u that is equal to last knot value
+	// index of last control point
+	int n = static_cast<int>(knots.size()) - degree - 2; 
+	
+	// For u that is equal to last knot value
 	if (close(u, knots[n + 1])) {
 		return n;
 	}
@@ -57,7 +58,7 @@ Compute a single B-spline basis function
 */
 // 
 double bsplineOneBasis(int i, int deg, const std::vector<double> &U, double u) {
-	int m = U.size() - 1;
+	int m = static_cast<int>(U.size()) - 1;
 	// Special case
 	if ((i == 0 && close(u, U[0])) || (i == m - deg - 1 && close(u, U[m]))) {
 		return 1.0;
