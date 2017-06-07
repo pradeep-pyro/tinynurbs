@@ -2,11 +2,7 @@
 #include "array2.h"
 
 bool ospl::isValidRelation(unsigned int degree, size_t nKnots, size_t nCtrlPts) {
-	cout << "isValidRelation: degree = " << degree << " nKnots = " << nKnots << " nCtrlPts = " << nCtrlPts << endl;
-	if (nKnots != nCtrlPts + degree + 1) {
-		return false;
-	}
-	return true;
+	return (nKnots >= nCtrlPts + degree + 1);
 }
 
 // Explicit template function instantiations for glm vec2, vec3, dvec2
@@ -58,22 +54,22 @@ template void ospl::nurbsCurveDerivatives<3, double>(double u, uint8_t degree,
 	const std::vector<glm::dvec3> &controlPoints,
 	int nDers, std::vector<glm::dvec3> &ders);
 
-template void ospl::nurbsCurveRationalDerivatives<2, float>(double u, uint8_t degree,
+template void ospl::nurbsRationalCurveDerivatives<2, float>(double u, uint8_t degree,
 	const std::vector<double> &knots,
 	const std::vector<glm::vec2> &controlPoints,
 	const std::vector<float> weights,
 	int nDers, std::vector<glm::vec2> &curveDers);
-template void ospl::nurbsCurveRationalDerivatives<2, double>(double u, uint8_t degree,
+template void ospl::nurbsRationalCurveDerivatives<2, double>(double u, uint8_t degree,
 	const std::vector<double> &knots,
 	const std::vector<glm::dvec2> &controlPoints,
 	const std::vector<double> weights,
 	int nDers, std::vector<glm::dvec2> &curveDers);
-template void ospl::nurbsCurveRationalDerivatives<3, float>(double u, uint8_t degree,
+template void ospl::nurbsRationalCurveDerivatives<3, float>(double u, uint8_t degree,
 	const std::vector<double> &knots,
 	const std::vector<glm::vec3> &controlPoints,
 	const std::vector<float> weights,
 	int nDers, std::vector<glm::vec3> &curveDers);
-template void ospl::nurbsCurveRationalDerivatives<3, double>(double u, uint8_t degree,
+template void ospl::nurbsRationalCurveDerivatives<3, double>(double u, uint8_t degree,
 	const std::vector<double> &knots,
 	const std::vector<glm::dvec3> &controlPoints,
 	const std::vector<double> weights,
