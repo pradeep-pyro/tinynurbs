@@ -143,7 +143,7 @@ Evaluate derivatives of a rational NURBS curve
 E.g. curveDers[n] is the nth derivative at u, where n is between 0 and nDers-1.
 */
 template <int dim, typename T>
-void nurbsCurveRationalDerivatives(double u, uint8_t degree,
+void nurbsRationalCurveDerivatives(double u, uint8_t degree,
 	const std::vector<double> &knots,
 	const std::vector<glm::vec<dim, T>> &controlPoints,
 	const std::vector<T> weights, int nDers,
