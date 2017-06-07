@@ -23,9 +23,15 @@ public:
 
 	NurbsCurve(unsigned int degree, const std::vector<double> &knots,
 		const std::vector<vecnt> &controlPoints) {
+
+		if (degree < 1) {
+			throw std::logic_error("Degree has to be atleast 1");
+		}
+
 		if (!isValidRelation(degree, knots.size(), 
 			controlPoints.size())) {
-			throw std::logic_error("nKnots != degree + nCtrlPts + 1");
+			throw std::logic_error("nvalid relation between degree, "
+				"knots and control points");
 		}
 		this->deg = degree;
 		this->knots = knots;
@@ -39,7 +45,8 @@ public:
 		NurbsCurve(degree, knots, controlPoints);
 		if (!isValidRelation(degree, knots.size(),
 			controlPoints.size())) {
-			throw std::logic_error("nKnots != degree + nCtrlPts + 1");
+			throw std::logic_error("Invalid relation between degree, "
+				"knots and control points");
 		}
 		this->deg = degree;
 		this->knots = knots;
