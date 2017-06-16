@@ -245,6 +245,28 @@ void nurbsRationalSurfacePoint(double u, double v, uint8_t degreeU, uint8_t degr
 	const std::vector<std::vector<T>> &weights,
 	glm::vec<dim, T> &point) {
 
+	typedef glm::vec<dim + 1, T> tvecnp1;
+
+	// Compute homogenous coordinates of control points
+	std::vector<std::vector<tvecnp1>> Cw;
+	Cw.resize(controlPoints.size());
+	for (auto &vec : Cw) {
+		vec.reserve(controlPoints[0].size());
+	}
+	for (int i = 0; i < controlPoints.size(); i++) {
+		for (int j = 0; j < controlPoints[0].size(); j++) {
+			Cw[i].push_back(tvecnp1(
+				util::cartesianToHomogenous(controlPoints[i][j], weights[i][j])
+			));
+		}
+	}
+
+	// Compute point using homogenous coordinates
+	tvecnp1 pointw;
+	nurbsSurfacePoint(u, v, degreeU, degreeV, knotsU, knotsV, Cw, pointw);
+	cout << pointw.x << " " << pointw.y << " " << pointw.z << endl;
+	// Convert back to cartesian coordinates
+	point = util::homogenousToCartesian(pointw);
 }
 
 /**
