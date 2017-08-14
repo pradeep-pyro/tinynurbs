@@ -2,7 +2,7 @@
 #include "array2.h"
 
 bool ospl::isValidRelation(unsigned int degree, size_t nKnots, size_t nCtrlPts) {
-	return (nKnots >= nCtrlPts + degree + 1);
+	return nKnots == nCtrlPts + degree + 1;
 }
 
 // Explicit template function instantiations for glm vec2, vec3, dvec2
