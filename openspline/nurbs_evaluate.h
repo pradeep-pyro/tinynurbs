@@ -96,7 +96,7 @@ Evaluate derivatives of a non-rational NURBS curve
 @param[in] knots Knot vector of the curve.
 @param[in] controlPoints Control points of the curve.
 @param[in] nDers Number of times to derivate.
-@param[in, out] curveDers Derivatives of the curve.
+@param[in, out] curveDers Derivatives of the curve at u.
 E.g. curveDers[n] is the nth derivative at u, where 0 <= n <= nDers.
 */
 template <int dim, typename T>
@@ -138,8 +138,8 @@ Evaluate derivatives of a rational NURBS curve
 @param[in] knots Knot vector of the curve.
 @param[in] controlPoints Control points of the curve.
 @param[in] weights Weights corresponding to each control point.
-@param[in] nDers Number of times to derivate.
-@param[in, out] curveDers Derivatives of the curve.
+@param[in] nDers Number of times to differentiate.
+@param[in, out] curveDers Derivatives of the curve at u.
 E.g. curveDers[n] is the nth derivative at u, where n is between 0 and nDers-1.
 */
 template <int dim, typename T>
@@ -193,10 +193,11 @@ Evaluate point on a nonrational NURBS surface
 @param[in] u Parameter to evaluate the surface at.
 @param[in] v Parameter to evaluate the surface at.
 @param[in] degreeU Degree of the given surface in u-direction.
-@param[in] degreeV Degree of the given surface.
-@param[in] knots Knot vector of the curve.
-@param[in] controlPoints Control points of the curve.
-@param[in, out] point Resulting point on the curve at parameter u.
+@param[in] degreeV Degree of the given surface in v-direction.
+@param[in] knotsU Knot vector of the surface in u-direction.
+@param[in] knotsV Knot vector of the surface in v-direction.
+@param[in] controlPoints Control points of the surface.
+@param[in, out] point Resulting point on the surface at (u, v).
 */
 template <int dim, typename T>
 void nurbsSurfacePoint(double u, double v, uint8_t degreeU, uint8_t degreeV,
@@ -234,9 +235,10 @@ Evaluate point on a non-rational NURBS surface
 @param[in] v Parameter to evaluate the surface at.
 @param[in] degreeU Degree of the given surface in u-direction.
 @param[in] degreeV Degree of the given surface.
-@param[in] knots Knot vector of the curve.
-@param[in] controlPoints Control points of the curve.
-@param[in, out] point Resulting point on the curve at parameter u.
+@param[in] knots Knot vector of the surface.
+@param[in] controlPoints Control points of the surface.
+@param[in] weights Weights corresponding to each control point.
+@param[in, out] point Resulting point on the surface at (u, v).
 */
 template <int dim, typename T>
 void nurbsRationalSurfacePoint(double u, double v, uint8_t degreeU, uint8_t degreeV,
@@ -264,7 +266,7 @@ void nurbsRationalSurfacePoint(double u, double v, uint8_t degreeU, uint8_t degr
 	// Compute point using homogenous coordinates
 	tvecnp1 pointw;
 	nurbsSurfacePoint(u, v, degreeU, degreeV, knotsU, knotsV, Cw, pointw);
-	cout << pointw.x << " " << pointw.y << " " << pointw.z << endl;
+
 	// Convert back to cartesian coordinates
 	point = util::homogenousToCartesian(pointw);
 }
@@ -274,10 +276,12 @@ Evaluate derivatives on a non-rational NURBS surface
 @param[in] u Parameter to evaluate the surface at.
 @param[in] v Parameter to evaluate the surface at.
 @param[in] degreeU Degree of the given surface in u-direction.
-@param[in] degreeV Degree of the given surface.
-@param[in] knots Knot vector of the curve.
-@param[in] controlPoints Control points of the curve.
-@param[in, out] surfDers Resulting point on the curve at parameter u.
+@param[in] degreeV Degree of the given surface in v-direction.
+@param[in] knotsU Knot vector of the surface in u-direction.
+@param[in] knotsV Knot vector of the surface in v-direction.
+@param[in] controlPoints Control points of the surface.
+@param[in] nDers Number of times to differentiate
+@param[in, out] surfDers Derivatives of the surface at (u, v).
 */
 template <int dim, typename T>
 void nurbsSurfaceDerivatives(double u, double v,
@@ -336,6 +340,19 @@ void nurbsSurfaceDerivatives(double u, double v,
 }
 
 
+/**
+Evaluate derivatives on a rational NURBS surface
+@param[in] u Parameter to evaluate the surface at.
+@param[in] v Parameter to evaluate the surface at.
+@param[in] degreeU Degree of the given surface in u-direction.
+@param[in] degreeV Degree of the given surface in v-direction.
+@param[in] knotsU Knot vector of the surface in u-direction.
+@param[in] knotsV Knot vector of the surface in v-direction.
+@param[in] controlPoints Control points of the surface.
+@param[in] weights Weights corresponding to each control point.
+@param[in] nDers Number of times to differentiate
+@param[in, out] surfDers Derivatives on the surface at parameter (u, v).
+*/
 template <int dim, typename T>
 void nurbsRationalSurfaceDerivatives(double u, double v,
 	uint8_t degreeU, uint8_t degreeV,
@@ -343,7 +360,59 @@ void nurbsRationalSurfaceDerivatives(double u, double v,
 	const std::vector<std::vector<glm::vec<dim, T>>> &controlPoints,
 	const std::vector<std::vector<T>> &weights,
 	int nDers, std::vector<std::vector<glm::vec<dim, T>>> &surfDers) {
+	
+	using namespace std;
+	using namespace glm;
 
+	typedef vec<dim, T> tvecn;
+	typedef vec<dim + 1, T> tvecnp1;
+
+	vector<vector<tvecnp1>> homoCp;
+	homoCp.resize(controlPoints.size());
+	for (int i = 0; i < controlPoints.size(); ++i) {
+		homoCp[i].resize(controlPoints[0].size());
+		for (int j = 0; j < controlPoints[0].size(); ++j) {
+			homoCp[i][j] = util::cartesianToHomogenous(controlPoints[i][j], weights[i][j]);
+		}
+	}
+
+	vector<vector<tvecnp1>> homoDers;
+	nurbsSurfaceDerivatives(u, v, degreeU, degreeV, knotsU, knotsV, homoCp, nDers, homoDers);
+	
+	vector<vector<tvecn>> Aders;
+	Aders.resize(nDers + 1);
+	for (int i = 0; i < homoDers.size(); ++i) {
+		Aders[i].resize(nDers + 1);
+		for (int j = 0; j < homoDers[0].size(); ++j) {
+			Aders[i][j] = util::truncateHomogenous(homoDers[i][j]);
+		}
+	}
+	
+	surfDers.resize(nDers + 1);
+	for (int k = 0; k < nDers + 1; ++k) {
+		surfDers[k].resize(nDers + 1);
+		for (int l = 0; l < nDers - k + 1; ++l) {
+			auto der = Aders[k][l];
+
+			for (int j = 1; j < l + 1; ++j) {
+				der -= (T)util::binomial(l, j) * homoDers[0][j][dim] * surfDers[k][l - j];
+			}
+
+			for (int i = 1; i <  k + 1; ++i) {
+				der -= (T)util::binomial(k, i) * homoDers[i][0][dim] * surfDers[k - i][l];
+
+				tvecn tmp((T)0.0);
+				for (int j = 1; j < l + 1; ++j) {
+					tmp -= (T)util::binomial(l, j) * homoDers[i][j][dim] * surfDers[k - 1][l - j];
+				}
+
+				der -= (T)util::binomial(k, i) * tmp;
+			}
+
+			der *= 1 / homoDers[0][0][dim];
+			surfDers[k][l] = der;
+		}
+	}
 }
 
 } // namespace ospl
