@@ -5,3 +5,5 @@ This is a C++ library for parametric curves and surfaces. The API is simple to u
 * Non-uniform Rational B-spline (NURBS) curves and surfaces
 * Bezier curves and surfaces
 * Work in progress...
+
+[glm]: https://github.com/g-truc/glm
