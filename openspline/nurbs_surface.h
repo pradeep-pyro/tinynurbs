@@ -12,6 +12,7 @@ the LICENSE.txt file.
 #include <vector>
 #include <exception>
 
+#include "surface.h"
 #include "nurbs_evaluate.h"
 #include "nurbs_knots.h"
 
@@ -23,7 +24,7 @@ namespace ospl {
 \tparam T Data type of control points and weights (float or double)
 */
 template <int nd, typename T>
-class NurbsSurface {
+class NurbsSurface : public Surface<nd, T> {
 public:
 	typedef glm::vec<nd, T> vecnt;
 
@@ -35,7 +36,7 @@ public:
 	@param knotsV Knot vector in v-direction
 	@param controlPoints 2D vector of control points
 	*/
-	NurbsSurface(unsigned int degreeU, unsigned int degreeV,
+	explicit NurbsSurface(unsigned int degreeU, unsigned int degreeV,
 		const std::vector<double> &knotsU, const std::vector<double> &knotsV,
 		const std::vector<std::vector<vecnt>> &controlPoints) {
 
@@ -73,7 +74,7 @@ public:
 	@param controlPoints 2D vector of control points
 	@param weights 2D vector of weights corresponding to control points
 	*/
-	NurbsSurface(unsigned int degreeU, unsigned int degreeV,
+	explicit NurbsSurface(unsigned int degreeU, unsigned int degreeV,
 		const std::vector<double> &knotsU, const std::vector<double> &knotsV,
 		const std::vector<std::vector<vecnt>> &controlPoints,
 		const std::vector<std::vector<T>> &weights) {
@@ -104,7 +105,7 @@ public:
 	@param v Parameter in the v-direction
 	@return Point on surface at (u, v)
 	*/
-	vecnt point(double u, double v) const {
+	vecnt point(double u, double v) const override {
 		vecnt pt;
 		if (!rational()) {
 			nurbsSurfacePoint<nd, T>(u, v, degU, degV, knotsU, knotsV, cp, pt);
@@ -129,7 +130,7 @@ public:
 	ders[2][0] is the second partial derivative w.r.t. u
 	*/
 	void derivatives(double u, double v, int nDers,
-		std::vector<std::vector<vecnt>> &ders) const {
+		std::vector<std::vector<vecnt>> &ders) const override {
 		if (!rational()) {
 			nurbsSurfaceDerivatives<nd, T>(u, v, degU, degV,
 				knotsU, knotsV, cp, nDers, ders);
@@ -147,7 +148,7 @@ public:
 	@param normalize Whether to return a unit vector
 	*/
 	void tangent(double u, double v, vecnt &du, vecnt &dv,
-		bool normalize = true) const {
+		bool normalize = true) const override {
 		std::vector<std::vector<vecnt>> ptder;
 		derivatives(u, v, 1, ptder);
 		du = ptder[1][0];
@@ -164,7 +165,7 @@ public:
 	@param v Parameter in the v-direction
 	@param normalize Whether to return a unit vector
 	*/
-	vecnt normal(double u, double v, bool normalize = true) const {
+	vecnt normal(double u, double v, bool normalize = true) const override {
 		std::vector<std::vector<vecnt>> ptder;
 		derivatives(u, v, 1, ptder);
 		vecnt normal = glm::cross(ptder[0][1], ptder[1][0]);
@@ -181,14 +182,14 @@ public:
 	/**
 	Returns the degree along u-direction
 	*/
-	int degreeU() const {
+	unsigned int degreeU() const override {
 		return degU;
 	}
 
 	/**
 	Returns the degree along v-direction
 	*/
-	int degreeV() const {
+	unsigned int degreeV() const override {
 		return degV;
 	}
 
@@ -296,21 +297,6 @@ public:
 		return true;
 	}
 
-	/**
-	Make the surface closed along u-direction by duplicating a row of
-	control points and wrapping the knot vector
-	*/
-	void setClosedU(bool flag) {
-
-	}
-
-	/**
-	Make the surface closed along v-direction by duplicating a column of
-	control points and wrapping the knot vector
-	*/
-	void setClosedV(bool flag) {
-		
-	}
 private:
 	unsigned int degU, degV;
 	std::vector<double> knotsU, knotsV;
