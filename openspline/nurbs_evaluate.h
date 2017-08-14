@@ -18,7 +18,7 @@ the LICENSE.txt file.
 #include "bspline_basis.h"
 #include "util.h"
 
-namespace ospl {
+namespace st {
 
 /**
 Checks if the relation between degree, number of knots, and

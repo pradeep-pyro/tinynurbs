@@ -11,7 +11,7 @@ the LICENSE.txt file.
 #pragma once
 #include "glm/glm.hpp"
 
-namespace ospl {
+namespace st {
 template <int nd, typename T>
 class Surface {
 	typedef glm::vec<nd, T> vecnt;

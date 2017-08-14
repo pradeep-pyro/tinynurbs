@@ -4,7 +4,7 @@
 
 #include <vector>
 
-namespace ospl {
+namespace st {
 namespace util {
 
 /**

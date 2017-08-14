@@ -1,6 +1,6 @@
 #include "util.h"
 
-namespace ospl {
+namespace st {
 namespace util {
 
 unsigned int binomial(unsigned int n, unsigned int k) {

@@ -2,7 +2,7 @@
 
 #include <vector>
 
-namespace ospl {
+namespace st {
 
 int findSpan(int degree, const std::vector<double> &knots, double u);
 

@@ -1,6 +1,6 @@
 #include "nurbs_curve.h"
 
-namespace ospl {
+namespace st {
 
 // Explicit template class instantiations for
 // 2D and 3D glm vector types

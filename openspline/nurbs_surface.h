@@ -16,7 +16,7 @@ the LICENSE.txt file.
 #include "nurbs_evaluate.h"
 #include "nurbs_knots.h"
 
-namespace ospl {
+namespace st {
 
 /**
 \brief Class for representing a NURBS surface

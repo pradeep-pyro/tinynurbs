@@ -5,7 +5,7 @@ bool close(double a, double b, double eps = std::numeric_limits<double>::epsilon
 	return (std::abs(a - b) < eps) ? true : false;
 }
 
-namespace ospl {
+namespace st {
 
 /**
 Find the span of the given parameter in the knot vector.

@@ -14,7 +14,7 @@ the LICENSE.txt file.
 
 #include "nurbs_evaluate.h"
 
-namespace ospl {
+namespace st {
 
 template <int nd, typename T>
 class NurbsCurve {

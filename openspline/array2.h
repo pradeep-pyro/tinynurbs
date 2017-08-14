@@ -4,7 +4,7 @@
 #include <iostream>
 using std::cout;
 using std::endl;
-namespace ospl {
+namespace st {
 
 /**
 A simple class for representing 2D dynamic arrays.
