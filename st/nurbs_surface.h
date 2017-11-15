@@ -50,19 +50,16 @@ public:
 				"knots and control points");
 		}
 
+		if (!isKnotVectorMonotonic(knotsU) || !isKnotVectorMonotonic(knotsV)) {
+			throw(std::logic_error("Knot vector(s) is not monotonic"));
+		}
+
 		this->degU = degreeU;
 		this->degV = degreeV;
 		this->knotsU = knotsU;
 		this->knotsV = knotsV;
 		this->cp = controlPoints;
 		this->isRat = false;
-
-		if (this->w.empty()) {
-			this->w.resize(this->cp.size());
-			for (auto &vec : this->w) {
-				vec.resize(this->cp[0].size(), 1.0);
-			}
-		}
 	}
 
 	/**
@@ -89,6 +86,10 @@ public:
 				"knots and control points");
 		}
 
+		if (!isKnotVectorMonotonic(knotsU) || !isKnotVectorMonotonic(knotsV)) {
+			throw(std::logic_error("Knot vector(s) is not monotonic"));
+		}
+		
 		this->degU = degreeU;
 		this->degV = degreeV;
 		this->knotsU = knotsU;
@@ -194,19 +195,61 @@ public:
 	}
 
 	/**
-	Returns knot vector along u-direction
+	Returns a copy of the knot vector along u-direction
 	*/
 	const std::vector<double> & knotVectorU() const {
 		return knotsU;
 	}
 
 	/**
-	Returns knot vector along v-direction
+	Returns knot value at index along u-direction
+	*/
+	double getKnotU(size_t index) const {
+		return knotsU[index];
+	}
+
+	/**
+	Sets knot value at index along u-direction
+	*/
+	void setKnotU(size_t index, double val) {
+		knotsU[index] = val;
+	}
+
+	/**
+	Returns knot value at index along v-direction
+	*/
+	double getKnotV(size_t index) const {
+		return knotsV[index];
+	}
+
+	/**
+	Sets knot value at index along v-direction
+	*/
+	void setKnotV(size_t index, double val) {
+		knotsV[index] = val;
+	}
+
+	/**
+	Returns a copy of the knot vector along v-direction
 	*/
 	const std::vector<double> & knotVectorV() const {
 		return knotsV;
 	}
 
+	/**
+	Returns number of knots along u-direction
+	*/
+	size_t numKnotsU() const {
+		return knotsU.size();
+	}
+
+	/**
+	Returns number of knots along u - direction
+	*/
+	size_t numKnotsV() const {
+		return knotsV.size();
+	}
+	
 	/**
 	Returns number of control points along u-direction
 	*/
@@ -243,10 +286,21 @@ public:
 		cp[i][j] = pt;
 	}
 
+	/**
+	Returns the weight of the control point at (i, j)
+	@param i Index along u-direction
+	@param j Index along v-direction
+	*/
 	T weight(size_t i, size_t j) const {
 		return w[i][j];
 	}
 
+	/**
+	Sets the weight of the control point at (i, j)
+	@param i Index along u-direction
+	@param j Index along v-direction
+	@param pt New weight value at (i, j)
+	*/
 	void setWeight(size_t i, size_t j, T weight) {
 		w[i][j] = weight;
 	}
@@ -263,6 +317,16 @@ public:
 	*/
 	void setRational(bool flag) {
 		isRat = flag;
+		if (isRat) {
+			// Allocate the weights for control points if not already done
+			if (this->w.empty() || this->w.size() != this->cp.size() ||
+				this->w[0].size() != this->cp[0].size()) {
+				this->w.resize(this->cp.size());
+				for (auto &vec : this->w) {
+					vec.resize(this->cp[0].size(), 1.0);
+				}
+			}
+		}
 	}
 
 	/**
@@ -297,6 +361,17 @@ public:
 		return true;
 	}
 
+	/**
+	Returns whether the surface is valid by checking the relationship
+	between the degree, knots and control points as well as the monotonicity
+	of the knot vectors
+	*/
+	bool isValid() const {
+		return isValidRelation(degU, knotsU.size(), cp.size()) &&
+			isValidRelation(degV, knotsV.size(), cp[0].size()) &&
+			isKnotVectorMonotonic(knotsU) && isKnotVectorMonotonic(knotsV);
+	}
+
 private:
 	unsigned int degU, degV;
 	std::vector<double> knotsU, knotsV;
@@ -309,4 +384,4 @@ private:
 typedef NurbsSurface<3, float> NurbsSurface3f;
 typedef NurbsSurface<3, double> NurbsSurface3d;
 
-} // namespace ospl
+} // namespace st

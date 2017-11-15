@@ -133,8 +133,7 @@ void bsplineBasis(int deg, int span, const std::vector<double> &knots, double u,
 @param[in] knots Knot vector corresponding to the basis functions.
 @param[in] u Parameter to evaluate the basis functions at.
 @param[in] nDers Number of derivatives to compute (nDers <= deg)
-@param[in, out] N Values of (deg+1) non-zero basis functions.
-@param[in, out] Nk Values of non-zero derivatives of basis functions.
+@param[in, out] ders Values of non-zero derivatives of basis functions.
 */
 void bsplineDerBasis(int deg, int span,
 	const std::vector<double>& knots, double u,
