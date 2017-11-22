@@ -76,27 +76,8 @@ public:
 		const std::vector<std::vector<vecnt>> &controlPoints,
 		const std::vector<std::vector<T>> &weights) {
 
-		if (degreeU < 1 && degreeV < 1) {
-			throw std::logic_error("Degree has to be atleast 1");
-		}
-
-		if (!isValidRelation(degreeU, knotsU.size(), controlPoints.size()) ||
-			!isValidRelation(degreeV, knotsV.size(), controlPoints[0].size())) {
-			throw std::logic_error("Invalid relation between degree, "
-				"knots and control points");
-		}
-
-		if (!isKnotVectorMonotonic(knotsU) || !isKnotVectorMonotonic(knotsV)) {
-			throw(std::logic_error("Knot vector(s) is not monotonic"));
-		}
-		
-		this->degU = degreeU;
-		this->degV = degreeV;
-		this->knotsU = knotsU;
-		this->knotsV = knotsV;
-		this->cp = controlPoints;
+		NurbsSurface(degreeU, degreeV, knotsU, knotsV, controlPoints);
 		this->isRat = true;
-
 		this->w = weights;
 	}
 
