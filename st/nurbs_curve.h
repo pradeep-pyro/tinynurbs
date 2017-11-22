@@ -36,23 +36,14 @@ public:
 		this->deg = degree;
 		this->knots = knots;
 		this->cp = controlPoints;
-		this->w.resize(controlPoints.size(), 1.0);
 		this->isRat = false;
 	}
 
 	NurbsCurve(unsigned int degree, const std::vector<double> &knots, 
 		const std::vector<vecnt> &controlPoints, const std::vector<T> &weights) {
 		NurbsCurve(degree, knots, controlPoints);
-		if (!isValidRelation(degree, knots.size(),
-			controlPoints.size())) {
-			throw std::logic_error("Invalid relation between degree, "
-				"knots and control points");
-		}
-		this->deg = degree;
-		this->knots = knots;
-		this->cp = controlPoints;
-		this->w = weights;
 		this->isRat = true;
+		this->w = weights;
 	}
 
 	int degree() const {
@@ -119,6 +110,12 @@ public:
 
 	void setRational(bool isRational) {
 		isRat = isRational;
+		if (isRat) {
+			// Allocate the weights for control points if not already done
+			if (this->w.empty() || this->w.size() != this->cp.size()) {
+				this->w.resize(this->cp.size(), 1.0);
+			}
+		}
 	}
 	
 private:
