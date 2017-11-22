@@ -1,5 +1,5 @@
 #include "nurbs_evaluate.h"
-#include "array2.h"
+#include "util.h"
 
 bool nurbstk::isValidRelation(unsigned int degree, size_t nKnots, size_t nCtrlPts) {
 	return nKnots == nCtrlPts + degree + 1;
