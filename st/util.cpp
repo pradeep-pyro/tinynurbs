@@ -1,6 +1,6 @@
 #include "util.h"
 
-namespace st {
+namespace nurbstk {
 namespace util {
 
 unsigned int binomial(unsigned int n, unsigned int k) {
@@ -16,4 +16,4 @@ unsigned int binomial(unsigned int n, unsigned int k) {
 }
 
 } // namespace util
-} // namespace ospl
+} // namespace nurbstk

@@ -1,15 +1,12 @@
 #pragma once
 
 #include <vector>
-#include <iostream>
-using std::cout;
-using std::endl;
-namespace st {
+#include <array>
+
+namespace nurbstk {
 
 /**
-A simple class for representing 2D dynamic arrays.
-This would most likely be replaced with std::dynarray or local runtime-arrays
-in future.
+// A simple class for representing 2D runtime arrays.
 */
 template <typename T>
 class array2 {
@@ -29,4 +26,4 @@ private:
 	std::vector<T> data;
 };
 
-}
+} // namespace nurbstk

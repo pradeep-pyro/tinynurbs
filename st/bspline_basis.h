@@ -2,7 +2,7 @@
 
 #include <vector>
 
-namespace st {
+namespace nurbstk {
 
 int findSpan(int degree, const std::vector<double> &knots, double u);
 
@@ -14,4 +14,4 @@ void bsplineBasis(int deg, int span, const std::vector<double> &knots,
 void bsplineDerBasis(int deg, int span, const std::vector<double> &knots,
 	double u, int nDers, std::vector<std::vector<double>> &Nk);
 
-} // namespace ospl
+} // namespace nurbstk

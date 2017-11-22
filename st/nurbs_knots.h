@@ -1,5 +1,5 @@
 /*
-@file openspline/nurbs_knots.h
+@file nurbstk/nurbs_knots.h
 @author Pradeep Kumar Jayaraman <pradeep.pyro@gmail.com>
 
 Helper functions for creating and modifying knot vectors.

@@ -1,5 +1,5 @@
 /*
-@file openspline/surface.h
+@file nurbstk/surface.h
 @author Pradeep Kumar Jayaraman <pradeep.pyro@gmail.com>
 
 The Surface class represents an abstract 3D paramteric surface.
@@ -11,7 +11,7 @@ the LICENSE.txt file.
 #pragma once
 #include "glm/glm.hpp"
 
-namespace st {
+namespace nurbstk {
 template <int nd, typename T>
 class Surface {
 	typedef glm::vec<nd, T> vecnt;
@@ -29,4 +29,4 @@ public:
 typedef Surface<3, double> Surface3d;
 typedef Surface<3, float> Surface3f;
 
-} // namespace ospl
+} // namespace nurbstk

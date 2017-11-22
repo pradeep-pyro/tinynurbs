@@ -1,5 +1,5 @@
 /*
-@file openspline/nurbs_surface.h
+@file nurbstk/nurbs_surface.h
 @author Pradeep Kumar Jayaraman <pradeep.pyro@gmail.com>
 
 The NurbsSurface class represents an non-uniform rational B-spline surface.
@@ -16,7 +16,7 @@ the LICENSE.txt file.
 #include "nurbs_evaluate.h"
 #include "nurbs_knots.h"
 
-namespace st {
+namespace nurbstk {
 
 /**
 \brief Class for representing a NURBS surface

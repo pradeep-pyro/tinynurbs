@@ -1,8 +1,8 @@
 #include "nurbs_surface.h"
 
-namespace st {
+namespace nurbstk {
 
 template class NurbsSurface<3, float>;
 template class NurbsSurface<3, double>;
 
-} // namespace ospl
+} // namespace nurbstk

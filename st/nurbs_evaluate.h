@@ -1,5 +1,5 @@
 /*
-@file openspline/nurbs_evaluate.h
+@file nurbstk/nurbs_evaluate.h
 @author Pradeep Kumar Jayaraman <pradeep.pyro@gmail.com>
 
 Core functionality for evaluating points and derivatives on NURBS curves and
@@ -18,7 +18,7 @@ the LICENSE.txt file.
 #include "bspline_basis.h"
 #include "util.h"
 
-namespace st {
+namespace nurbstk {
 
 /**
 Checks if the relation between degree, number of knots, and
@@ -415,4 +415,4 @@ void nurbsRationalSurfaceDerivatives(double u, double v,
 	}
 }
 
-} // namespace ospl
+} // namespace nurbstk

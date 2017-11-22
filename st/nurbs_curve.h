@@ -1,5 +1,5 @@
 /*
-@file openspline/nurbs_curve.h
+@file nurbstk/nurbs_curve.h
 @author Pradeep Kumar Jayaraman <pradeep.pyro@gmail.com>
 
 The NurbsCurve class represents an non-uniform rational B-spline curve.
@@ -14,7 +14,7 @@ the LICENSE.txt file.
 
 #include "nurbs_evaluate.h"
 
-namespace st {
+namespace nurbstk {
 
 template <int nd, typename T>
 class NurbsCurve {
@@ -135,4 +135,4 @@ typedef NurbsCurve<2, double> NurbsCurve2d;
 typedef NurbsCurve<3, float> NurbsCurve3f;
 typedef NurbsCurve<3, double> NurbsCurve3d;
 
-} // namespace ospl
+} // namespace nurbstk

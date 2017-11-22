@@ -4,7 +4,7 @@
 
 #include <vector>
 
-namespace st {
+namespace nurbstk {
 namespace util {
 
 /**
@@ -48,4 +48,4 @@ Compute the binomial coefficient (nCk) using the formula
 unsigned int binomial(unsigned int n, unsigned int k);
 
 } // namespace util
-} // namespace ospl
+} // namespace nurbstk
