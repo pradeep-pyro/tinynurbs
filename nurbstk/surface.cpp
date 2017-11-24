@@ -1,4 +1,4 @@
-#include "nurbs_surface.h"
+#include "surface.h"
 
 namespace nurbstk {
 

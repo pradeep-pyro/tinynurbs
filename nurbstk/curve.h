@@ -12,7 +12,7 @@ the LICENSE.txt file.
 #include <vector>
 #include <exception>
 
-#include "nurbs_evaluate.h"
+#include "evaluate.h"
 
 namespace nurbstk {
 

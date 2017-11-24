@@ -1,4 +1,4 @@
-#include "nurbs_knots.h"
+#include "knots.h"
 
 #include <iostream>
 #include <algorithm>

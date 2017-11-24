@@ -15,7 +15,7 @@ the LICENSE.txt file.
 
 #include "glm/glm.hpp"
 
-#include "bspline_basis.h"
+#include "basis.h"
 #include "util.h"
 
 namespace nurbstk {

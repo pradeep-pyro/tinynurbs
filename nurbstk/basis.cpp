@@ -1,4 +1,4 @@
-#include "bspline_basis.h"
+#include "basis.h"
 #include "util.h"
 
 
