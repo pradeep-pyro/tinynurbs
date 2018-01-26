@@ -30,9 +30,10 @@ public:
 
 		if (!isValidRelation(degree, knots.size(), 
 			controlPoints.size())) {
-			throw std::logic_error("nvalid relation between degree, "
+			throw std::logic_error("Invalid relation between degree, "
 				"knots and control points");
 		}
+
 		this->deg = degree;
 		this->knots = knots;
 		this->cp = controlPoints;
@@ -53,20 +54,20 @@ public:
 	vecnt point(double u) {
 		vecnt pt;
 		if (!rational()) {
-			nurbsCurvePoint<nd, T>(u, deg, knots, cp, pt);
+			curvePoint<nd, T>(u, deg, knots, cp, pt);
 		}
 		else {
-			nurbsRationalCurvePoint<nd, T>(u, deg, knots, cp, w, pt);
+			rationalCurvePoint<nd, T>(u, deg, knots, cp, w, pt);
 		}
 		return pt;
 	}
 
 	void derivatives(double u, int nDers, std::vector<vecnt> &ptder) {
 		if (!rational()) {
-			nurbsCurveDerivatives<nd, T>(u, deg, knots, cp, nDers, ptder);
+			curveDerivatives<nd, T>(u, deg, knots, cp, nDers, ptder);
 		}
 		else {
-			nurbsRationalCurveDerivatives<nd, T>(u, deg, knots, cp, w, 1, ptder);
+			rationalCurveDerivatives<nd, T>(u, deg, knots, cp, w, 1, ptder);
 		}
 	}
 

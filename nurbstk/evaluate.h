@@ -1,5 +1,5 @@
 /*
-@file nurbstk/nurbs_evaluate.h
+@file nurbstk/evaluate.h
 @author Pradeep Kumar Jayaraman <pradeep.pyro@gmail.com>
 
 Core functionality for evaluating points and derivatives on NURBS curves and
@@ -39,7 +39,7 @@ Evaluate point on a nonrational NURBS curve
 @param[in, out] point Resulting point on the curve at parameter u.
 */
 template <int dim, typename T>
-void nurbsCurvePoint(double u, uint8_t degree, const std::vector<double> &knots,
+void curvePoint(double u, uint8_t degree, const std::vector<double> &knots,
 	const std::vector<glm::vec<dim, T>> &controlPoints, glm::vec<dim, T> &point) {
 	// Initialize result to 0s
 	for (int i = 0; i < dim; i++) {
@@ -66,7 +66,7 @@ Evaluate point on a rational NURBS curve
 @param[in, out] point Resulting point on the curve.
 */
 template <int dim, typename T>
-void nurbsRationalCurvePoint(double u, uint8_t degree,
+void rationalCurvePoint(double u, uint8_t degree,
 	const std::vector<double> &knots,
 	const std::vector<glm::vec<dim, T>> &controlPoints,
 	const std::vector<T> &weights, glm::vec<dim, T> &point) {
@@ -84,7 +84,7 @@ void nurbsRationalCurvePoint(double u, uint8_t degree,
 
 	// Compute point using homogenous coordinates
 	tvecnp1 pointw;
-	nurbsCurvePoint(u, degree, knots, Cw, pointw);
+	curvePoint(u, degree, knots, Cw, pointw);
 
 	// Convert back to cartesian coordinates
 	point = util::homogenousToCartesian(pointw);
@@ -100,7 +100,7 @@ Evaluate derivatives of a non-rational NURBS curve
 E.g. curveDers[n] is the nth derivative at u, where 0 <= n <= nDers.
 */
 template <int dim, typename T>
-void nurbsCurveDerivatives(double u, uint8_t degree,
+void curveDerivatives(double u, uint8_t degree,
 	const std::vector<double> &knots,
 	const std::vector<glm::vec<dim, T>> &controlPoints,
 	int nDers, std::vector<glm::vec<dim, T>> &curveDers) {
@@ -143,7 +143,7 @@ Evaluate derivatives of a rational NURBS curve
 E.g. curveDers[n] is the nth derivative at u, where n is between 0 and nDers-1.
 */
 template <int dim, typename T>
-void nurbsRationalCurveDerivatives(double u, uint8_t degree,
+void rationalCurveDerivatives(double u, uint8_t degree,
 	const std::vector<double> &knots,
 	const std::vector<glm::vec<dim, T>> &controlPoints,
 	const std::vector<T> weights, int nDers,
@@ -164,7 +164,7 @@ void nurbsRationalCurveDerivatives(double u, uint8_t degree,
 
 	// Derivatives of Cw
 	vector<tvecnp1> Cwders;
-	nurbsCurveDerivatives(u, degree, knots, Cw, nDers, Cwders);
+	curveDerivatives(u, degree, knots, Cw, nDers, Cwders);
 
 	// Split Cwders into coordinates and weights
 	vector<tvecn> Aders;
@@ -200,7 +200,7 @@ Evaluate point on a nonrational NURBS surface
 @param[in, out] point Resulting point on the surface at (u, v).
 */
 template <int dim, typename T>
-void nurbsSurfacePoint(double u, double v, uint8_t degreeU, uint8_t degreeV,
+void surfacePoint(double u, double v, uint8_t degreeU, uint8_t degreeV,
 	const std::vector<double> &knotsU, const std::vector<double> &knotsV,
 	const std::vector<std::vector<glm::vec<dim, T>>> &controlPoints,
 	glm::vec<dim, T> &point) {
@@ -241,7 +241,7 @@ Evaluate point on a non-rational NURBS surface
 @param[in, out] point Resulting point on the surface at (u, v).
 */
 template <int dim, typename T>
-void nurbsRationalSurfacePoint(double u, double v, uint8_t degreeU, uint8_t degreeV,
+void rationalSurfacePoint(double u, double v, uint8_t degreeU, uint8_t degreeV,
 	const std::vector<double> &knotsU, const std::vector<double> &knotsV,
 	const std::vector<std::vector<glm::vec<dim, T>>> &controlPoints,
 	const std::vector<std::vector<T>> &weights,
@@ -265,7 +265,7 @@ void nurbsRationalSurfacePoint(double u, double v, uint8_t degreeU, uint8_t degr
 
 	// Compute point using homogenous coordinates
 	tvecnp1 pointw;
-	nurbsSurfacePoint(u, v, degreeU, degreeV, knotsU, knotsV, Cw, pointw);
+	surfacePoint(u, v, degreeU, degreeV, knotsU, knotsV, Cw, pointw);
 
 	// Convert back to cartesian coordinates
 	point = util::homogenousToCartesian(pointw);
@@ -284,7 +284,7 @@ Evaluate derivatives on a non-rational NURBS surface
 @param[in, out] surfDers Derivatives of the surface at (u, v).
 */
 template <int dim, typename T>
-void nurbsSurfaceDerivatives(double u, double v,
+void surfaceDerivatives(double u, double v,
 	uint8_t degreeU, uint8_t degreeV,
 	const std::vector<double> &knotsU, const std::vector<double> &knotsV,
 	const std::vector<std::vector<glm::vec<dim, T>>> &controlPoints,
@@ -354,7 +354,7 @@ Evaluate derivatives on a rational NURBS surface
 @param[in, out] surfDers Derivatives on the surface at parameter (u, v).
 */
 template <int dim, typename T>
-void nurbsRationalSurfaceDerivatives(double u, double v,
+void rationalSurfaceDerivatives(double u, double v,
 	uint8_t degreeU, uint8_t degreeV,
 	const std::vector<double> &knotsU, const std::vector<double> &knotsV,
 	const std::vector<std::vector<glm::vec<dim, T>>> &controlPoints,
@@ -377,7 +377,7 @@ void nurbsRationalSurfaceDerivatives(double u, double v,
 	}
 
 	vector<vector<tvecnp1>> homoDers;
-	nurbsSurfaceDerivatives(u, v, degreeU, degreeV, knotsU, knotsV, homoCp, nDers, homoDers);
+	surfaceDerivatives(u, v, degreeU, degreeV, knotsU, knotsV, homoCp, nDers, homoDers);
 	
 	vector<vector<tvecn>> Aders;
 	Aders.resize(nDers + 1);

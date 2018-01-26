@@ -1,5 +1,5 @@
 /*
-@file nurbstk/nurbs_surface.h
+@file nurbstk/surface.h
 @author Pradeep Kumar Jayaraman <pradeep.pyro@gmail.com>
 
 The NurbsSurface class represents an non-uniform rational B-spline surface.
@@ -89,10 +89,10 @@ public:
 	vecnt point(double u, double v) const {
 		vecnt pt;
 		if (!rational()) {
-			nurbsSurfacePoint<nd, T>(u, v, degU, degV, knotsU, knotsV, cp, pt);
+			surfacePoint<nd, T>(u, v, degU, degV, knotsU, knotsV, cp, pt);
 		}
 		else {
-			nurbsRationalSurfacePoint<nd, T>(u, v, degU, degV, knotsU, knotsV,
+			rationalSurfacePoint<nd, T>(u, v, degU, degV, knotsU, knotsV,
 				cp, w, pt);
 		}
 		return pt;
@@ -113,11 +113,11 @@ public:
 	void derivatives(double u, double v, int nDers,
 		std::vector<std::vector<vecnt>> &ders) const {
 		if (!rational()) {
-			nurbsSurfaceDerivatives<nd, T>(u, v, degU, degV,
+			surfaceDerivatives<nd, T>(u, v, degU, degV,
 				knotsU, knotsV, cp, nDers, ders);
 		}
 		else {
-			nurbsRationalSurfaceDerivatives<nd, T>(u, v, degU, degV, knotsU,
+			rationalSurfaceDerivatives<nd, T>(u, v, degU, degV, knotsU,
 				knotsV, cp, w, nDers, ders);
 		}
 	}
@@ -364,4 +364,4 @@ private:
 typedef NurbsSurface<3, float> NurbsSurface3f;
 typedef NurbsSurface<3, double> NurbsSurface3d;
 
-} // namespace st
+} // namespace nurbstk
