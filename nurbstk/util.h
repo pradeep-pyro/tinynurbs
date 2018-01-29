@@ -13,19 +13,19 @@ namespace util {
 template <typename T>
 class array2 {
 public:
-	array2(size_t nRows, size_t nCols, T fillValue = 0.0)
-		: rows(nRows), cols(nCols) {
-		data.resize(rows * cols, fillValue);
-	}
-	T operator()(size_t row, size_t col) const {
-		return data[row*cols + col];
-	}
-	T& operator()(size_t row, size_t col) {
-		return data[row*cols + col];
-	}
+    array2(size_t nRows, size_t nCols, T fillValue = 0.0)
+        : rows(nRows), cols(nCols) {
+        data.resize(rows * cols, fillValue);
+    }
+    T operator()(size_t row, size_t col) const {
+        return data[row*cols + col];
+    }
+    T& operator()(size_t row, size_t col) {
+        return data[row*cols + col];
+    }
 private:
-	size_t rows, cols;
-	std::vector<T> data;
+    size_t rows, cols;
+    std::vector<T> data;
 };
 
 /**
@@ -36,7 +36,7 @@ coordinates by perspective division
 */
 template<int nd, typename T>
 inline glm::vec<nd - 1, T> homogenousToCartesian(glm::vec<nd, T> pt) {
-	return glm::vec<nd - 1, T>(pt / pt[pt.length() - 1]);
+    return glm::vec<nd - 1, T>(pt / pt[pt.length() - 1]);
 }
 
 /**
@@ -48,7 +48,7 @@ coordinates
 */
 template<int nd, typename T>
 inline glm::vec<nd + 1, T> cartesianToHomogenous(glm::vec<nd, T> pt, T w) {
-	return glm::vec<nd + 1, T>(pt * w, w);
+    return glm::vec<nd + 1, T>(pt * w, w);
 }
 
 /**
@@ -59,7 +59,7 @@ by truncating the last dimension
 */
 template<int nd, typename T>
 inline glm::vec<nd - 1, T> truncateHomogenous(glm::vec<nd, T> pt) {
-	return glm::vec<nd - 1, T>(pt);
+    return glm::vec<nd - 1, T>(pt);
 }
 
 /**
@@ -67,6 +67,12 @@ Compute the binomial coefficient (nCk) using the formula
 \product_{i=0}^k (n + 1 - i) / i
 */
 unsigned int binomial(unsigned int n, unsigned int k);
+
+template <typename T>
+inline bool close(T a, T b, double eps = std::numeric_limits<T>::epsilon()) {
+    return (std::abs(a - b) < eps) ? true : false;
+}
+
 
 } // namespace util
 } // namespace nurbstk

@@ -12,18 +12,95 @@ the LICENSE.txt file.
 
 #include <vector>
 
+template <typename T>
 bool makeUniformKnotVector(unsigned int degree, size_t nCtrlPts,
-	std::vector<double> &knots);
+                           std::vector<T> &knots) {
+    // Compute number of knots
+    if (nCtrlPts < degree + 1) {
+        return false;
+    }
+    int nKnots = nCtrlPts + degree + 1;
 
+    // Interior knots
+    T step = 1.0 / (nKnots - 1);
+    knots.clear();
+    knots.reserve(nKnots);
+    for (T u = 0.0; u <= 1.0; u += step) {
+        knots.push_back(u);
+    }
+
+    return true;
+}
+
+template <typename T>
 bool makeClampedUniformKnotVector(unsigned int degree, size_t nCtrlPts,
-	std::vector<double> &knots);
+                                  std::vector<T> &knots) {
+    // Compute number of knots
+    if (nCtrlPts < degree + 1) {
+        return false;
+    }
+    int nKnots = nCtrlPts + degree + 1;
+    int nIntKnots = nKnots - 2 * degree;
 
-void clampKnotVector(unsigned int degree, std::vector<double> &knots);
+    knots.clear();
+    knots.reserve(nKnots);
 
-void clampKnotVectorLeft(unsigned int degree, std::vector<double> &knots);
+    // Clamp left side
+    for (int i = 0; i < degree; i++) {
+        knots.push_back(0.0);
+    }
 
-void clampKnotVectorRight(unsigned int degree, std::vector<double> &knots);
+    // Interior knots
+    if (nIntKnots > 0) {
+        double step = 1.0 / (nIntKnots - 1);
+        double u = 0.0;
+        for (int i = 0; i < nIntKnots; i++) {
+            knots.push_back(static_cast<double>(i) * step);
+        }
+    }
 
-bool isKnotVectorMonotonic(const std::vector<double> &knots);
+    // Clamp right side
+    for (int i = 0; i < degree; i++) {
+        knots.push_back(1.0);
+    }
 
-bool isKnotVectorClosed(unsigned int degree, const std::vector<double> &knots);
+    return true;
+}
+
+template <typename T>
+void clampKnotVector(unsigned int degree, std::vector<T> &knots) {
+    clampKnotVectorLeft(degree, knots);
+    clampKnotVectorRight(degree, knots);
+}
+
+template <typename T>
+void clampKnotVectorLeft(unsigned int degree, std::vector<T> &knots) {
+    T start = knots[degree];
+    for (int i = 0; i < degree; i++) {
+        knots[i] = start;
+    }
+}
+
+template <typename T>
+void clampKnotVectorRight(unsigned int degree, std::vector<T> &knots) {
+    T end = knots[knots.size() - degree - 1];
+    for (int i = 0; i < degree; i++) {
+        knots[knots.size() - 1 - i] = end;
+    }
+}
+
+template <typename T>
+bool isKnotVectorMonotonic(const std::vector<T> &knots) {
+    return std::is_sorted(knots.begin(), knots.end());
+}
+
+template <typename T>
+bool isKnotVectorClosed(unsigned int degree, const std::vector<T> &knots) {
+    T eps = std::numeric_limits<T>::epsilon();
+    for (int i = 0; i < degree + 2; i++) {
+        if (std::abs(knots[i] - knots[knots.size() - degree - 2 + i]) > eps) {
+            return false;
+        }
+    }
+    return true;
+}
