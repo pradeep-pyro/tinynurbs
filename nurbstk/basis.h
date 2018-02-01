@@ -106,10 +106,10 @@ void bsplineBasis(unsigned int deg, int span, const std::vector<T> &knots,
                   T u, std::vector<T> &N) {
     N.clear();
     N.resize(deg + 1, 0.0);
-    std::vector<double> left, right;
-    left.resize(deg + 1, 0.0);
-    right.resize(deg + 1, 0.0);
-    double saved = 0.0, temp = 0.0;
+    std::vector<T> left, right;
+    left.resize(deg + 1, static_cast<T>(0.0));
+    right.resize(deg + 1, static_cast<T>(0.0));
+    T saved = 0.0, temp = 0.0;
 
     N[0] = 1.0;
 
@@ -139,12 +139,12 @@ template <typename T>
 void bsplineDerBasis(unsigned int deg, int span, const std::vector<T> &knots,
                      T u, int nDers, std::vector<std::vector<T>> &ders) {
     using util::array2;
-    std::vector<double> left, right;
+    std::vector<T> left, right;
     left.resize(deg + 1, 0.0);
     right.resize(deg + 1, 0.0);
-    double saved = 0.0, temp = 0.0;
+    T saved = 0.0, temp = 0.0;
 
-    array2<double> ndu(deg + 1, deg + 1);
+    array2<T> ndu(deg + 1, deg + 1);
     ndu(0, 0) = 1.0;
 
     for (int j = 1; j <= deg; j++) {
@@ -174,7 +174,7 @@ void bsplineDerBasis(unsigned int deg, int span, const std::vector<T> &knots,
         ders[0][j] = ndu(j, deg);
     }
 
-    array2<double> a(2, deg + 1);
+    array2<T> a(2, deg + 1);
 
     for (int r = 0; r <= deg; r++) {
         int s1 = 0;
@@ -182,7 +182,7 @@ void bsplineDerBasis(unsigned int deg, int span, const std::vector<T> &knots,
         a(0, 0) = 1.0;
 
         for (int k = 1; k <= nDers; k++) {
-            double d = 0.0;
+            T d = 0.0;
             int rk = r - k;
             int pk = deg - k;
             int j1 = 0;
@@ -226,12 +226,12 @@ void bsplineDerBasis(unsigned int deg, int span, const std::vector<T> &knots,
         }
     }
 
-    double fac = static_cast<double>(deg);
+    double fac = static_cast<T>(deg);
     for (int k = 1; k <= nDers; k++) {
         for (int j = 0; j <= deg; j++) {
             ders[k][j] *= fac;
         }
-        fac *= static_cast<double>(deg - k);
+        fac *= static_cast<T>(deg - k);
     }
 }
 

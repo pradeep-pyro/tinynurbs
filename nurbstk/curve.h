@@ -118,7 +118,16 @@ public:
 
     virtual void derivatives(T u, int nDers, std::vector<vecnt> &ptder) const = 0;
 
-    virtual vecnt tangent(T u, bool normalize) const = 0;
+    /**
+    Compute the tangent of the curve
+    @param u Parameter to compute the tangent
+    @param normalize Whether to normalize the tangent vector
+    */
+    vecnt tangent(T u, bool normalize) const {
+        std::vector<vecnt> ders;
+        derivatives(u, 1, ders);
+        return normalize ? glm::normalize(ders[1]) : ders[1];
+    }
 
 protected:
     unsigned int degree_;
@@ -163,17 +172,6 @@ public:
     */
     void derivatives(T u, int nDers, std::vector<vecnt> &ptder) const override {
         curveDerivatives<nd, T>(u, this->degree_, this->knots_, this->control_points_, nDers, ptder);
-    }
-
-    /**
-    Compute the tangent of the curve
-    @param u Parameter to compute the tangent
-    @param normalize Whether to normalize the tangent vector
-    */
-    vecnt tangent(T u, bool normalize=true) const override {
-        std::vector<vecnt> ders;
-        derivatives(u, 1, ders);
-        return normalize ? glm::normalize(ders[1]) : ders[1];
     }
 };
 
@@ -242,17 +240,6 @@ public:
     */
     void derivatives(T u, int num_deriv, std::vector<vecnt> &ptder) const override {
         rationalCurveDerivatives<nd, T>(u, this->degree_, this->knots_, this->control_points_, this->weights_, num_deriv, ptder);
-    }
-
-    /**
-    Compute the tangent of the rational curve
-    @param u Parameter to compute the tangent
-    @param normalize Whether to normalize the tangent vector
-    */
-    vecnt tangent(T u, bool normalize=true) const override {
-        std::vector<vecnt> ders;
-        derivatives(u, 1, ders);
-        return normalize ? glm::normalize(ders[1]) : ders[1];
     }
 
     /**

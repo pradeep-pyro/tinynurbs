@@ -216,7 +216,7 @@ void surfacePoint(T u, T v, uint8_t degreeU, uint8_t degreeV,
     // Find span and non-zero basis functions
     int spanU = findSpan(degreeU, knotsU, u);
     int spanV = findSpan(degreeV, knotsV, v);
-    std::vector<double> Nu, Nv;
+    std::vector<T> Nu, Nv;
     bsplineBasis(degreeU, spanU, knotsU, u, Nu);
     bsplineBasis(degreeV, spanV, knotsV, v, Nv);
 
@@ -309,7 +309,7 @@ void surfaceDerivatives(T u, T v,
     // Find span and basis function derivatives
     int spanU = findSpan(degreeU, knotsU, u);
     int spanV = findSpan(degreeV, knotsV, v);
-    std::vector<std::vector<double>> dersU, dersV;
+    std::vector<std::vector<T>> dersU, dersV;
     bsplineDerBasis(degreeU, spanU, knotsU, u, nDers, dersU);
     bsplineDerBasis(degreeV, spanV, knotsV, v, nDers, dersV);
 
