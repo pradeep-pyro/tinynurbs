@@ -2,7 +2,7 @@
 @file nurbstk/surface.h
 @author Pradeep Kumar Jayaraman <pradeep.pyro@gmail.com>
 
-The NurbsSurface class represents an non-uniform rational B-spline surface.
+The Surface and RationalSurface classes represent non-rational and rational NURBS surfaces, respectively.
 
 Use of this source code is governed by a BSD-style license that can be found in
 the LICENSE.txt file.
