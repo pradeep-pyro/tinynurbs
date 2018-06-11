@@ -35,7 +35,7 @@ coordinates by perspective division
 @return Input point in cartesian coordinates
 */
 template<int nd, typename T>
-inline glm::vec<nd - 1, T> homogenousToCartesian(glm::vec<nd, T> pt) {
+inline glm::vec<nd - 1, T> homogenousToCartesian(const glm::vec<nd, T> &pt) {
     return glm::vec<nd - 1, T>(pt / pt[pt.length() - 1]);
 }
 
@@ -47,7 +47,7 @@ coordinates
 @return Input point in homogenous coordinates
 */
 template<int nd, typename T>
-inline glm::vec<nd + 1, T> cartesianToHomogenous(glm::vec<nd, T> pt, T w) {
+inline glm::vec<nd + 1, T> cartesianToHomogenous(const glm::vec<nd, T> &pt, T w) {
     return glm::vec<nd + 1, T>(pt * w, w);
 }
 
@@ -58,7 +58,7 @@ by truncating the last dimension
 @return Input point in cartesian coordinates
 */
 template<int nd, typename T>
-inline glm::vec<nd - 1, T> truncateHomogenous(glm::vec<nd, T> pt) {
+inline glm::vec<nd - 1, T> truncateHomogenous(const glm::vec<nd, T> &pt) {
     return glm::vec<nd - 1, T>(pt);
 }
 

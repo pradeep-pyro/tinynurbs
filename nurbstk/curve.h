@@ -48,7 +48,7 @@ public:
     /**
     Get the degree of the curve
     */
-    int degree() const {
+    unsigned int degree() const {
         return degree_;
     }
 
@@ -101,7 +101,6 @@ public:
 
     /**
     Get all the knots defining the curve
-    @param i Index of the control point
     */
     const std::vector<T>& knots() const {
         return knots_;
