@@ -33,7 +33,7 @@ void testRationalCurvePoint() {
     controlPoints.push_back(glm::vec2(1, 0));
     controlPoints.push_back(glm::vec2(1, 1));
     controlPoints.push_back(glm::vec2(0, 1));
-    nerbs::RationalCurve2f crv(degree, knots, controlPoints, std::vector<float> {1, 1, 2});
+    nurbstk::RationalCurve2f crv(degree, knots, controlPoints, std::vector<float> {1, 1, 2});
     cout << glm::to_string(crv.point(0)) << endl;
     cout << glm::to_string(crv.point(0.5)) << endl;
     cout << glm::to_string(crv.point(1)) << endl;
@@ -51,13 +51,6 @@ void testRationalSurfacePoint() {
     cp[1].push_back(glm::vec3(-1, 1, 0));
     cp[1].push_back(glm::vec3(-1, 1, 1));
     cp[1].push_back(glm::vec3(-1, 0, 1));
-    SurfaceData<float> data;
-    data.deg_u = 1;
-    data.deg_v = 2;
-    data.knots_u = {0, 0, 1, 1};
-    data.knots_v = {0, 0, 0, 1, 1, 1};
-    data.cp.resize(2, 4);
-    data.cp(0, 0) = ;
     std::vector<std::vector<float>> w {{1, 1, 2}, {1, 1, 2}};
     nurbstk::RationalSurface3f srf(degreeU, degreeV, knotsU, knotsV, cp, w);
     cout << glm::to_string(srf.point(0, 0)) << endl;

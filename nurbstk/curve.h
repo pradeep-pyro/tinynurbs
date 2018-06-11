@@ -12,6 +12,7 @@ the LICENSE.txt file.
 #pragma once
 #include <vector>
 #include <exception>
+#include <stdexcept>
 
 #include "evaluate.h"
 #include "knots.h"
