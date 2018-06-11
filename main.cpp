@@ -1,6 +1,7 @@
 #include <iostream>
 #include "nurbstk/curve.h"
 #include "nurbstk/surface.h"
+#include "nurbstk/io.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 
@@ -58,12 +59,35 @@ void testRationalSurfacePoint() {
     cout << glm::to_string(srf.point(1, 1)) << endl;
 }
 
+void testCurveDeriv() {
+    unsigned int degree = 3;
+    std::vector<float> knots {0, 0, 0, 0, 1, 1, 1, 1};
+    std::vector<glm::vec2> controlPoints;
+    controlPoints.push_back(glm::vec2(10, 0));
+    controlPoints.push_back(glm::vec2(20, 10));
+    controlPoints.push_back(glm::vec2(30, 20));
+    controlPoints.push_back(glm::vec2(50, 50));
+    nurbstk::Curve2f crv(degree, knots, controlPoints);
+    std::vector<glm::vec2> ptder;
+    crv.derivatives(0, 2, ptder);
+    cout << "Derivative (order 0): " << glm::to_string(ptder[0]) << endl;
+    cout << "Derivative (order 1): " << glm::to_string(ptder[1]) << endl;
+    cout << "Derivative (order 2): " << glm::to_string(ptder[2]) << endl;
+}
+
 int main() {
-    // SurfaceData<float> data; // 3d bspline surface
-    // SurfaceData<float, 4> data; // 4d rat bspline surface
-    // readOBJ("test.obj", data.deg_u, data.deg_v, data.knots_u, data.knots_v, data.ctrl_pts, data.rational);
-    testCurvePoint();
-    testRationalCurvePoint();
-    testRationalSurfacePoint();
+    nurbstk::Surface3d srf = nurbstk::Surface3d::fromOBJ("../car50_100.obj");
+    cout << glm::to_string(srf.point(0.5, 0.5)) << endl;
+
+    unsigned int degreeU;
+    unsigned int degreeV;
+    std::vector<float> knotsU, knotsV;
+    nurbstk::util::array2<glm::vec3> cp;
+    nurbstk::util::array2<float> w;
+    bool rational;
+    readOBJ<float>("../car50_100.obj", degreeU, degreeV, knotsU, knotsV, cp, w, rational);
+    for (int i = 0; i < cp.size(); ++i) {
+        cout << glm::to_string(cp[i]) << endl;
+    }
     return 0;
 }

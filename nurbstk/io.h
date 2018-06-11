@@ -5,294 +5,10 @@
 #include <sstream>
 #include <fstream>
 #include <algorithm>
+#include "glm/glm.hpp"
+#include "util.h"
 
 using namespace std;
-/*
-bool loadOBJ(string filename, unsigned int &degU, unsigned int &degV,
-    vector<double> &knotsU, vector<double> &knotsV,
-    vector<vector<glm::dvec3>> &ctrlPts) {
-    int k = 0, num = 1;
-    double uknot_min = 0, uknot_max = 1;
-    double vknot_min = 0, vknot_max = 1;
-    double temp;
-    glm::vec3 pt;
-
-    vector<glm::vec3> Posi;
-    vector<glm::vec3> temp_Posi;
-    vector<int> Posi_num;
-    vector<double> temp_uknots;
-    vector<double> temp_vknots;
-
-    string start, token;
-    string sline;
-    istringstream ssline;
-
-    ifstream file(filename);
-    if (!file) {
-        cerr << "File not found!" << endl;
-        return false;
-    }
-
-    degU = 0, degV = 0;
-    int nKnotsU = 0, nKnotsV = 0;
-
-    while (!file.eof()) {
-        getline(file, sline);
-        if (sline.size() == 0) {
-            break;
-        }
-        ssline.str(sline);
-        ssline >> start;
-        if (start == "v") {
-            ssline >> pt[0] >> pt[1] >> pt[2];
-            temp_Posi.push_back(pt);
-        }
-        else if (start == "deg")
-            ssline >> degU >> degV;
-        else if (start == "surf") {
-            ssline >> uknot_min >> uknot_max >> vknot_min >> vknot_max;
-            while (!ssline.eof()) {
-                ssline >> token;
-                if (token == "\\") {
-                    ssline.clear();
-                    getline(file, sline);
-                    ssline.str(sline);
-                }
-                else {
-                    num = atof(token.c_str());
-                    Posi_num.push_back(num);
-                }
-            }
-        }
-        else if (start == "parm") {
-            ssline >> start;
-            if (start == "u") {
-                while (!ssline.eof()) {
-                    ssline >> token;
-                    if (token == "\\") {
-                        ssline.clear();
-                        getline(file, sline);
-                        ssline.str(sline);
-                    }
-                    else {
-                        temp = atof(token.c_str());
-                        temp_uknots.push_back(temp);
-                        ++nKnotsU;
-                    }
-                }
-            }
-            else if (start == "v") {
-                while (!ssline.eof()) {
-                    ssline >> token;
-                    if (token == "\\") {
-                        ssline.clear();
-                        getline(file, sline);
-                        ssline.str(sline);
-                    }
-                    else {
-                        temp = atof(token.c_str());
-                        temp_vknots.push_back(temp);
-                        ++nKnotsV;
-                    }
-                }
-            }
-        }
-        else if (start == "end") {
-            break;
-        }
-        ssline.clear();
-    }
-    file.close();
-
-    cout << temp_uknots[0] << endl;
-
-    for (int i = 0; i < (int)Posi_num.size(); i++) {
-        Posi.push_back(temp_Posi[(int)Posi_num[i] - 1]);
-    }
-
-    int NIPts = (int)Posi.size();
-    int nCtrlPtsU = nKnotsU - (degU + 1);
-    int nCtrlPtsV = nKnotsV - (degV + 1);
-
-    if (NIPts != nCtrlPtsU*nCtrlPtsV) {
-        cerr << "Invalid OBJ: " << endl;
-        cerr << "Degree: " << degU << ", " << degV << endl;
-        cerr << "Knots: " << nKnotsU << ", " << nKnotsV << endl;
-        cerr << "Control points: " << nCtrlPtsU << ", " << nCtrlPtsV << endl;
-        return false;
-    }
-
-    ctrlPts.resize(nCtrlPtsU);
-    for (int i = 0; i < nCtrlPtsU; i++) {
-        ctrlPts[i].resize(nCtrlPtsV);
-    }
-    num = 0;
-    for (int j = 0; j < nCtrlPtsV; j++) {
-        for (int i = 0; i < nCtrlPtsU; i++) {
-            ctrlPts[i][j] = Posi[num];
-            num++;
-        }
-    }
-    for (int j = 0; j < nCtrlPtsV; j++) {
-        for (int i = 0; i < nCtrlPtsU; i++) {
-            ctrlPts[i][j] = Posi[num];
-            num++;
-        }
-    }
-    knotsU.reserve(nKnotsU);
-    knotsV.reserve(nKnotsV);
-    for (int i = 0; i < nKnotsU; ++i) {
-        knotsU.push_back((temp_uknots[i] - uknot_min) / (uknot_max - uknot_min));
-    }
-    for (int j = 0; j < nKnotsV; ++j) {
-        knotsV.push_back((temp_vknots[j] - vknot_min) / (vknot_max - vknot_min));
-    }
-
-    return true;
-    //MaxMinMidPoint();
-}
-
-bool loadOBJ(string filename, unsigned int &degU, unsigned int &degV,
-    vector<double> &knotsU, vector<double> &knotsV,
-    vector<vector<glm::dvec3>> &ctrlPts) {
-    int k = 0, num = 1;
-    double uknot_min = 0, uknot_max = 1;
-    double vknot_min = 0, vknot_max = 1;
-    double temp;
-    glm::vec3 pt;
-
-    vector<glm::vec3> Posi;
-    vector<glm::vec3> temp_Posi;
-    vector<int> Posi_num;
-    string start, token;
-    string sline;
-    istringstream ssline;
-
-    ifstream file(filename);
-    if (!file) {
-        cerr << "File not found!" << endl;
-        return false;
-    }
-
-    degU = 0, degV = 0;
-
-    while (!file.eof()) {
-        getline(file, sline);
-        if (sline.size() == 0) {
-            break;
-        }
-        ssline.str(sline);
-        ssline >> start;
-        if (start == "v") {
-            ssline >> pt[0] >> pt[1] >> pt[2];
-            temp_Posi.push_back(pt);
-        }
-        else if (start == "deg")
-            ssline >> degU >> degV;
-        else if (start == "surf") {
-            ssline >> uknot_min >> uknot_max >> vknot_min >> vknot_max;
-            while (!ssline.eof()) {
-                ssline >> token;
-                if (token == "\\") {
-                    ssline.clear();
-                    getline(file, sline);
-                    ssline.str(sline);
-                }
-                else {
-                    num = atof(token.c_str());
-                    Posi_num.push_back(num);
-                }
-            }
-        }
-        else if (start == "parm") {
-            ssline >> start;
-            if (start == "u") {
-                while (!ssline.eof()) {
-                    ssline >> token;
-                    if (token == "\\") {
-                        ssline.clear();
-                        getline(file, sline);
-                        ssline.str(sline);
-                    }
-                    else {
-                        temp = atof(token.c_str());
-                        knotsU.push_back(temp);
-                    }
-                }
-            }
-            else if (start == "v") {
-                while (!ssline.eof()) {
-                    ssline >> token;
-                    if (token == "\\") {
-                        ssline.clear();
-                        getline(file, sline);
-                        ssline.str(sline);
-                    }
-                    else {
-                        temp = atof(token.c_str());
-                        knotsV.push_back(temp);
-                    }
-                }
-            }
-        }
-        else if (start == "end") {
-            break;
-        }
-        ssline.clear();
-    }
-    file.close();
-
-    for (int index : Posi_num) {
-        Posi.push_back(temp_Posi[index - 1]);
-    }
-
-    cout << Posi_num.size() << "  " << Posi.size() << endl;
-
-    int NIPts = (int)Posi.size();
-    int nCtrlPtsU = knotsU.size() - (degU + 1);
-    int nCtrlPtsV = knotsV.size() - (degV + 1);
-
-    if (NIPts != nCtrlPtsU*nCtrlPtsV) {
-    cerr << "Invalid OBJ: " << endl;
-    cerr << "NIPts: " << NIPts << " != " << nCtrlPtsU << " * " << nCtrlPtsV << endl;
-    cerr << "Degree: " << degU << ", " << degV << endl;
-    cerr << "Knots: " << knotsU.size() << ", " << knotsV.size() << endl;
-    for (auto val : knotsU) {
-        cout << val << " ";
-    }
-    cout << endl;
-    cerr << "Control points: " << nCtrlPtsU << " * " << nCtrlPtsV << " = " << NIPts << endl;
-    return false;
-    }
-
-    ctrlPts.resize(nCtrlPtsU);
-    for (int i = 0; i < nCtrlPtsU; i++) {
-        ctrlPts[i].resize(nCtrlPtsV);
-    }
-    num = 0;
-    for (int j = 0; j < nCtrlPtsV; j++) {
-        for (int i = 0; i < nCtrlPtsU; i++) {
-            ctrlPts[i][j] = Posi[num];
-            num++;
-        }
-    }
-    for (int j = 0; j < nCtrlPtsV; j++) {
-        for (int i = 0; i < nCtrlPtsU; i++) {
-            ctrlPts[i][j] = Posi[num];
-            num++;
-        }
-    }
-
-    for (double &val : knotsU) {
-        val = (val - uknot_min) / (uknot_max - uknot_min);
-    }
-    for (double &val : knotsV) {
-        val = (val - vknot_min) / (vknot_max - vknot_min);
-    }
-
-    return true;
-}
-*/
 
 template <typename T>
 T mapToRange(T val, T old_min, T old_max, T new_min, T new_max) {
@@ -301,18 +17,18 @@ T mapToRange(T val, T old_min, T old_max, T new_min, T new_max) {
     return (((val - old_min) * new_range) / old_range) + new_min;
 }
 
-bool readOBJ(string filename, unsigned int &degU, unsigned int &degV,
-             vector<double> &knotsU, vector<double> &knotsV,
-             vector<vector<glm::dvec3>> &ctrlPts, bool &rational) {
-    int num = 1;
-    double uknot_min = 0, uknot_max = 1;
-    double vknot_min = 0, vknot_max = 1;
+template <typename T>
+bool readOBJ(const string &filename, unsigned int &degU, unsigned int &degV,
+             vector<T> &knotsU, vector<T> &knotsV,
+             nurbstk::util::array2<glm::vec<3, T>> &ctrlPts, nurbstk::util::array2<T> &weights, bool &rational) {
+    T uknot_min = 0, uknot_max = 1;
+    T vknot_min = 0, vknot_max = 1;
 
-    vector<glm::vec3> Posi;
-    vector<glm::vec3> ctrl_pts_buf;
+    vector<glm::vec<3, T>> ctrl_pts_buf;
+    vector<T> weights_buf;
     vector<int> indices;
-    vector<double> temp_uknots;
-    vector<double> temp_vknots;
+    vector<T> temp_uknots;
+    vector<T> temp_vknots;
 
     string start, token;
     string sline;
@@ -324,9 +40,11 @@ bool readOBJ(string filename, unsigned int &degU, unsigned int &degV,
         return false;
     }
 
-    degU = 0, degV = 0;
+    struct ToParse {
+        bool deg, cstype, surf, parm;
+    };
 
-    bool cstype_parsed = false;
+    ToParse parsed;
 
     while (getline(file, sline)) {
         if (sline.size() == 0) {
@@ -335,35 +53,35 @@ bool readOBJ(string filename, unsigned int &degU, unsigned int &degV,
         ssline.str(sline);
         ssline >> start;
         if (start == "v") {
-            glm::vec4 pt;
-            pt[3] = 1.0;
-            for (int i = 0; i < 4 && !ssline; ++i) {
-                ssline >> pt[i];
+            std::vector<double> four_coords;
+            four_coords.resize(4);
+            four_coords[3] = 1.0;
+            int index = 0;
+            while (ssline && index <= 3) {
+                ssline >> four_coords[index++];
             }
-            /*
-             * glm::vec3 pt;
-            ssline >> pt[0] >> pt[1] >> pt[2];
-            */
-            ctrl_pts_buf.push_back(pt);
+            ctrl_pts_buf.emplace_back(four_coords[0], four_coords[1], four_coords[2]);
+            weights_buf.push_back(four_coords[3]);
         }
         else if (start == "cstype") {
             std::string token1;
             ssline >> token1;
             if (token1 == "bspline") {
                 rational = false;
-                cstype_parsed = true;
+                parsed.cstype = true;
             }
-            else if (token == "rat") {
+            else if (token1 == "rat") {
                 std::string token2;
                 ssline >> token2;
                 if (token2 == "bspline") {
                     rational = true;
-                    cstype_parsed = true;
+                    parsed.cstype = true;
                 }
             }
         }
         else if (start == "deg") {
             ssline >> degU >> degV;
+            parsed.deg = true;
         }
         else if (start == "surf") {
             ssline >> uknot_min >> uknot_max >> vknot_min >> vknot_max;
@@ -377,6 +95,7 @@ bool readOBJ(string filename, unsigned int &degU, unsigned int &degV,
                     indices.push_back(std::stof(token));
                 }
             }
+            parsed.surf = true;
         }
         else if (start == "parm") {
             ssline >> start;
@@ -388,7 +107,7 @@ bool readOBJ(string filename, unsigned int &degU, unsigned int &degV,
                         ssline.str(sline);
                     }
                     else {
-                        temp_uknots.push_back(atof(token.c_str()));
+                        temp_uknots.push_back(std::stof(token));
                     }
                 }
             }
@@ -400,10 +119,11 @@ bool readOBJ(string filename, unsigned int &degU, unsigned int &degV,
                         ssline.str(sline);
                     }
                     else {
-                        temp_vknots.push_back(atof(token.c_str()));
+                        temp_vknots.push_back(std::stof(token));
                     }
                 }
             }
+            parsed.parm = true;
         }
         else if (start == "end") {
             break;
@@ -412,9 +132,165 @@ bool readOBJ(string filename, unsigned int &degU, unsigned int &degV,
     }
     file.close();
 
-    if (!cstype_parsed) {
-        std::cerr << "'cstype bspline / cstype rat bspline' line missing in file" << std::endl;
+    // Check if necessary data was available in file
+    if (!parsed.cstype) {
+        throw std::runtime_error("'cstype bspline / cstype rat bspline' line missing in file");
+    }
+    if (!parsed.deg) {
+        throw std::runtime_error("'deg' line missing/incomplete in file");
+    }
+    if (!parsed.parm) {
+        throw std::runtime_error("'parm' line missing/incomplete in file");
+    }
+
+    int num_knots_u = temp_uknots.size();
+    int num_knots_v = temp_vknots.size();
+    int num_cp_u = num_knots_u - degU - 1;
+    int num_cp_v = num_knots_v - degV - 1;
+
+    ctrlPts.resize(num_cp_u, num_cp_v);
+    weights.resize(num_cp_u, num_cp_v);
+    for (auto idx : indices) {
+        size_t idxm1 = idx - 1;
+        size_t i = idxm1 / num_cp_v, j = idxm1 % num_cp_v;
+        ctrlPts(i, j) = ctrl_pts_buf[idxm1];
+        weights(i, j) = weights_buf[idxm1];
+    }
+
+    knotsU = temp_uknots;
+    knotsV = temp_vknots;
+
+    return true;
+}
+
+template <typename T>
+bool readOBJ(string filename, unsigned int &degU, unsigned int &degV,
+             vector<T> &knotsU, vector<T> &knotsV,
+             vector<vector<glm::vec<3, T>>> &ctrlPts, vector<vector<T>> &weights, bool &rational) {
+    int num = 1;
+    double uknot_min = 0, uknot_max = 1;
+    double vknot_min = 0, vknot_max = 1;
+
+    vector<glm::vec<3, T>> Posi;
+    vector<glm::vec<3, T>> ctrl_pts_buf;
+    vector<T> weights_buf;
+    vector<int> indices;
+    vector<T> temp_uknots;
+    vector<T> temp_vknots;
+
+    string start, token;
+    string sline;
+    istringstream ssline;
+
+    ifstream file(filename);
+    if (!file) {
+        cerr << "File not found!" << endl;
         return false;
+    }
+
+    degU = 0, degV = 0;
+
+    struct ToParse {
+        bool deg, cstype, surf, parm;
+    };
+
+    ToParse to_parse;
+
+    while (getline(file, sline)) {
+        if (sline.size() == 0) {
+            break;
+        }
+        ssline.str(sline);
+        ssline >> start;
+        if (start == "v") {
+            std::vector<double> four_coords;
+            four_coords.resize(4);
+            four_coords[3] = 1.0;
+            int index = 0;
+            while (ssline && index <= 3) {
+                ssline >> four_coords[index++];
+            }
+            ctrl_pts_buf.emplace_back(four_coords[0], four_coords[1], four_coords[2]);
+            weights_buf.push_back(four_coords[3]);
+        }
+        else if (start == "cstype") {
+            std::string token1;
+            ssline >> token1;
+            if (token1 == "bspline") {
+                rational = false;
+                to_parse.cstype = true;
+            }
+            else if (token1 == "rat") {
+                std::string token2;
+                ssline >> token2;
+                if (token2 == "bspline") {
+                    rational = true;
+                    to_parse.cstype = true;
+                }
+            }
+        }
+        else if (start == "deg") {
+            ssline >> degU >> degV;
+            to_parse.deg = true;
+        }
+        else if (start == "surf") {
+            ssline >> uknot_min >> uknot_max >> vknot_min >> vknot_max;
+            while (ssline >> token) {
+                if (token == "\\") {
+                    ssline.clear();
+                    getline(file, sline);
+                    ssline.str(sline);
+                }
+                else {
+                    indices.push_back(std::stof(token));
+                }
+            }
+            to_parse.surf = true;
+        }
+        else if (start == "parm") {
+            ssline >> start;
+            if (start == "u") {
+                while (ssline >> token) {
+                    if (token == "\\") {
+                        ssline.clear();
+                        getline(file, sline);
+                        ssline.str(sline);
+                    }
+                    else {
+                        temp_uknots.push_back(std::stof(token));
+                    }
+                }
+            }
+            else if (start == "v") {
+                while (ssline >> token) {
+                    if (token == "\\") {
+                        ssline.clear();
+                        getline(file, sline);
+                        ssline.str(sline);
+                    }
+                    else {
+                        temp_vknots.push_back(std::stof(token));
+                    }
+                }
+            }
+            to_parse.parm = true;
+        }
+        else if (start == "end") {
+            break;
+        }
+        ssline.clear();
+    }
+    file.close();
+
+    // Check if necessary data was available in file
+    if (!to_parse.cstype) {
+        throw std::runtime_error("'cstype bspline / cstype rat bspline' line missing in file");
+    }
+    if (!to_parse.deg) {
+        throw std::runtime_error("'deg' line missing/incomplete in file");
+    }
+    if (!to_parse.parm) {
+        throw std::runtime_error("'parm' line missing/incomplete in file");
     }
 
     for (int i = 0; i < (int)indices.size(); ++i) {
@@ -444,6 +320,18 @@ bool readOBJ(string filename, unsigned int &degU, unsigned int &degV,
         }
     }
 
+    weights.resize(nCtrlPtsU);
+    for (int i = 0; i < nCtrlPtsU; i++) {
+        weights[i].resize(nCtrlPtsV);
+    }
+    num = 0;
+    for (int j = 0; j < nCtrlPtsV; j++) {
+        for (int i = 0; i < nCtrlPtsU; i++) {
+            weights[i][j] = weights_buf[num];
+            num++;
+        }
+    }
+
     knotsU.reserve(nKnotsU);
     knotsV.reserve(nKnotsV);
     auto mnmxu = std::minmax_element(temp_uknots.begin(), temp_uknots.end());
@@ -456,11 +344,11 @@ bool readOBJ(string filename, unsigned int &degU, unsigned int &degV,
     }
 
     return true;
-    //MaxMinMidPoint();
 }
 
-void saveOBJ(std::string filename, unsigned int degU, unsigned int degV, const std::vector<double>& knotsU, const std::vector<double>& knotsV,
-             const std::vector<std::vector<glm::dvec3>>& ctrlPts) {
+template <typename T>
+void saveOBJ(const std::string &filename, unsigned int degU, unsigned int degV, const std::vector<T>& knotsU, const std::vector<T>& knotsV,
+             const std::vector<std::vector<glm::vec<3, T>>> &ctrlPts, bool rational) {
 
     ofstream fout(filename);
 
@@ -480,7 +368,13 @@ void saveOBJ(std::string filename, unsigned int degU, unsigned int degV, const s
     int nCpU = ctrlPts.size();
     int nCpV = ctrlPts[0].size();
 
-    fout << "cstype bspline" << endl << "deg " << degU << " " << degV << endl << "surf ";
+    if (!rational) {
+        fout << "cstype bspline" << endl;
+    }
+    else {
+        fout << "cstype rat bspline" << endl;
+    }
+    fout << "deg " << degU << " " << degV << endl << "surf ";
     fout << knotsU[degU] << " " << knotsU[nKnotsU - degU - 1] << " "
          << knotsV[degV] << " " << knotsV[nKnotsV - degV - 1];
     for (int i = 0; i < nCpU*nCpV; i++) {

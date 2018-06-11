@@ -14,12 +14,13 @@ the LICENSE.txt file.
 
 #include "evaluate.h"
 #include "knots.h"
+#include "io.h"
 
 namespace nurbstk {
 
 /**
 \brief Base Class for representing a NURBS surface
-\tparam nd Dimension of the surface
+\tparam nd Dimension of the surface (always 3)
 \tparam T Data type of control points and weights (float or double)
 */
 template <int nd, typename T>
@@ -45,11 +46,11 @@ public:
             throw(std::logic_error("Knot vector(s) is not monotonic"));
         }
 
-        this->deg_u = degreeU;
-        this->deg_v = degreeV;
-        this->knots_u = knotsU;
-        this->knots_v = knotsV;
-        this->ctrlPts = controlPoints;
+        this->degree_u_ = degreeU;
+        this->degree_v_ = degreeV;
+        this->knots_u_ = knotsU;
+        this->knots_v_ = knotsV;
+        this->control_points_ = controlPoints;
     }
 
     /**
@@ -110,94 +111,94 @@ public:
     Returns a 2D vector of control points
     */
     const std::vector<std::vector<vecnt>> & controlPoints() const {
-        return ctrlPts;
+        return control_points_;
     }
 
     /**
     Returns the degree along u-direction
     */
     unsigned int degreeU() const {
-        return deg_u;
+        return degree_u_;
     }
 
     /**
     Returns the degree along v-direction
     */
     unsigned int degreeV() const {
-        return deg_v;
+        return degree_v_;
     }
 
     /**
     Returns a copy of the knot vector along u-direction
     */
     const std::vector<double> & knotsU() const {
-        return knots_u;
+        return knots_u_;
     }
 
     /**
     Returns knot value at index along u-direction
     */
     T knotU(size_t index) const {
-        return knots_u[index];
+        return knots_u_[index];
     }
 
     /**
     Sets knot value at index along u-direction
     */
     T & knotU(size_t index) {
-        return knots_u[index];
+        return knots_u_[index];
     }
 
     /**
     Returns knot value at index along v-direction
     */
     T knotV(size_t index) const {
-        return knots_v[index];
+        return knots_v_[index];
     }
 
     /**
     Sets knot value at index along v-direction
     */
     T & knotV(size_t index, double val) {
-        return knots_v[index];
+        return knots_v_[index];
     }
 
     /**
     Returns a copy of the knot vector along v-direction
     */
     const std::vector<double> & knotsV() const {
-        return knots_v;
+        return knots_v_;
     }
 
     /**
     Returns number of knots along u-direction
     */
     size_t numKnotsU() const {
-        return knots_u.size();
+        return knots_u_.size();
     }
 
     /**
     Returns number of knots along u - direction
     */
     size_t numKnotsV() const {
-        return knots_v.size();
+        return knots_v_.size();
     }
 
     /**
     Returns number of control points along u-direction
     */
     size_t numControlPointsU() const {
-        return ctrlPts.size();
+        return control_points_.size();
     }
 
     /**
     Returns number of control points along v-direction
     */
     size_t numControlPointsV() const {
-        if (ctrlPts.empty()) {
+        if (control_points_.empty()) {
             return 0;
         }
-        return ctrlPts[0].size();
+        return control_points_[0].size();
     }
 
     /**
@@ -206,7 +207,7 @@ public:
     @param j Index along v-direction
     */
     vecnt controlPoint(size_t i, size_t j) const {
-        return ctrlPts[i][j];
+        return control_points_[i][j];
     }
 
     /**
@@ -216,7 +217,7 @@ public:
     @param pt New control point at (i, j)
     */
     vecnt & controlPoint(size_t i, size_t j) {
-        return ctrlPts[i][j];
+        return control_points_[i][j];
     }
 
     /**
@@ -224,12 +225,12 @@ public:
     */
     bool isClosedU() const {
         for (int j = 0; j < numControlPointsV(); j++) {
-            if (ctrlPts[0][j] != ctrlPts[numControlPointsU() - 1][j]) {
+            if (control_points_[0][j] != control_points_[numControlPointsU() - 1][j]) {
                 return false;
             }
         }
 
-        if (!isKnotVectorClosed(deg_u, knots_u)) {
+        if (!isKnotVectorClosed(degree_u_, knots_u_)) {
             return false;
         }
         return true;
@@ -240,12 +241,12 @@ public:
     */
     bool isClosedV() const {
         for (int i = 0; i < numControlPointsU(); i++) {
-            if (ctrlPts[i][0] != ctrlPts[i][numControlPointsV() - 1]) {
+            if (control_points_[i][0] != control_points_[i][numControlPointsV() - 1]) {
                 return false;
             }
         }
 
-        if (!isKnotVectorClosed(deg_v, knots_v)) {
+        if (!isKnotVectorClosed(degree_v_, knots_v_)) {
             return false;
         }
         return true;
@@ -257,18 +258,22 @@ public:
     of the knot vectors
     */
     bool isValid() const {
-        return isValidRelation(deg_u, knots_u.size(), ctrlPts.size()) &&
-               isValidRelation(deg_v, knots_v.size(), ctrlPts[0].size()) &&
-               isKnotVectorMonotonic(knots_u) && isKnotVectorMonotonic(knots_v);
+        return isValidRelation(degree_u_, knots_u_.size(), control_points_.size()) &&
+               isValidRelation(degree_v_, knots_v_.size(), control_points_[0].size()) &&
+               isKnotVectorMonotonic(knots_u_) && isKnotVectorMonotonic(knots_v_);
     }
 
 protected:
-    unsigned int deg_u, deg_v;
-    std::vector<T> knots_u, knots_v;
-    std::vector<std::vector<vecnt>> ctrlPts;
+    unsigned int degree_u_, degree_v_;
+    std::vector<T> knots_u_, knots_v_;
+    std::vector<std::vector<vecnt>> control_points_;
 };
 
-
+/**
+\brief Class for representing a non-rational B-spline surface
+\tparam nd Dimension of the surface (always 3)
+\tparam T Data type of control points and weights (float or double)
+*/
 template <int nd, typename T>
 class Surface : public BaseSurface<nd, T> {
 public:
@@ -288,21 +293,35 @@ public:
         : BaseSurface<nd, T>(degreeU, degreeV, knotsU, knotsV, controlPoints) {
     }
 
+    static Surface<nd, T> fromOBJ(const std::string &filename) {
+        unsigned int deg_u, deg_v;
+        std::vector<double> knots_u, knots_v;
+        std::vector<std::vector<glm::dvec3>> ctrl_pts;
+        std::vector<std::vector<double>> weights;
+        bool rational;
+        readOBJ(filename, deg_u, deg_v, knots_u, knots_v, ctrl_pts, weights, rational);
+        return Surface<nd, T>(deg_u, deg_v, knots_u, knots_v, ctrl_pts);
+    }
+
     vecnt point(T u, T v) const override {
         vecnt pt;
-        surfacePoint<nd, T>(u, v, this->deg_u, this->deg_v, this->knots_u, this->knots_v,
-                            this->ctrlPts, pt);
+        surfacePoint<nd, T>(u, v, this->degree_u_, this->degree_v_, this->knots_u_, this->knots_v_,
+                            this->control_points_, pt);
         return pt;
     }
 
     void derivatives(T u, T v, int nDers,
                      std::vector<std::vector<vecnt>> &ders) const override {
-        surfaceDerivatives<nd, T>(u, v, this->deg_u, this->deg_v,
-                                  this->knots_u, this->knots_v, this->ctrlPts, nDers, ders);
+        surfaceDerivatives<nd, T>(u, v, this->degree_u_, this->degree_v_,
+                                  this->knots_u_, this->knots_v_, this->control_points_, nDers, ders);
     }
 };
 
-
+/**
+\brief Class for representing a rational B-spline (NURBS) surface
+\tparam nd Dimension of the surface (always 3)
+\tparam T Data type of control points and weights (float or double)
+*/
 template <int nd, typename T>
 class RationalSurface : public BaseSurface<nd, T> {
 public:
@@ -325,7 +344,17 @@ public:
         if (weights.size() != controlPoints.size()) {
             throw std::logic_error("Number of weights should be equal to number of control points");
         }
-        this->weights = weights;
+        this->weights_ = weights;
+    }
+
+    static RationalSurface<nd, T> fromOBJ(const std::string &filename) {
+        unsigned int deg_u, deg_v;
+        std::vector<double> knots_u, knots_v;
+        std::vector<std::vector<glm::dvec3>> ctrl_pts;
+        std::vector<std::vector<double>> weights;
+        bool rational;
+        readOBJ(filename, deg_u, deg_v, knots_u, knots_v, ctrl_pts, weights, rational);
+        return RationalSurface<nd, T>(deg_u, deg_v, knots_u, knots_v, ctrl_pts, weights);
     }
 
     /**
@@ -334,7 +363,7 @@ public:
     @param j Index along v-direction
     */
     T weight(size_t i, size_t j) const {
-        return weights[i][j];
+        return weights_[i][j];
     }
 
     /**
@@ -343,22 +372,23 @@ public:
     @param j Index along v-direction
     */
     T & weight(size_t i, size_t j) {
-        return weights[i][j];
+        return weights_[i][j];
     }
 
     vecnt point(T u, T v) const override {
         vecnt pt;
-        rationalSurfacePoint<nd, T>(u, v, this->deg_u, this->deg_v, this->knots_u, this->knots_v,
-                                    this->ctrlPts, weights, pt);
+        rationalSurfacePoint<nd, T>(u, v, this->degree_u_, this->degree_v_, this->knots_u_, this->knots_v_,
+                                    this->control_points_, weights_, pt);
         return pt;
     }
 
     void derivatives(T u, T v, int nDers, std::vector<std::vector<vecnt>> &ders) const override {
-        rationalSurfaceDerivatives<nd, T>(u, v, this->deg_u, this->deg_v, this->knots_u, this->knots_v,
-                                          this->ctrlPts, weights, nDers, ders);
+        rationalSurfaceDerivatives<nd, T>(u, v, this->degree_u_, this->degree_v_, this->knots_u_, this->knots_v_,
+                                          this->control_points_, weights_, nDers, ders);
     }
+
 private:
-    std::vector<std::vector<T>> weights;
+    std::vector<std::vector<T>> weights_;
 };
 
 // Typedefs for ease of use

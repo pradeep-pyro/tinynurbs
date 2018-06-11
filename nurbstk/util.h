@@ -13,19 +13,43 @@ namespace util {
 template <typename T>
 class array2 {
 public:
-    array2(size_t nRows, size_t nCols, T fillValue = 0.0)
-        : rows(nRows), cols(nCols) {
-        data.resize(rows * cols, fillValue);
+    array2() {
+    }
+    array2(size_t rows, size_t cols, T default_value = T()) {
+        resize(rows, cols, default_value);
+    }
+    void resize(size_t rows, size_t cols, T val=T()) {
+        data_.resize(rows * cols, val);
+        rows_ = rows;
+        cols_ = cols;
     }
     T operator()(size_t row, size_t col) const {
-        return data[row*cols + col];
+        return data_[row*cols_ + col];
     }
     T& operator()(size_t row, size_t col) {
-        return data[row*cols + col];
+        return data_[row*cols_ + col];
+    }
+    T operator[](size_t idx) const {
+        return data_[idx];
+    }
+    T& operator[](size_t idx) {
+        return data_[idx];
+    }
+    size_t rows() const {
+        return rows_;
+    }
+    size_t cols() const {
+        return cols_;
+    }
+    size_t size() const {
+        return data_.size();
+    }
+    T * data() {
+        return &data_[0];
     }
 private:
-    size_t rows, cols;
-    std::vector<T> data;
+    size_t rows_, cols_;
+    std::vector<T> data_;
 };
 
 /**
