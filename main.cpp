@@ -85,7 +85,7 @@ int main() {
     nurbstk::util::array2<glm::vec3> cp;
     nurbstk::util::array2<float> w;
     bool rational;
-    readOBJ<float>("../car50_100.obj", degreeU, degreeV, knotsU, knotsV, cp, w, rational);
+    nurbstk::readOBJ<float>("../car50_100.obj", degreeU, degreeV, knotsU, knotsV, cp, w, rational);
     for (int i = 0; i < cp.size(); ++i) {
         cout << glm::to_string(cp[i]) << endl;
     }
