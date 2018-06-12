@@ -11,8 +11,8 @@
 namespace nurbstk {
 
 template <typename T>
-bool readOBJ(const std::string &filename, unsigned int &degU, unsigned int &degV,
-             std::vector<T> &knotsU, std::vector<T> &knotsV,
+bool readOBJ(const std::string &filename, unsigned int &deg_u, unsigned int &deg_v,
+             std::vector<T> &knots_u, std::vector<T> &knots_v,
              util::array2<glm::vec<3, T>> &ctrlPts, util::array2<T> &weights, bool &rational) {
     T uknot_min = 0, uknot_max = 1;
     T vknot_min = 0, vknot_max = 1;
@@ -72,7 +72,7 @@ bool readOBJ(const std::string &filename, unsigned int &degU, unsigned int &degV
             }
         }
         else if (start == "deg") {
-            ssline >> degU >> degV;
+            ssline >> deg_u >> deg_v;
             parsed.deg = true;
         }
         else if (start == "surf") {
@@ -137,8 +137,8 @@ bool readOBJ(const std::string &filename, unsigned int &degU, unsigned int &degV
 
     int num_knots_u = temp_uknots.size();
     int num_knots_v = temp_vknots.size();
-    int num_cp_u = num_knots_u - degU - 1;
-    int num_cp_v = num_knots_v - degV - 1;
+    int num_cp_u = num_knots_u - deg_u - 1;
+    int num_cp_v = num_knots_v - deg_v - 1;
 
     ctrlPts.resize(num_cp_u, num_cp_v);
     weights.resize(num_cp_u, num_cp_v);
@@ -149,15 +149,15 @@ bool readOBJ(const std::string &filename, unsigned int &degU, unsigned int &degV
         weights(i, j) = weights_buf[idxm1];
     }
 
-    knotsU = temp_uknots;
-    knotsV = temp_vknots;
+    knots_u = temp_uknots;
+    knots_v = temp_vknots;
 
     return true;
 }
 
 template <typename T>
-bool readOBJ(const std::string &filename, unsigned int &degU, unsigned int &degV,
-             std::vector<T> &knotsU, std::vector<T> &knotsV,
+bool readOBJ(const std::string &filename, unsigned int &deg_u, unsigned int &deg_v,
+             std::vector<T> &knots_u, std::vector<T> &knots_v,
              std::vector<std::vector<glm::vec<3, T>>> &ctrlPts, std::vector<std::vector<T>> &weights, bool &rational) {
     int num = 1;
     double uknot_min = 0, uknot_max = 1;
@@ -178,7 +178,7 @@ bool readOBJ(const std::string &filename, unsigned int &degU, unsigned int &degV
         throw std::runtime_error("File not found: " + filename);
     }
 
-    degU = 0, degV = 0;
+    deg_u = 0, deg_v = 0;
 
     struct ToParse {
         bool deg, cstype, surf, parm;
@@ -220,7 +220,7 @@ bool readOBJ(const std::string &filename, unsigned int &degU, unsigned int &degV
             }
         }
         else if (start == "deg") {
-            ssline >> degU >> degV;
+            ssline >> deg_u >> deg_v;
             to_parse.deg = true;
         }
         else if (start == "surf") {
@@ -286,11 +286,11 @@ bool readOBJ(const std::string &filename, unsigned int &degU, unsigned int &degV
     for (int i = 0; i < (int)indices.size(); ++i) {
         Posi.push_back(ctrl_pts_buf[(int)indices[i] - 1]);
     }
-    int nKnotsU = temp_uknots.size();
-    int nKnotsV = temp_vknots.size();
+    int nknots_u = temp_uknots.size();
+    int nknots_v = temp_vknots.size();
     int NIPts = (int)Posi.size();
-    int nCtrlPtsU = nKnotsU - degU - 1;
-    int nCtrlPtsV = nKnotsV - degV - 1;
+    int nCtrlPtsU = nknots_u - deg_u - 1;
+    int nCtrlPtsV = nknots_v - deg_v - 1;
 
     /*if (NIPts != nCtrlPtsU*nCtrlPtsV) {
         cerr << "Invalid relation between knots, degree and control points: " <<
@@ -322,22 +322,22 @@ bool readOBJ(const std::string &filename, unsigned int &degU, unsigned int &degV
         }
     }
 
-    knotsU.reserve(nKnotsU);
-    knotsV.reserve(nKnotsV);
+    knots_u.reserve(nknots_u);
+    knots_v.reserve(nknots_v);
     auto mnmxu = std::minmax_element(temp_uknots.begin(), temp_uknots.end());
-    for (int i = 0; i < nKnotsU; ++i) {
-        knotsU.push_back(util::mapToRange(temp_uknots[i], *mnmxu.first, *mnmxu.second, 0.0, 1.0));
+    for (int i = 0; i < nknots_u; ++i) {
+        knots_u.push_back(util::mapToRange(temp_uknots[i], *mnmxu.first, *mnmxu.second, 0.0, 1.0));
     }
     auto mnmxv = std::minmax_element(temp_vknots.begin(), temp_vknots.end());
-    for (int j = 0; j < nKnotsV; ++j) {
-        knotsV.push_back(util::mapToRange(temp_vknots[j], *mnmxv.first, *mnmxv.second, 0.0, 1.0));
+    for (int j = 0; j < nknots_v; ++j) {
+        knots_v.push_back(util::mapToRange(temp_vknots[j], *mnmxv.first, *mnmxv.second, 0.0, 1.0));
     }
 
     return true;
 }
 
 template <typename T>
-void saveOBJ(const std::string &filename, unsigned int degU, unsigned int degV, const std::vector<T>& knotsU, const std::vector<T>& knotsV,
+void saveOBJ(const std::string &filename, unsigned int deg_u, unsigned int deg_v, const std::vector<T>& knots_u, const std::vector<T>& knots_v,
              const std::vector<std::vector<glm::vec<3, T>>> &ctrlPts, bool rational) {
 
     using std::endl;
@@ -353,8 +353,8 @@ void saveOBJ(const std::string &filename, unsigned int degU, unsigned int degV, 
         }
     }
 
-    int nKnotsU = knotsU.size();
-    int nKnotsV = knotsV.size();
+    int nknots_u = knots_u.size();
+    int nknots_v = knots_v.size();
 
     int nCpU = ctrlPts.size();
     int nCpV = ctrlPts[0].size();
@@ -365,18 +365,18 @@ void saveOBJ(const std::string &filename, unsigned int degU, unsigned int degV, 
     else {
         fout << "cstype rat bspline" << endl;
     }
-    fout << "deg " << degU << " " << degV << endl << "surf ";
-    fout << knotsU[degU] << " " << knotsU[nKnotsU - degU - 1] << " "
-         << knotsV[degV] << " " << knotsV[nKnotsV - degV - 1];
+    fout << "deg " << deg_u << " " << deg_v << endl << "surf ";
+    fout << knots_u[deg_u] << " " << knots_u[nknots_u - deg_u - 1] << " "
+         << knots_v[deg_v] << " " << knots_v[nknots_v - deg_v - 1];
     for (int i = 0; i < nCpU*nCpV; i++) {
         fout << " " << i + 1;
     }
     fout << endl << "parm u";
-    for (auto knot : knotsU) {
+    for (auto knot : knots_u) {
         fout << " " << knot;
     }
     fout << endl << "parm v";
-    for (auto knot : knotsV) {
+    for (auto knot : knots_v) {
         fout << " " << knot;
     }
     fout << endl << "end";

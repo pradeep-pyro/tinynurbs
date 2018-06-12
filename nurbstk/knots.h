@@ -15,18 +15,18 @@ the LICENSE.txt file.
 #include "glm/glm.hpp"
 
 template <typename T>
-bool makeUniformKnotVector(unsigned int degree, size_t nCtrlPts,
+bool makeUniformKnotVector(unsigned int degree, size_t num_ctrl_pts,
                            std::vector<T> &knots) {
     // Compute number of knots
-    if (nCtrlPts < degree + 1) {
+    if (num_ctrl_pts < degree + 1) {
         return false;
     }
-    int nKnots = nCtrlPts + degree + 1;
+    int num_knots = num_ctrl_pts + degree + 1;
 
     // Interior knots
-    T step = 1.0 / (nKnots - 1);
+    T step = 1.0 / (num_knots - 1);
     knots.clear();
-    knots.reserve(nKnots);
+    knots.reserve(num_knots);
     for (T u = 0.0; u <= 1.0; u += step) {
         knots.push_back(u);
     }
@@ -35,17 +35,17 @@ bool makeUniformKnotVector(unsigned int degree, size_t nCtrlPts,
 }
 
 template <typename T>
-bool makeClampedUniformKnotVector(unsigned int degree, size_t nCtrlPts,
+bool makeClampedUniformKnotVector(unsigned int degree, size_t num_ctrl_pts,
                                   std::vector<T> &knots) {
     // Compute number of knots
-    if (nCtrlPts < degree + 1) {
+    if (num_ctrl_pts < degree + 1) {
         return false;
     }
-    int nKnots = nCtrlPts + degree + 1;
-    int nIntKnots = nKnots - 2 * degree;
+    int num_knots = num_ctrl_pts + degree + 1;
+    int num_int_knots = num_knots - 2 * degree;
 
     knots.clear();
-    knots.reserve(nKnots);
+    knots.reserve(num_knots);
 
     // Clamp left side
     for (int i = 0; i < degree; i++) {
@@ -53,10 +53,9 @@ bool makeClampedUniformKnotVector(unsigned int degree, size_t nCtrlPts,
     }
 
     // Interior knots
-    if (nIntKnots > 0) {
-        double step = 1.0 / (nIntKnots - 1);
-        double u = 0.0;
-        for (int i = 0; i < nIntKnots; i++) {
+    if (num_int_knots > 0) {
+        double step = 1.0 / (num_int_knots - 1);
+        for (int i = 0; i < num_int_knots; i++) {
             knots.push_back(static_cast<double>(i) * step);
         }
     }

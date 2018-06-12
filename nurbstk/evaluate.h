@@ -24,23 +24,23 @@ namespace nurbstk {
 Checks if the relation between degree, number of knots, and
 number of control points is valid
 @param degree Degree of the NURBS curve
-@param nKnots Number of knot values
-@param nCtrlPts Number of control points
+@param num_knots Number of knot values
+@param num_ctrl_pts Number of control points
 @return Whether the relationship is valid
 */
-bool isValidRelation(unsigned int degree, size_t nKnots, size_t nCtrlPts);
+bool isValidRelation(unsigned int degree, size_t num_knots, size_t num_ctrl_pts);
 
 /**
 Evaluate point on a nonrational NURBS curve
 @param[in] u Parameter to evaluate the curve at.
 @param[in] degree Degree of the given curve.
 @param[in] knots Knot vector of the curve.
-@param[in] controlPoints Control points of the curve.
+@param[in] control_points Control points of the curve.
 @param[in, out] point Resulting point on the curve at parameter u.
 */
 template <int dim, typename T>
 void curvePoint(T u, uint8_t degree, const std::vector<T> &knots,
-                const std::vector<glm::vec<dim, T>> &controlPoints, glm::vec<dim, T> &point) {
+                const std::vector<glm::vec<dim, T>> &control_points, glm::vec<dim, T> &point) {
     // Initialize result to 0s
     for (int i = 0; i < dim; i++) {
         point[i] = static_cast<T>(0.0);
@@ -53,7 +53,7 @@ void curvePoint(T u, uint8_t degree, const std::vector<T> &knots,
 
     // Compute point
     for (int j = 0; j <= degree; j++) {
-        point += static_cast<T>(N[j]) * controlPoints[span - degree + j];
+        point += static_cast<T>(N[j]) * control_points[span - degree + j];
     }
 }
 
@@ -61,24 +61,24 @@ void curvePoint(T u, uint8_t degree, const std::vector<T> &knots,
 Evaluate point on a rational NURBS curve
 @param[in] u Parameter to evaluate the curve at.
 @param[in] knots Knot vector of the curve.
-@param[in] controlPoints Control points of the curve.
+@param[in] control_points Control points of the curve.
 @param[in] weights Weights corresponding to each control point.
 @param[in, out] point Resulting point on the curve.
 */
 template <int dim, typename T>
 void rationalCurvePoint(T u, uint8_t degree,
                         const std::vector<T> &knots,
-                        const std::vector<glm::vec<dim, T>> &controlPoints,
+                        const std::vector<glm::vec<dim, T>> &control_points,
                         const std::vector<T> &weights, glm::vec<dim, T> &point) {
 
     typedef glm::vec<dim + 1, T> tvecnp1;
 
     // Compute homogenous coordinates of control points
     std::vector<tvecnp1> Cw;
-    Cw.reserve(controlPoints.size());
-    for (int i = 0; i < controlPoints.size(); i++) {
+    Cw.reserve(control_points.size());
+    for (int i = 0; i < control_points.size(); i++) {
         Cw.push_back(tvecnp1(
-                         util::cartesianToHomogenous(controlPoints[i], weights[i])
+                         util::cartesianToHomogenous(control_points[i], weights[i])
                      ));
     }
 
@@ -94,40 +94,40 @@ void rationalCurvePoint(T u, uint8_t degree,
 Evaluate derivatives of a non-rational NURBS curve
 @param[in] u Parameter to evaluate the derivatives at.
 @param[in] knots Knot vector of the curve.
-@param[in] controlPoints Control points of the curve.
-@param[in] nDers Number of times to derivate.
-@param[in, out] curveDers Derivatives of the curve at u.
-E.g. curveDers[n] is the nth derivative at u, where 0 <= n <= nDers.
+@param[in] control_points Control points of the curve.
+@param[in] num_ders Number of times to derivate.
+@param[in, out] curve_ders Derivatives of the curve at u.
+E.g. curve_ders[n] is the nth derivative at u, where 0 <= n <= num_ders.
 */
 template <int dim, typename T>
 void curveDerivatives(T u, uint8_t degree,
                       const std::vector<T> &knots,
-                      const std::vector<glm::vec<dim, T>> &controlPoints,
-                      int nDers, std::vector<glm::vec<dim, T>> &curveDers) {
+                      const std::vector<glm::vec<dim, T>> &control_points,
+                      int num_ders, std::vector<glm::vec<dim, T>> &curve_ders) {
 
     typedef glm::vec<dim, T> tvecn;
     using std::vector;
 
-    curveDers.clear();
-    curveDers.resize(nDers + 1);
+    curve_ders.clear();
+    curve_ders.resize(num_ders + 1);
 
     // Assign higher order derivatives to zero
-    for (int k = degree + 1; k <= nDers; k++) {
-        curveDers[k] = tvecn(0.0);
+    for (int k = degree + 1; k <= num_ders; k++) {
+        curve_ders[k] = tvecn(0.0);
     }
 
     // Find the span and corresponding non-zero basis functions & derivatives
     int span = findSpan(degree, knots, u);
     vector<vector<T>> ders;
-    bsplineDerBasis<T>(degree, span, knots, u, nDers, ders);
+    bsplineDerBasis<T>(degree, span, knots, u, num_ders, ders);
 
-    // Compute first nDers derivatives
-    int du = nDers < degree ? nDers : degree;
+    // Compute first num_ders derivatives
+    int du = num_ders < degree ? num_ders : degree;
     for (int k = 0; k <= du; k++) {
-        curveDers[k] = tvecn(0.0);
+        curve_ders[k] = tvecn(0.0);
         for (int j = 0; j <= degree; j++) {
-            curveDers[k] += static_cast<T>(ders[k][j]) *
-                            controlPoints[span - degree + j];
+            curve_ders[k] += static_cast<T>(ders[k][j]) *
+                            control_points[span - degree + j];
         }
     }
 }
@@ -136,38 +136,38 @@ void curveDerivatives(T u, uint8_t degree,
 Evaluate derivatives of a rational NURBS curve
 @param[in] u Parameter to evaluate the derivatives at.
 @param[in] knots Knot vector of the curve.
-@param[in] controlPoints Control points of the curve.
+@param[in] control_points Control points of the curve.
 @param[in] weights Weights corresponding to each control point.
-@param[in] nDers Number of times to differentiate.
-@param[in, out] curveDers Derivatives of the curve at u.
-E.g. curveDers[n] is the nth derivative at u, where n is between 0 and nDers-1.
+@param[in] num_ders Number of times to differentiate.
+@param[in, out] curve_ders Derivatives of the curve at u.
+E.g. curve_ders[n] is the nth derivative at u, where n is between 0 and num_ders-1.
 */
 template <int dim, typename T>
 void rationalCurveDerivatives(T u, uint8_t degree,
                               const std::vector<T> &knots,
-                              const std::vector<glm::vec<dim, T>> &controlPoints,
-                              const std::vector<T> weights, int nDers,
-                              std::vector<glm::vec<dim, T>> &curveDers) {
+                              const std::vector<glm::vec<dim, T>> &control_points,
+                              const std::vector<T> weights, int num_ders,
+                              std::vector<glm::vec<dim, T>> &curve_ders) {
 
     typedef glm::vec<dim, T> tvecn;
     typedef glm::vec<dim + 1, T> tvecnp1;
     using std::vector;
 
-    curveDers.clear();
-    curveDers.resize(nDers + 1);
+    curve_ders.clear();
+    curve_ders.resize(num_ders + 1);
 
     // Compute homogenous coordinates of control points
     vector<tvecnp1> Cw;
-    Cw.reserve(controlPoints.size());
-    for (int i = 0; i < controlPoints.size(); i++) {
+    Cw.reserve(control_points.size());
+    for (int i = 0; i < control_points.size(); i++) {
         Cw.push_back(tvecnp1(
-                         util::cartesianToHomogenous(controlPoints[i], weights[i])
+                         util::cartesianToHomogenous(control_points[i], weights[i])
                      ));
     }
 
     // Derivatives of Cw
     vector<tvecnp1> Cwders;
-    curveDerivatives(u, degree, knots, Cw, nDers, Cwders);
+    curveDerivatives(u, degree, knots, Cw, num_ders, Cwders);
 
     // Split Cwders into coordinates and weights
     vector<tvecn> Aders;
@@ -182,12 +182,12 @@ void rationalCurveDerivatives(T u, uint8_t degree,
     }
 
     // Compute rational derivatives
-    for (int k = 0; k <= nDers; k++) {
+    for (int k = 0; k <= num_ders; k++) {
         tvecn v = Aders[k];
         for (int i = 1; i <= k; i++) {
-            v -= static_cast<T>(util::binomial(k, i)) * wders[i] * curveDers[k - i];
+            v -= static_cast<T>(util::binomial(k, i)) * wders[i] * curve_ders[k - i];
         }
-        curveDers[k] = v / wders[0];
+        curve_ders[k] = v / wders[0];
     }
 }
 
@@ -195,17 +195,17 @@ void rationalCurveDerivatives(T u, uint8_t degree,
 Evaluate point on a nonrational NURBS surface
 @param[in] u Parameter to evaluate the surface at.
 @param[in] v Parameter to evaluate the surface at.
-@param[in] degreeU Degree of the given surface in u-direction.
-@param[in] degreeV Degree of the given surface in v-direction.
-@param[in] knotsU Knot vector of the surface in u-direction.
-@param[in] knotsV Knot vector of the surface in v-direction.
-@param[in] controlPoints Control points of the surface.
+@param[in] degree_u Degree of the given surface in u-direction.
+@param[in] degree_v Degree of the given surface in v-direction.
+@param[in] knots_u Knot vector of the surface in u-direction.
+@param[in] knots_v Knot vector of the surface in v-direction.
+@param[in] control_points Control points of the surface.
 @param[in, out] point Resulting point on the surface at (u, v).
 */
 template <int dim, typename T>
-void surfacePoint(T u, T v, uint8_t degreeU, uint8_t degreeV,
-                  const std::vector<T> &knotsU, const std::vector<T> &knotsV,
-                  const std::vector<std::vector<glm::vec<dim, T>>> &controlPoints,
+void surfacePoint(T u, T v, uint8_t degree_u, uint8_t degree_v,
+                  const std::vector<T> &knots_u, const std::vector<T> &knots_v,
+                  const std::vector<std::vector<glm::vec<dim, T>>> &control_points,
                   glm::vec<dim, T> &point) {
 
     // Initialize result to 0s
@@ -214,17 +214,17 @@ void surfacePoint(T u, T v, uint8_t degreeU, uint8_t degreeV,
     }
 
     // Find span and non-zero basis functions
-    int spanU = findSpan(degreeU, knotsU, u);
-    int spanV = findSpan(degreeV, knotsV, v);
+    int span_u = findSpan(degree_u, knots_u, u);
+    int span_v = findSpan(degree_v, knots_v, v);
     std::vector<T> Nu, Nv;
-    bsplineBasis(degreeU, spanU, knotsU, u, Nu);
-    bsplineBasis(degreeV, spanV, knotsV, v, Nv);
+    bsplineBasis(degree_u, span_u, knots_u, u, Nu);
+    bsplineBasis(degree_v, span_v, knots_v, v, Nv);
 
-    for (int l = 0; l <= degreeV; l++) {
+    for (int l = 0; l <= degree_v; l++) {
         glm::vec<dim, T> temp(0.0);
-        for (int k = 0; k <= degreeU; k++) {
+        for (int k = 0; k <= degree_u; k++) {
             temp += static_cast<T>(Nu[k]) *
-                    controlPoints[spanU - degreeU + k][spanV - degreeV + l];
+                    control_points[span_u - degree_u + k][span_v - degree_v + l];
         }
 
         point += static_cast<T>(Nv[l]) * temp;
@@ -236,17 +236,17 @@ void surfacePoint(T u, T v, uint8_t degreeU, uint8_t degreeV,
 Evaluate point on a non-rational NURBS surface
 @param[in] u Parameter to evaluate the surface at.
 @param[in] v Parameter to evaluate the surface at.
-@param[in] degreeU Degree of the given surface in u-direction.
-@param[in] degreeV Degree of the given surface.
+@param[in] degree_u Degree of the given surface in u-direction.
+@param[in] degree_v Degree of the given surface.
 @param[in] knots Knot vector of the surface.
-@param[in] controlPoints Control points of the surface.
+@param[in] control_points Control points of the surface.
 @param[in] weights Weights corresponding to each control point.
 @param[in, out] point Resulting point on the surface at (u, v).
 */
 template <int dim, typename T>
-void rationalSurfacePoint(T u, T v, uint8_t degreeU, uint8_t degreeV,
-                          const std::vector<T> &knotsU, const std::vector<T> &knotsV,
-                          const std::vector<std::vector<glm::vec<dim, T>>> &controlPoints,
+void rationalSurfacePoint(T u, T v, uint8_t degree_u, uint8_t degree_v,
+                          const std::vector<T> &knots_u, const std::vector<T> &knots_v,
+                          const std::vector<std::vector<glm::vec<dim, T>>> &control_points,
                           const std::vector<std::vector<T>> &weights,
                           glm::vec<dim, T> &point) {
 
@@ -254,21 +254,21 @@ void rationalSurfacePoint(T u, T v, uint8_t degreeU, uint8_t degreeV,
 
     // Compute homogenous coordinates of control points
     std::vector<std::vector<tvecnp1>> Cw;
-    Cw.resize(controlPoints.size());
+    Cw.resize(control_points.size());
     for (auto &vec : Cw) {
-        vec.reserve(controlPoints[0].size());
+        vec.reserve(control_points[0].size());
     }
-    for (int i = 0; i < controlPoints.size(); i++) {
-        for (int j = 0; j < controlPoints[0].size(); j++) {
+    for (int i = 0; i < control_points.size(); i++) {
+        for (int j = 0; j < control_points[0].size(); j++) {
             Cw[i].push_back(tvecnp1(
-                                util::cartesianToHomogenous(controlPoints[i][j], weights[i][j])
+                                util::cartesianToHomogenous(control_points[i][j], weights[i][j])
                             ));
         }
     }
 
     // Compute point using homogenous coordinates
     tvecnp1 pointw;
-    surfacePoint(u, v, degreeU, degreeV, knotsU, knotsV, Cw, pointw);
+    surfacePoint(u, v, degree_u, degree_v, knots_u, knots_v, Cw, pointw);
 
     // Convert back to cartesian coordinates
     point = util::homogenousToCartesian(pointw);
@@ -278,65 +278,65 @@ void rationalSurfacePoint(T u, T v, uint8_t degreeU, uint8_t degreeV,
 Evaluate derivatives on a non-rational NURBS surface
 @param[in] u Parameter to evaluate the surface at.
 @param[in] v Parameter to evaluate the surface at.
-@param[in] degreeU Degree of the given surface in u-direction.
-@param[in] degreeV Degree of the given surface in v-direction.
-@param[in] knotsU Knot vector of the surface in u-direction.
-@param[in] knotsV Knot vector of the surface in v-direction.
-@param[in] controlPoints Control points of the surface.
-@param[in] nDers Number of times to differentiate
-@param[in, out] surfDers Derivatives of the surface at (u, v).
+@param[in] degree_u Degree of the given surface in u-direction.
+@param[in] degree_v Degree of the given surface in v-direction.
+@param[in] knots_u Knot vector of the surface in u-direction.
+@param[in] knots_v Knot vector of the surface in v-direction.
+@param[in] control_points Control points of the surface.
+@param[in] num_ders Number of times to differentiate
+@param[in, out] surf_ders Derivatives of the surface at (u, v).
 */
 template <int dim, typename T>
 void surfaceDerivatives(T u, T v,
-                        uint8_t degreeU, uint8_t degreeV,
-                        const std::vector<T> &knotsU, const std::vector<T> &knotsV,
-                        const std::vector<std::vector<glm::vec<dim, T>>> &controlPoints,
-                        int nDers, std::vector<std::vector<glm::vec<dim, T>>> &surfDers) {
+                        uint8_t degree_u, uint8_t degree_v,
+                        const std::vector<T> &knots_u, const std::vector<T> &knots_v,
+                        const std::vector<std::vector<glm::vec<dim, T>>> &control_points,
+                        int num_ders, std::vector<std::vector<glm::vec<dim, T>>> &surf_ders) {
 
-    surfDers.clear();
-    surfDers.resize(nDers + 1);
-    for (auto &vec : surfDers) {
-        vec.resize(nDers + 1);
+    surf_ders.clear();
+    surf_ders.resize(num_ders + 1);
+    for (auto &vec : surf_ders) {
+        vec.resize(num_ders + 1);
     }
 
     // Set higher order derivatives to 0
-    for (int k = degreeU + 1; k <= nDers; k++) {
-        for (int l = degreeV + 1; l <= nDers; l++) {
-            surfDers[k][l] = glm::vec<dim, T>(0.0);
+    for (int k = degree_u + 1; k <= num_ders; k++) {
+        for (int l = degree_v + 1; l <= num_ders; l++) {
+            surf_ders[k][l] = glm::vec<dim, T>(0.0);
         }
     }
 
     // Find span and basis function derivatives
-    int spanU = findSpan(degreeU, knotsU, u);
-    int spanV = findSpan(degreeV, knotsV, v);
-    std::vector<std::vector<T>> dersU, dersV;
-    bsplineDerBasis(degreeU, spanU, knotsU, u, nDers, dersU);
-    bsplineDerBasis(degreeV, spanV, knotsV, v, nDers, dersV);
+    int span_u = findSpan(degree_u, knots_u, u);
+    int span_v = findSpan(degree_v, knots_v, v);
+    std::vector<std::vector<T>> ders_u, ders_v;
+    bsplineDerBasis(degree_u, span_u, knots_u, u, num_ders, ders_u);
+    bsplineDerBasis(degree_v, span_v, knots_v, v, num_ders, ders_v);
 
     // Number of non-zero derivatives is <= degree
-    int du = nDers < degreeU ? nDers : degreeU;
-    int dv = nDers < degreeV ? nDers : degreeV;
+    int du = num_ders < degree_u ? num_ders : degree_u;
+    int dv = num_ders < degree_v ? num_ders : degree_v;
     std::vector<glm::vec<dim, T>> temp;
-    temp.resize(degreeV + 1);
+    temp.resize(degree_v + 1);
 
     // Compute derivatives
     for (int k = 0; k <= du; k++) {
-        for (int s = 0; s <= degreeV; s++) {
+        for (int s = 0; s <= degree_v; s++) {
             temp[s] = glm::vec<dim, T>(0.0);
-            for (int r = 0; r <= degreeU; r++) {
-                temp[s] += static_cast<T>(dersU[k][r]) *
-                           controlPoints[spanU - degreeU + r][spanV - degreeV + s];
+            for (int r = 0; r <= degree_u; r++) {
+                temp[s] += static_cast<T>(ders_u[k][r]) *
+                           control_points[span_u - degree_u + r][span_v - degree_v + s];
             }
         }
 
-        int nk = nDers - k;
+        int nk = num_ders - k;
         int dd = nk < dv ? nk : dv;
 
         for (int l = 0; l <= dd; l++) {
-            surfDers[k][l] = glm::vec<dim, T>(0.0);
+            surf_ders[k][l] = glm::vec<dim, T>(0.0);
 
-            for (int s = 0; s <= degreeV; s++) {
-                surfDers[k][l] += static_cast<T>(dersV[l][s]) * temp[s];
+            for (int s = 0; s <= degree_v; s++) {
+                surf_ders[k][l] += static_cast<T>(ders_v[l][s]) * temp[s];
             }
         }
     }
@@ -347,22 +347,22 @@ void surfaceDerivatives(T u, T v,
 Evaluate derivatives on a rational NURBS surface
 @param[in] u Parameter to evaluate the surface at.
 @param[in] v Parameter to evaluate the surface at.
-@param[in] degreeU Degree of the given surface in u-direction.
-@param[in] degreeV Degree of the given surface in v-direction.
-@param[in] knotsU Knot vector of the surface in u-direction.
-@param[in] knotsV Knot vector of the surface in v-direction.
-@param[in] controlPoints Control points of the surface.
+@param[in] degree_u Degree of the given surface in u-direction.
+@param[in] degree_v Degree of the given surface in v-direction.
+@param[in] knots_u Knot vector of the surface in u-direction.
+@param[in] knots_v Knot vector of the surface in v-direction.
+@param[in] control_points Control points of the surface.
 @param[in] weights Weights corresponding to each control point.
-@param[in] nDers Number of times to differentiate
-@param[in, out] surfDers Derivatives on the surface at parameter (u, v).
+@param[in] num_ders Number of times to differentiate
+@param[in, out] surf_ders Derivatives on the surface at parameter (u, v).
 */
 template <int dim, typename T>
 void rationalSurfaceDerivatives(T u, T v,
-                                uint8_t degreeU, uint8_t degreeV,
-                                const std::vector<T> &knotsU, const std::vector<T> &knotsV,
-                                const std::vector<std::vector<glm::vec<dim, T>>> &controlPoints,
+                                uint8_t degree_u, uint8_t degree_v,
+                                const std::vector<T> &knots_u, const std::vector<T> &knots_v,
+                                const std::vector<std::vector<glm::vec<dim, T>>> &control_points,
                                 const std::vector<std::vector<T>> &weights,
-                                int nDers, std::vector<std::vector<glm::vec<dim, T>>> &surfDers) {
+                                int num_ders, std::vector<std::vector<glm::vec<dim, T>>> &surf_ders) {
 
     using namespace std;
     using namespace glm;
@@ -370,50 +370,50 @@ void rationalSurfaceDerivatives(T u, T v,
     typedef vec<dim, T> tvecn;
     typedef vec<dim + 1, T> tvecnp1;
 
-    vector<vector<tvecnp1>> homoCp;
-    homoCp.resize(controlPoints.size());
-    for (int i = 0; i < controlPoints.size(); ++i) {
-        homoCp[i].resize(controlPoints[0].size());
-        for (int j = 0; j < controlPoints[0].size(); ++j) {
-            homoCp[i][j] = util::cartesianToHomogenous(controlPoints[i][j], weights[i][j]);
+    vector<vector<tvecnp1>> homo_cp;
+    homo_cp.resize(control_points.size());
+    for (int i = 0; i < control_points.size(); ++i) {
+        homo_cp[i].resize(control_points[0].size());
+        for (int j = 0; j < control_points[0].size(); ++j) {
+            homo_cp[i][j] = util::cartesianToHomogenous(control_points[i][j], weights[i][j]);
         }
     }
 
-    vector<vector<tvecnp1>> homoDers;
-    surfaceDerivatives(u, v, degreeU, degreeV, knotsU, knotsV, homoCp, nDers, homoDers);
+    vector<vector<tvecnp1>> homo_ders;
+    surfaceDerivatives(u, v, degree_u, degree_v, knots_u, knots_v, homo_cp, num_ders, homo_ders);
 
     vector<vector<tvecn>> Aders;
-    Aders.resize(nDers + 1);
-    for (int i = 0; i < homoDers.size(); ++i) {
-        Aders[i].resize(nDers + 1);
-        for (int j = 0; j < homoDers[0].size(); ++j) {
-            Aders[i][j] = util::truncateHomogenous(homoDers[i][j]);
+    Aders.resize(num_ders + 1);
+    for (int i = 0; i < homo_ders.size(); ++i) {
+        Aders[i].resize(num_ders + 1);
+        for (int j = 0; j < homo_ders[0].size(); ++j) {
+            Aders[i][j] = util::truncateHomogenous(homo_ders[i][j]);
         }
     }
 
-    surfDers.resize(nDers + 1);
-    for (int k = 0; k < nDers + 1; ++k) {
-        surfDers[k].resize(nDers + 1);
-        for (int l = 0; l < nDers - k + 1; ++l) {
+    surf_ders.resize(num_ders + 1);
+    for (int k = 0; k < num_ders + 1; ++k) {
+        surf_ders[k].resize(num_ders + 1);
+        for (int l = 0; l < num_ders - k + 1; ++l) {
             auto der = Aders[k][l];
 
             for (int j = 1; j < l + 1; ++j) {
-                der -= (T)util::binomial(l, j) * homoDers[0][j][dim] * surfDers[k][l - j];
+                der -= (T)util::binomial(l, j) * homo_ders[0][j][dim] * surf_ders[k][l - j];
             }
 
             for (int i = 1; i <  k + 1; ++i) {
-                der -= (T)util::binomial(k, i) * homoDers[i][0][dim] * surfDers[k - i][l];
+                der -= (T)util::binomial(k, i) * homo_ders[i][0][dim] * surf_ders[k - i][l];
 
                 tvecn tmp((T)0.0);
                 for (int j = 1; j < l + 1; ++j) {
-                    tmp -= (T)util::binomial(l, j) * homoDers[i][j][dim] * surfDers[k - 1][l - j];
+                    tmp -= (T)util::binomial(l, j) * homo_ders[i][j][dim] * surf_ders[k - 1][l - j];
                 }
 
                 der -= (T)util::binomial(k, i) * tmp;
             }
 
-            der *= 1 / homoDers[0][0][dim];
-            surfDers[k][l] = der;
+            der *= 1 / homo_ders[0][0][dim];
+            surf_ders[k][l] = der;
         }
     }
 }

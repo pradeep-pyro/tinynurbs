@@ -28,29 +28,29 @@ class BaseSurface {
 public:
     typedef glm::vec<nd, T> vecnt;
 
-    explicit BaseSurface(unsigned int degreeU, unsigned int degreeV,
-                         const std::vector<T> &knotsU, const std::vector<T> &knotsV,
-                         const std::vector<std::vector<vecnt>> &controlPoints) {
+    explicit BaseSurface(unsigned int degree_u, unsigned int degree_v,
+                         const std::vector<T> &knots_u, const std::vector<T> &knots_v,
+                         const std::vector<std::vector<vecnt>> &control_points) {
 
-        if (degreeU < 1 && degreeV < 1) {
+        if (degree_u < 1 && degree_v < 1) {
             throw std::logic_error("Degree has to be atleast 1");
         }
 
-        if (!isValidRelation(degreeU, knotsU.size(), controlPoints.size()) ||
-                !isValidRelation(degreeV, knotsV.size(), controlPoints[0].size())) {
+        if (!isValidRelation(degree_u, knots_u.size(), control_points.size()) ||
+                !isValidRelation(degree_v, knots_v.size(), control_points[0].size())) {
             throw std::logic_error("Invalid relation between degree, "
                                    "knots and control points");
         }
 
-        if (!isKnotVectorMonotonic(knotsU) || !isKnotVectorMonotonic(knotsV)) {
+        if (!isKnotVectorMonotonic(knots_u) || !isKnotVectorMonotonic(knots_v)) {
             throw(std::logic_error("Knot vector(s) is not monotonic"));
         }
 
-        this->degree_u_ = degreeU;
-        this->degree_v_ = degreeV;
-        this->knots_u_ = knotsU;
-        this->knots_v_ = knotsV;
-        this->control_points_ = controlPoints;
+        this->degree_u_ = degree_u;
+        this->degree_v_ = degree_v;
+        this->knots_u_ = knots_u;
+        this->knots_v_ = knots_v;
+        this->control_points_ = control_points;
     }
 
     /**
@@ -110,28 +110,28 @@ public:
     /**
     Returns a 2D vector of control points
     */
-    const std::vector<std::vector<vecnt>> & controlPoints() const {
+    const std::vector<std::vector<vecnt>> & control_points() const {
         return control_points_;
     }
 
     /**
     Returns the degree along u-direction
     */
-    unsigned int degreeU() const {
+    unsigned int degree_u() const {
         return degree_u_;
     }
 
     /**
     Returns the degree along v-direction
     */
-    unsigned int degreeV() const {
+    unsigned int degree_v() const {
         return degree_v_;
     }
 
     /**
     Returns a copy of the knot vector along u-direction
     */
-    const std::vector<double> & knotsU() const {
+    const std::vector<double> & knots_u() const {
         return knots_u_;
     }
 
@@ -166,35 +166,35 @@ public:
     /**
     Returns a copy of the knot vector along v-direction
     */
-    const std::vector<double> & knotsV() const {
+    const std::vector<double> & knots_v() const {
         return knots_v_;
     }
 
     /**
     Returns number of knots along u-direction
     */
-    size_t numKnotsU() const {
+    size_t numknots_u() const {
         return knots_u_.size();
     }
 
     /**
     Returns number of knots along u - direction
     */
-    size_t numKnotsV() const {
+    size_t numknots_v() const {
         return knots_v_.size();
     }
 
     /**
     Returns number of control points along u-direction
     */
-    size_t numControlPointsU() const {
+    size_t numcontrol_pointsU() const {
         return control_points_.size();
     }
 
     /**
     Returns number of control points along v-direction
     */
-    size_t numControlPointsV() const {
+    size_t numcontrol_pointsV() const {
         if (control_points_.empty()) {
             return 0;
         }
@@ -224,8 +224,8 @@ public:
     Returns whether the surface is closed along the u-direction
     */
     bool isClosedU() const {
-        for (int j = 0; j < numControlPointsV(); j++) {
-            if (control_points_[0][j] != control_points_[numControlPointsU() - 1][j]) {
+        for (int j = 0; j < numcontrol_pointsV(); j++) {
+            if (control_points_[0][j] != control_points_[numcontrol_pointsU() - 1][j]) {
                 return false;
             }
         }
@@ -240,8 +240,8 @@ public:
     Returns whether the surface is closed along the v-direction
     */
     bool isClosedV() const {
-        for (int i = 0; i < numControlPointsU(); i++) {
-            if (control_points_[i][0] != control_points_[i][numControlPointsV() - 1]) {
+        for (int i = 0; i < numcontrol_pointsU(); i++) {
+            if (control_points_[i][0] != control_points_[i][numcontrol_pointsV() - 1]) {
                 return false;
             }
         }
@@ -281,16 +281,16 @@ public:
 
     /**
     Create a non-rational NURBS surface
-    @param degreeU Degree of the surface in u-direction
-    @param degreeV Degree of the surface in v-direction
-    @param knotsU Knot vector in u-direction
-    @param knotsV Knot vector in v-direction
-    @param controlPoints 2D vector of control points
+    @param degree_u Degree of the surface in u-direction
+    @param degree_v Degree of the surface in v-direction
+    @param knots_u Knot vector in u-direction
+    @param knots_v Knot vector in v-direction
+    @param control_points 2D vector of control points
     */
-    Surface(unsigned int degreeU, unsigned int degreeV,
-            const std::vector<T> &knotsU, const std::vector<T> &knotsV,
-            const std::vector<std::vector<vecnt>> &controlPoints)
-        : BaseSurface<nd, T>(degreeU, degreeV, knotsU, knotsV, controlPoints) {
+    Surface(unsigned int degree_u, unsigned int degree_v,
+            const std::vector<T> &knots_u, const std::vector<T> &knots_v,
+            const std::vector<std::vector<vecnt>> &control_points)
+        : BaseSurface<nd, T>(degree_u, degree_v, knots_u, knots_v, control_points) {
     }
 
     static Surface<nd, T> fromOBJ(const std::string &filename) {
@@ -329,19 +329,19 @@ public:
 
     /**
     Create a rational NURBS surface
-    @param degreeU Degree of the surface in u-direction
-    @param degreeV Degree of the surface in v-direction
-    @param knotsU Knot vector in u-direction
-    @param knotsV Knot vector in v-direction
-    @param controlPoints 2D vector of control points
+    @param degree_u Degree of the surface in u-direction
+    @param degree_v Degree of the surface in v-direction
+    @param knots_u Knot vector in u-direction
+    @param knots_v Knot vector in v-direction
+    @param control_points 2D vector of control points
     @param weights 2D vector of weights corresponding to control points
     */
-    RationalSurface(unsigned int degreeU, unsigned int degreeV,
-                    const std::vector<T> &knotsU, const std::vector<T> &knotsV,
-                    const std::vector<std::vector<vecnt>> &controlPoints,
+    RationalSurface(unsigned int degree_u, unsigned int degree_v,
+                    const std::vector<T> &knots_u, const std::vector<T> &knots_v,
+                    const std::vector<std::vector<vecnt>> &control_points,
                     const std::vector<std::vector<T>> &weights)
-        : BaseSurface<nd, T>(degreeU, degreeV, knotsU, knotsV, controlPoints) {
-        if (weights.size() != controlPoints.size()) {
+        : BaseSurface<nd, T>(degree_u, degree_v, knots_u, knots_v, control_points) {
+        if (weights.size() != control_points.size()) {
             throw std::logic_error("Number of weights should be equal to number of control points");
         }
         this->weights_ = weights;
