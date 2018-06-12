@@ -8,16 +8,9 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}")
 find_package(glm REQUIRED)
 message("Using glm from: ${glm_INCLUDE_DIR}")
 
-set(SOURCES nurbstk/basis.h
-            nurbstk/evaluate.h
-            nurbstk/evaluate.cpp
-            nurbstk/knots.h
-            nurbstk/curve.h nurbstk/curve.cpp
-            nurbstk/surface.h nurbstk/surface.cpp
-            nurbstk/util.h nurbstk/util.cpp
-            nurbstk/refine.h
-            nurbstk/io.h)
+file(GLOB INCLUDES "nurbstk/*.h")
+file(GLOB SOURCES "nurbstk/*.cpp")
 
 # add_library(nurbstk STATIC ${SOURCES})
-add_executable(nurbstk main.cpp ${SOURCES})
+add_executable(nurbstk main.cpp ${INCLUDES} ${SOURCES})
 target_include_directories(nurbstk PUBLIC ${glm_INCLUDE_DIR})

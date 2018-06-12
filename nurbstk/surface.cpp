@@ -1,7 +1,8 @@
 #include "surface.h"
 
+#define TINYNURBS_STATICLIB
 #ifdef TINYNURBS_STATICLIB
-namespace tinynurbs {
+namespace nurbstk {
 
 template class Surface<3, float>;
 template class Surface<3, double>;

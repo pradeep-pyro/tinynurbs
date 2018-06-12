@@ -16,6 +16,7 @@ the LICENSE.txt file.
 #include "glm/glm.hpp"
 
 #include "basis.h"
+#include "array2.h"
 #include "util.h"
 
 namespace nurbstk {
@@ -118,7 +119,7 @@ void curveDerivatives(T u, uint8_t degree,
 
     // Find the span and corresponding non-zero basis functions & derivatives
     int span = findSpan(degree, knots, u);
-    vector<vector<T>> ders;
+    array2<T> ders;
     bsplineDerBasis<T>(degree, span, knots, u, num_ders, ders);
 
     // Compute first num_ders derivatives
@@ -126,7 +127,7 @@ void curveDerivatives(T u, uint8_t degree,
     for (int k = 0; k <= du; k++) {
         curve_ders[k] = tvecn(0.0);
         for (int j = 0; j <= degree; j++) {
-            curve_ders[k] += static_cast<T>(ders[k][j]) *
+            curve_ders[k] += static_cast<T>(ders(k, j)) *
                             control_points[span - degree + j];
         }
     }
@@ -199,13 +200,13 @@ Evaluate point on a nonrational NURBS surface
 @param[in] degree_v Degree of the given surface in v-direction.
 @param[in] knots_u Knot vector of the surface in u-direction.
 @param[in] knots_v Knot vector of the surface in v-direction.
-@param[in] control_points Control points of the surface.
+@param[in] control_points Control points of the surface in a 2d array.
 @param[in, out] point Resulting point on the surface at (u, v).
 */
 template <int dim, typename T>
 void surfacePoint(T u, T v, uint8_t degree_u, uint8_t degree_v,
                   const std::vector<T> &knots_u, const std::vector<T> &knots_v,
-                  const std::vector<std::vector<glm::vec<dim, T>>> &control_points,
+                  const array2<glm::vec<dim, T>> &control_points,
                   glm::vec<dim, T> &point) {
 
     // Initialize result to 0s
@@ -224,7 +225,7 @@ void surfacePoint(T u, T v, uint8_t degree_u, uint8_t degree_v,
         glm::vec<dim, T> temp(0.0);
         for (int k = 0; k <= degree_u; k++) {
             temp += static_cast<T>(Nu[k]) *
-                    control_points[span_u - degree_u + k][span_v - degree_v + l];
+                    control_points(span_u - degree_u + k, span_v - degree_v + l);
         }
 
         point += static_cast<T>(Nv[l]) * temp;
@@ -239,30 +240,25 @@ Evaluate point on a non-rational NURBS surface
 @param[in] degree_u Degree of the given surface in u-direction.
 @param[in] degree_v Degree of the given surface.
 @param[in] knots Knot vector of the surface.
-@param[in] control_points Control points of the surface.
+@param[in] control_points Control points of the surface in a 2D array.
 @param[in] weights Weights corresponding to each control point.
 @param[in, out] point Resulting point on the surface at (u, v).
 */
 template <int dim, typename T>
 void rationalSurfacePoint(T u, T v, uint8_t degree_u, uint8_t degree_v,
                           const std::vector<T> &knots_u, const std::vector<T> &knots_v,
-                          const std::vector<std::vector<glm::vec<dim, T>>> &control_points,
-                          const std::vector<std::vector<T>> &weights,
+                          const array2<glm::vec<dim, T>> &control_points,
+                          const array2<T> &weights,
                           glm::vec<dim, T> &point) {
 
     typedef glm::vec<dim + 1, T> tvecnp1;
 
     // Compute homogenous coordinates of control points
-    std::vector<std::vector<tvecnp1>> Cw;
-    Cw.resize(control_points.size());
-    for (auto &vec : Cw) {
-        vec.reserve(control_points[0].size());
-    }
-    for (int i = 0; i < control_points.size(); i++) {
-        for (int j = 0; j < control_points[0].size(); j++) {
-            Cw[i].push_back(tvecnp1(
-                                util::cartesianToHomogenous(control_points[i][j], weights[i][j])
-                            ));
+    array2<tvecnp1> Cw;
+    Cw.resize(control_points.rows(), control_points.cols());
+    for (int i = 0; i < control_points.rows(); i++) {
+        for (int j = 0; j < control_points.cols(); j++) {
+            Cw(i, j) = tvecnp1(util::cartesianToHomogenous(control_points(i, j), weights(i, j)));
         }
     }
 
@@ -282,7 +278,7 @@ Evaluate derivatives on a non-rational NURBS surface
 @param[in] degree_v Degree of the given surface in v-direction.
 @param[in] knots_u Knot vector of the surface in u-direction.
 @param[in] knots_v Knot vector of the surface in v-direction.
-@param[in] control_points Control points of the surface.
+@param[in] control_points Control points of the surface in a 2D array.
 @param[in] num_ders Number of times to differentiate
 @param[in, out] surf_ders Derivatives of the surface at (u, v).
 */
@@ -290,26 +286,23 @@ template <int dim, typename T>
 void surfaceDerivatives(T u, T v,
                         uint8_t degree_u, uint8_t degree_v,
                         const std::vector<T> &knots_u, const std::vector<T> &knots_v,
-                        const std::vector<std::vector<glm::vec<dim, T>>> &control_points,
-                        int num_ders, std::vector<std::vector<glm::vec<dim, T>>> &surf_ders) {
+                        const array2<glm::vec<dim, T>> &control_points,
+                        int num_ders, array2<glm::vec<dim, T>> &surf_ders) {
 
     surf_ders.clear();
-    surf_ders.resize(num_ders + 1);
-    for (auto &vec : surf_ders) {
-        vec.resize(num_ders + 1);
-    }
+    surf_ders.resize(num_ders + 1, num_ders + 1);
 
     // Set higher order derivatives to 0
     for (int k = degree_u + 1; k <= num_ders; k++) {
         for (int l = degree_v + 1; l <= num_ders; l++) {
-            surf_ders[k][l] = glm::vec<dim, T>(0.0);
+            surf_ders(k, l) = glm::vec<dim, T>(0.0);
         }
     }
 
     // Find span and basis function derivatives
     int span_u = findSpan(degree_u, knots_u, u);
     int span_v = findSpan(degree_v, knots_v, v);
-    std::vector<std::vector<T>> ders_u, ders_v;
+    array2<T> ders_u, ders_v;
     bsplineDerBasis(degree_u, span_u, knots_u, u, num_ders, ders_u);
     bsplineDerBasis(degree_v, span_v, knots_v, v, num_ders, ders_v);
 
@@ -324,8 +317,8 @@ void surfaceDerivatives(T u, T v,
         for (int s = 0; s <= degree_v; s++) {
             temp[s] = glm::vec<dim, T>(0.0);
             for (int r = 0; r <= degree_u; r++) {
-                temp[s] += static_cast<T>(ders_u[k][r]) *
-                           control_points[span_u - degree_u + r][span_v - degree_v + s];
+                temp[s] += static_cast<T>(ders_u(k, r)) *
+                           control_points(span_u - degree_u + r, span_v - degree_v + s);
             }
         }
 
@@ -333,10 +326,10 @@ void surfaceDerivatives(T u, T v,
         int dd = nk < dv ? nk : dv;
 
         for (int l = 0; l <= dd; l++) {
-            surf_ders[k][l] = glm::vec<dim, T>(0.0);
+            surf_ders(k, l) = glm::vec<dim, T>(0.0);
 
             for (int s = 0; s <= degree_v; s++) {
-                surf_ders[k][l] += static_cast<T>(ders_v[l][s]) * temp[s];
+                surf_ders(k, l) += static_cast<T>(ders_v(l, s)) * temp[s];
             }
         }
     }
@@ -360,9 +353,9 @@ template <int dim, typename T>
 void rationalSurfaceDerivatives(T u, T v,
                                 uint8_t degree_u, uint8_t degree_v,
                                 const std::vector<T> &knots_u, const std::vector<T> &knots_v,
-                                const std::vector<std::vector<glm::vec<dim, T>>> &control_points,
-                                const std::vector<std::vector<T>> &weights,
-                                int num_ders, std::vector<std::vector<glm::vec<dim, T>>> &surf_ders) {
+                                const array2<glm::vec<dim, T>> &control_points,
+                                const array2<T> &weights,
+                                int num_ders, array2<glm::vec<dim, T>> &surf_ders) {
 
     using namespace std;
     using namespace glm;
@@ -370,50 +363,47 @@ void rationalSurfaceDerivatives(T u, T v,
     typedef vec<dim, T> tvecn;
     typedef vec<dim + 1, T> tvecnp1;
 
-    vector<vector<tvecnp1>> homo_cp;
-    homo_cp.resize(control_points.size());
-    for (int i = 0; i < control_points.size(); ++i) {
-        homo_cp[i].resize(control_points[0].size());
-        for (int j = 0; j < control_points[0].size(); ++j) {
-            homo_cp[i][j] = util::cartesianToHomogenous(control_points[i][j], weights[i][j]);
+    array2<tvecnp1> homo_cp;
+    homo_cp.resize(control_points.rows(), control_points.cols());
+    for (int i = 0; i < control_points.rows(); ++i) {
+        for (int j = 0; j < control_points.cols(); ++j) {
+            homo_cp(i, j) = util::cartesianToHomogenous(control_points(i, j), weights(i, j));
         }
     }
 
-    vector<vector<tvecnp1>> homo_ders;
+    array2<tvecnp1> homo_ders;
     surfaceDerivatives(u, v, degree_u, degree_v, knots_u, knots_v, homo_cp, num_ders, homo_ders);
 
-    vector<vector<tvecn>> Aders;
-    Aders.resize(num_ders + 1);
-    for (int i = 0; i < homo_ders.size(); ++i) {
-        Aders[i].resize(num_ders + 1);
-        for (int j = 0; j < homo_ders[0].size(); ++j) {
-            Aders[i][j] = util::truncateHomogenous(homo_ders[i][j]);
+    array2<tvecn> Aders;
+    Aders.resize(num_ders + 1, num_ders + 1);
+    for (int i = 0; i < homo_ders.rows(); ++i) {
+        for (int j = 0; j < homo_ders.cols(); ++j) {
+            Aders(i, j) = util::truncateHomogenous(homo_ders(i, j));
         }
     }
 
-    surf_ders.resize(num_ders + 1);
+    surf_ders.resize(num_ders + 1, num_ders + 1);
     for (int k = 0; k < num_ders + 1; ++k) {
-        surf_ders[k].resize(num_ders + 1);
         for (int l = 0; l < num_ders - k + 1; ++l) {
-            auto der = Aders[k][l];
+            auto der = Aders(k, l);
 
             for (int j = 1; j < l + 1; ++j) {
-                der -= (T)util::binomial(l, j) * homo_ders[0][j][dim] * surf_ders[k][l - j];
+                der -= (T)util::binomial(l, j) * homo_ders(0, j)[dim] * surf_ders(k, l - j);
             }
 
             for (int i = 1; i <  k + 1; ++i) {
-                der -= (T)util::binomial(k, i) * homo_ders[i][0][dim] * surf_ders[k - i][l];
+                der -= (T)util::binomial(k, i) * homo_ders(i, 0)[dim] * surf_ders(k - i, l);
 
                 tvecn tmp((T)0.0);
                 for (int j = 1; j < l + 1; ++j) {
-                    tmp -= (T)util::binomial(l, j) * homo_ders[i][j][dim] * surf_ders[k - 1][l - j];
+                    tmp -= (T)util::binomial(l, j) * homo_ders(i, j)[dim] * surf_ders(k - 1, l - j);
                 }
 
                 der -= (T)util::binomial(k, i) * tmp;
             }
 
-            der *= 1 / homo_ders[0][0][dim];
-            surf_ders[k][l] = der;
+            der *= 1 / homo_ders(0, 0)[dim];
+            surf_ders(k, l) = der;
         }
     }
 }

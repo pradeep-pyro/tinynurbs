@@ -98,7 +98,7 @@ bool isKnotVectorMonotonic(const std::vector<T> &knots) {
 template <typename T>
 bool isKnotVectorClosed(unsigned int degree, const std::vector<T> &knots) {
     T eps = std::numeric_limits<T>::epsilon();
-    for (int i = 0; i < degree + 2; i++) {
+    for (int i = 0; i <= degree + 1; i++) {
         if (std::abs(knots[i] - knots[knots.size() - degree - 2 + i]) > eps) {
             return false;
         }

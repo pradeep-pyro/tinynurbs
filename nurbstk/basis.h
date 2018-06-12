@@ -2,6 +2,7 @@
 
 #include <vector>
 #include "util.h"
+#include "array2.h"
 
 namespace nurbstk {
 
@@ -132,13 +133,12 @@ void bsplineBasis(unsigned int deg, int span, const std::vector<T> &knots,
 @param[in] span Index obtained from findSpan() corresponding the u and knots.
 @param[in] knots Knot vector corresponding to the basis functions.
 @param[in] u Parameter to evaluate the basis functions at.
-@param[in] nDers Number of derivatives to compute (nDers <= deg)
+@param[in] num_ders Number of derivatives to compute (num_ders <= deg)
 @param[in, out] ders Values of non-zero derivatives of basis functions.
 */
 template <typename T>
 void bsplineDerBasis(unsigned int deg, int span, const std::vector<T> &knots,
-                     T u, int nDers, std::vector<std::vector<T>> &ders) {
-    using util::array2;
+                     T u, int num_ders, array2<T> &ders) {
     std::vector<T> left, right;
     left.resize(deg + 1, 0.0);
     right.resize(deg + 1, 0.0);
@@ -165,13 +165,10 @@ void bsplineDerBasis(unsigned int deg, int span, const std::vector<T> &knots,
     }
 
     ders.clear();
-    ders.resize(nDers + 1);
-    for (int i = 0; i < ders.size(); i++) {
-        ders[i].resize(deg + 1, 0.0);
-    }
+    ders.resize(num_ders + 1, deg + 1, 0.0);
 
     for (int j = 0; j <= deg; j++) {
-        ders[0][j] = ndu(j, deg);
+        ders(0, j) = ndu(j, deg);
     }
 
     array2<T> a(2, deg + 1);
@@ -181,7 +178,7 @@ void bsplineDerBasis(unsigned int deg, int span, const std::vector<T> &knots,
         int s2 = 1;
         a(0, 0) = 1.0;
 
-        for (int k = 1; k <= nDers; k++) {
+        for (int k = 1; k <= num_ders; k++) {
             T d = 0.0;
             int rk = r - k;
             int pk = deg - k;
@@ -218,7 +215,7 @@ void bsplineDerBasis(unsigned int deg, int span, const std::vector<T> &knots,
             }
 
 
-            ders[k][r] = d;
+            ders(k, r) = d;
 
             int temp = s1;
             s1 = s2;
@@ -227,9 +224,9 @@ void bsplineDerBasis(unsigned int deg, int span, const std::vector<T> &knots,
     }
 
     double fac = static_cast<T>(deg);
-    for (int k = 1; k <= nDers; k++) {
+    for (int k = 1; k <= num_ders; k++) {
         for (int j = 0; j <= deg; j++) {
-            ders[k][j] *= fac;
+            ders(k, j) *= fac;
         }
         fac *= static_cast<T>(deg - k);
     }

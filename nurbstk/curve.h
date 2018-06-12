@@ -129,6 +129,20 @@ public:
         return normalize ? glm::normalize(ders[1]) : ders[1];
     }
 
+    /**
+    Returns whether the curve is closed
+    */
+    bool isClosed() const {
+        for (int i = 0; i < degree_; ++i) {
+            if (glm::length(control_points_[i] - control_points_[control_points_.size() - degree_ + i]) >
+                        std::numeric_limits<T>::epsilon()) {
+                return false;
+            }
+        }
+        return true;
+        // return isKnotVectorClosed(degree_, knots_);
+    }
+
 protected:
     unsigned int degree_;
     std::vector<T> knots_;
@@ -256,6 +270,17 @@ public:
     */
     T & weight(int i) {
         return weights_[i];
+    }
+
+    bool isClosed() const {
+        if (!BaseCurve<nd, T>::isClosed()) {
+            return false;
+        }
+        if (std::abs(weights_[0] - weights_[weights_.size() - 1]) >
+                    std::numeric_limits<T>::epsilon()) {
+            return false;
+        }
+        return true;
     }
 private:
     std::vector<T> weights_;

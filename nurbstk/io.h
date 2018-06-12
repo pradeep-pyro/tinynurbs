@@ -7,13 +7,14 @@
 #include <algorithm>
 #include "glm/glm.hpp"
 #include "util.h"
+#include "array2.h"
 
 namespace nurbstk {
 
 template <typename T>
 bool readOBJ(const std::string &filename, unsigned int &deg_u, unsigned int &deg_v,
              std::vector<T> &knots_u, std::vector<T> &knots_v,
-             util::array2<glm::vec<3, T>> &ctrlPts, util::array2<T> &weights, bool &rational) {
+             array2<glm::vec<3, T>> &ctrlPts, array2<T> &weights, bool &rational) {
     T uknot_min = 0, uknot_max = 1;
     T vknot_min = 0, vknot_max = 1;
 
@@ -335,6 +336,19 @@ bool readOBJ(const std::string &filename, unsigned int &deg_u, unsigned int &deg
 
     return true;
 }
+
+
+/*
+static Surface<nd, T> fromOBJ(const std::string &filename) {
+    unsigned int deg_u, deg_v;
+    std::vector<double> knots_u, knots_v;
+    array2<glm::dvec3> ctrl_pts;
+    array2<double> weights;
+    bool rational;
+    readOBJ(filename, deg_u, deg_v, knots_u, knots_v, ctrl_pts, weights, rational);
+    return Surface<nd, T>(deg_u, deg_v, knots_u, knots_v, ctrl_pts);
+}
+*/
 
 template <typename T>
 void saveOBJ(const std::string &filename, unsigned int deg_u, unsigned int deg_v, const std::vector<T>& knots_u, const std::vector<T>& knots_v,
