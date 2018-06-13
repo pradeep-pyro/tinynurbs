@@ -10,4 +10,5 @@ template class RationalSurface<3, float>;
 template class RationalSurface<3, double>;
 
 } // namespace nurbstk
+
 #endif
