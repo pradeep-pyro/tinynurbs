@@ -11,7 +11,7 @@ the LICENSE.txt file.
 #pragma once
 #include <vector>
 #include <stdexcept>
-#include "array2.h"
+#include "../util/array2.h"
 #include "glm/glm.hpp"
 
 namespace nurbstk {

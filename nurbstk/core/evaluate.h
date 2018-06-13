@@ -16,10 +16,10 @@ the LICENSE.txt file.
 #include "glm/glm.hpp"
 
 #include "basis.h"
-#include "array2.h"
-#include "util.h"
-#include "curve.h"
-#include "surface.h"
+#include "../util/array2.h"
+#include "../util/util.h"
+#include "../geometry/curve.h"
+#include "../geometry/surface.h"
 
 namespace nurbstk {
 
@@ -242,7 +242,7 @@ Evaluate the tangent of a B-spline curve
 */
 template <int dim, typename T>
 void curveTangent(const Curve<dim, T> &crv, T u, glm::vec<dim, T> &tgt) {
-    std::vector<glm::vec<dim, T>> &ders;
+    std::vector<glm::vec<dim, T>> ders;
     curveDerivatives(crv, 1, u, ders);
     tgt = glm::normalize(ders[1]);
 }
@@ -254,7 +254,7 @@ Evaluate the tangent of a rational B-spline curve
 */
 template <int dim, typename T>
 void rationalCurveTangent(const RationalCurve<dim, T> &crv, T u, glm::vec<dim, T> &tgt) {
-    std::vector<glm::vec<dim, T>> &ders;
+    std::vector<glm::vec<dim, T>> ders;
     rationalCurveDerivatives(crv, 1, u, ders);
     tgt = glm::normalize(ders[1]);
 }

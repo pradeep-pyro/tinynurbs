@@ -4,10 +4,14 @@
 #include <vector>
 #include <limits>
 #include "glm/glm.hpp"
-#include "curve.h"
-#include "knots.h"
+#include "../geometry/curve.h"
 
 namespace nurbstk {
+
+template <typename T>
+bool isKnotVectorMonotonic(const std::vector<T> &knots) {
+    return std::is_sorted(knots.begin(), knots.end());
+}
 
 template <int dim, typename T>
 bool isCurveValid(unsigned int degree, const std::vector<T> &knots, const std::vector<glm::vec<dim, T>> &control_points) {
@@ -25,7 +29,7 @@ bool isCurveValid(unsigned int degree, const std::vector<T> &knots, const std::v
 
 template <int dim, typename T>
 bool isRationalCurveValid(unsigned int degree, const std::vector<T> &knots, const std::vector<glm::vec<dim, T>> &control_points,
-             const std::vector<T> &weights) {
+                          const std::vector<T> &weights) {
     if (!isValid(degree, knots, control_points)) {
         return false;
     }
@@ -93,6 +97,7 @@ bool isKnotVectorClosed(unsigned int degree, const std::vector<T> &knots) {
             return false;
         }
     }
+    return true;
 }
 
 template <int dim, typename T>
@@ -100,7 +105,7 @@ bool isControlPointsClosed(unsigned int degree, const std::vector<glm::vec<dim, 
     for (int i = 0; i < degree; ++i) {
         int j = control_points.size() - degree + i;
         if (glm::length(control_points[i] - control_points[j]) >
-                    std::numeric_limits<T>::epsilon()) {
+                std::numeric_limits<T>::epsilon()) {
             return false;
         }
     }
@@ -124,8 +129,8 @@ bool isControlPointsClosedU(unsigned int degree_u, const array2<glm::vec<dim, T>
         for (int j = 0; j < control_points.cols(); ++j) {
             int k = control_points.cols() - degree_u + i;
             if (glm::length(control_points(i, j) - control_points(k, j)) >
-                std::numeric_limits<T>::epsilon()) {
-               return false;
+                    std::numeric_limits<T>::epsilon()) {
+                return false;
             }
         }
     }
@@ -138,8 +143,8 @@ bool isControlPointsClosedV(unsigned int degree_v, const array2<glm::vec<dim, T>
         for (int j = 0; j < degree_v; j++) {
             int k = control_points.rows() - degree_v + i;
             if (glm::length(control_points(i, j) - control_points(i, k)) >
-                std::numeric_limits<T>::epsilon()) {
-               return false;
+                    std::numeric_limits<T>::epsilon()) {
+                return false;
             }
         }
     }
@@ -152,7 +157,7 @@ bool isWeightsClosedU(unsigned int degree_u, const array2<T> &weights) {
         for (int j = 0; j < weights.rows(); ++j) {
             int k = weights.rows() - degree_u + i;
             if (std::abs(weights(i, j) - weights(k, j)) > std::numeric_limits<T>::epsilon()) {
-               return false;
+                return false;
             }
         }
     }
@@ -165,8 +170,8 @@ bool isWeightsClosedV(unsigned int degree_v, const array2<T> &weights) {
         for (int j = 0; j < degree_v; j++) {
             int k = weights.rows() - degree_v + i;
             if (glm::length(weights(i, j) - weights(i, k)) >
-                std::numeric_limits<T>::epsilon()) {
-               return false;
+                    std::numeric_limits<T>::epsilon()) {
+                return false;
             }
         }
     }
@@ -177,14 +182,14 @@ bool isWeightsClosedV(unsigned int degree_v, const array2<T> &weights) {
 template <int dim, typename T>
 bool isCurveClosed(const Curve<dim, T> &crv) {
     return isControlPointsClosed(crv.degree, crv.control_points) &&
-            isKnotVectorClosed(crv.degree, crv.knots);
+           isKnotVectorClosed(crv.degree, crv.knots);
 }
 
 template <int dim, typename T>
 bool isRationalCurveClosed(const RationalCurve<dim, T> &crv) {
     return isControlPointsClosed(crv.degree, crv.control_points) &&
-            isWeightsClosed(crv.degree, crv.weights) &&
-            isKnotVectorClosed(crv.degree, crv.knots);
+           isWeightsClosed(crv.degree, crv.weights) &&
+           isKnotVectorClosed(crv.degree, crv.knots);
 }
 
 /**
@@ -193,7 +198,7 @@ Returns whether the surface is closed along the u-direction
 template <int dim, typename T>
 bool isSurfaceClosedU(const Surface<dim, T> &srf) {
     return isControlPointsClosedU(srf.degree_u, srf.control_points) &&
-            isKnotVectorClosed(srf.degree_u, srf.knots_u);
+           isKnotVectorClosed(srf.degree_u, srf.knots_u);
 }
 
 /**
@@ -202,7 +207,7 @@ Returns whether the surface is closed along the v-direction
 template <int dim, typename T>
 bool isSurfaceClosedV(const Surface<dim, T> &srf) {
     return isControlPointsClosedV(srf.degree_v, srf.control_points) &&
-            isKnotVectorClosed(srf.degree_v, srf.knots_v);
+           isKnotVectorClosed(srf.degree_v, srf.knots_v);
 }
 
 /**
@@ -211,8 +216,8 @@ Returns whether the rational surface is closed along the u-direction
 template <int dim, typename T>
 bool isRationalSurfaceClosedU(const RationalSurface<dim, T> &srf) {
     return isControlPointsClosedU(srf.degree_u, srf.control_points) &&
-            isKnotVectorClosed(srf.degree_u, srf.knots_u) &&
-            isWeightsClosedU(srf.degree_u, srf.weights);
+           isKnotVectorClosed(srf.degree_u, srf.knots_u) &&
+           isWeightsClosedU(srf.degree_u, srf.weights);
 }
 
 /**
@@ -221,8 +226,8 @@ Returns whether the rational surface is closed along the v-direction
 template <int dim, typename T>
 bool isRationalSurfaceClosedV(const RationalSurface<dim, T> &srf) {
     return isControlPointsClosedV(srf.degree_v, srf.control_points) &&
-            isKnotVectorClosed(srf.degree_v, srf.knots_v) &&
-            isWeightsClosedV(srf.degree_v, srf.weights);
+           isKnotVectorClosed(srf.degree_v, srf.knots_v) &&
+           isWeightsClosedV(srf.degree_v, srf.weights);
 }
 
 } // namespace nurbstk

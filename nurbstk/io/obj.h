@@ -7,7 +7,7 @@
 #include <algorithm>
 #include "glm/glm.hpp"
 #include "util.h"
-#include "array2.h"
+#include "../util/array2.h"
 
 namespace nurbstk {
 

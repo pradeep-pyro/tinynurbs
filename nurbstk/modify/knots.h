@@ -8,11 +8,14 @@ Use of this source code is governed by a BSD-style license that can be found in
 the LICENSE.txt file.
 */
 
-#pragma once
+#ifndef KNOTS_H
+#define KNOTS_H
 
 #include <algorithm>
 #include <vector>
 #include "glm/glm.hpp"
+
+namespace nurbstk {
 
 template <typename T>
 bool makeUniformKnotVector(unsigned int degree, size_t num_ctrl_pts,
@@ -90,19 +93,6 @@ void clampKnotVectorRight(unsigned int degree, std::vector<T> &knots) {
     }
 }
 
-template <typename T>
-bool isKnotVectorMonotonic(const std::vector<T> &knots) {
-    return std::is_sorted(knots.begin(), knots.end());
-}
+} // namespace nurbstk
 
-template <typename T>
-bool isKnotVectorClosed(unsigned int degree, const std::vector<T> &knots) {
-    T eps = std::numeric_limits<T>::epsilon();
-    for (int i = 0; i <= degree + 1; i++) {
-        if (std::abs(knots[i] - knots[knots.size() - degree - 2 + i]) > eps) {
-            return false;
-        }
-    }
-    return true;
-}
-
+#endif

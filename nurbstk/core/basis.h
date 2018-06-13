@@ -1,8 +1,8 @@
 #pragma once
 
 #include <vector>
-#include "util.h"
-#include "array2.h"
+#include "../util/util.h"
+#include "../util/array2.h"
 
 namespace nurbstk {
 
