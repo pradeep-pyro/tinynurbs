@@ -223,7 +223,7 @@ void bsplineDerBasis(unsigned int deg, int span, const std::vector<T> &knots,
         }
     }
 
-    double fac = static_cast<T>(deg);
+    T fac = static_cast<T>(deg);
     for (int k = 1; k <= num_ders; k++) {
         for (int j = 0; j <= deg; j++) {
             ders(k, j) *= fac;
