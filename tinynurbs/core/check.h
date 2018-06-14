@@ -5,6 +5,7 @@
 #include <limits>
 #include "glm/glm.hpp"
 #include "../geometry/curve.h"
+#include <algorithm>
 
 namespace tinynurbs {
 

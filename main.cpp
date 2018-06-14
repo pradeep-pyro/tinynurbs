@@ -8,6 +8,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/glm.hpp"
 #include "glm/gtx/string_cast.hpp"
+#include <cmath>
 
 using namespace std;
 
@@ -114,11 +115,22 @@ void testCurveClosed() {
     cout << isCurveClosed(crv) << endl;
 }
 
+void testIO() {
+    unsigned int degu, degv;
+    std::vector<float> knotsu, knotsv;
+    tinynurbs::array2<glm::vec3> cp;
+    tinynurbs::array2<float> w;
+    bool rat;
+    tinynurbs::readOBJ("/home/pradeep/Downloads/car50_100.obj", degu, degv, knotsu, knotsv, cp, w, rat);
+    tinynurbs::saveOBJ("/home/pradeep/Downloads/car50_1002.obj", degu, degv, knotsu, knotsv, cp, w, rat);
+}
+
 int main() {
-    testCurvePoint();
+    /*testCurvePoint();
     testRationalCurvePoint();
     testCurveDeriv();
     testCurveClosed();
-    testRationalSurfacePoint();
+    testRationalSurfacePoint();*/
+    testIO();
     return 0;
 }
