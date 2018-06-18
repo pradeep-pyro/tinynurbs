@@ -38,6 +38,7 @@ struct Curve {
     std::vector<T> knots;
     std::vector<glm::vec<dim, T>> control_points;
 
+    Curve() = default;
     Curve(unsigned int degree, const std::vector<T> &knots,
           const std::vector<glm::vec<dim, T>> &control_points)
         : degree(degree), knots(knots), control_points(control_points) {
@@ -53,6 +54,7 @@ template <int dim, typename T>
 struct RationalCurve : public Curve<dim, T> {
     std::vector<T> weights;
 
+    RationalCurve() = default;
     RationalCurve(unsigned int degree, const std::vector<T> &knots,
                   const std::vector<glm::vec<dim, T>> &control_points,
                   const std::vector<T> weights)

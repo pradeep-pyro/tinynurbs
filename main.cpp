@@ -4,6 +4,7 @@
 #include "tinynurbs/core/check.h"
 #include "tinynurbs/geometry/surface.h"
 #include "tinynurbs/io/obj.h"
+#include "tinynurbs/modify/refine.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/glm.hpp"
@@ -125,12 +126,32 @@ void testIO() {
     tinynurbs::saveOBJ("/home/pradeep/Downloads/car50_1002.obj", degu, degv, knotsu, knotsv, cp, w, rat);
 }
 
+void testKnotInsert() {
+    using namespace tinynurbs;
+    Curve2f crv;
+    crv.degree = 3;
+    crv.control_points = {{5.0, 5.0}, {10.0, 10.0}, {20.0, 15.0}, {35.0, 15.0}, {45.0, 10.0}, {50.0, 5.0}};
+    crv.knots = {0.0, 0.0, 0.0, 0.0, 0.33, 0.66, 1.0, 1.0, 1.0, 1.0};
+
+    // Set evaluation parameter
+    float u = 0.3f;
+    glm::vec2 pt;
+    curvePoint(crv, u, pt);
+    cout << glm::to_string(pt) << endl;
+    curveInsertKnot(crv.degree, crv.knots, crv.control_points, u);
+    curvePoint(crv, u, pt);
+    cout << glm::to_string(pt) << endl;
+    // Evaluation result
+    glm::vec2 res(18.617, 13.377);
+}
+
 int main() {
     /*testCurvePoint();
     testRationalCurvePoint();
     testCurveDeriv();
     testCurveClosed();
-    testRationalSurfacePoint();*/
-    testIO();
+    testRationalSurfacePoint();
+    testIO();*/
+    testKnotInsert();
     return 0;
 }
