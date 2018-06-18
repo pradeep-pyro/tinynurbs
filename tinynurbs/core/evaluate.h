@@ -442,7 +442,7 @@ Evaluate derivatives on a non-rational NURBS surface
 template <int dim, typename T>
 void surfaceDerivatives(const Surface<dim, T> &srf, int num_ders, T u, T v, array2<glm::vec<dim, T>> &surf_ders) {
     surfaceDerivatives(srf.degree_u, srf.degree_v, srf.knots_u, srf.knots_v, srf.control_points,
-                       srf.weights, num_ders, u, v, surf_ders);
+                       num_ders, u, v, surf_ders);
 }
 
 /**
@@ -544,8 +544,8 @@ void surfaceTangent(const Surface<dim, T> &srf, T u, T v,
                     glm::vec<dim, T> &du, glm::vec<dim, T> &dv) {
     array2<glm::vec<dim, T>> ptder;
     surfaceDerivatives(srf, 1, u, v, ptder);
-    du = ptder[1][0];
-    dv = ptder[0][1];
+    du = ptder(1, 0);
+    dv = ptder(0, 1);
     du = glm::normalize(du);
     dv = glm::normalize(dv);
 }
@@ -563,8 +563,8 @@ void rationalSurfaceTangent(const RationalSurface<dim, T> &srf, T u, T v,
                             glm::vec<dim, T> &du, glm::vec<dim, T> &dv) {
     array2<glm::vec<dim, T>> ptder;
     rationalSurfaceDerivatives(srf, 1, u, v, ptder);
-    du = ptder[1][0];
-    dv = ptder[0][1];
+    du = ptder(1, 0);
+    dv = ptder(0, 1);
     du = glm::normalize(du);
     dv = glm::normalize(dv);
 }
@@ -581,7 +581,7 @@ template <int dim, typename T>
 void surfaceNormal(const Surface<dim, T> &srf, T u, T v, glm::vec<dim, T> &normal) {
     array2<glm::vec<dim, T>> ptder;
     surfaceDerivatives(srf, 1, u, v, ptder);
-    normal = glm::cross(ptder[0][1], ptder[1][0]);
+    normal = glm::cross(ptder(0, 1), ptder(1, 0));
     normal = glm::normalize(normal);
 }
 
@@ -596,7 +596,7 @@ template <int dim, typename T>
 void rationalSurfaceNormal(const RationalSurface<dim, T> &srf, T u, T v, glm::vec<dim, T> &normal) {
     array2<glm::vec<dim, T>> ptder;
     rationalSurfaceDerivatives(srf, 1, u, v, ptder);
-    normal = glm::cross(ptder[0][1], ptder[1][0]);
+    normal = glm::cross(ptder(0, 1), ptder(1, 0));
     normal = glm::normalize(normal);
 }
 
