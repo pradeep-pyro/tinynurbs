@@ -10,7 +10,7 @@ template <int dim, typename T>
 void curveInsertKnot(unsigned int deg, std::vector<T> &knots, std::vector<glm::vec<dim, T>> &cp,
                      T u, unsigned int r=1) {
     int k = findSpan(deg, knots, u);
-    int s = 0; // multiplicity
+    int s = 0; // TODO: compute multiplicity
     // Insert new knots between span and (span + 1)
     std::vector<T> new_knots;
     new_knots.resize(knots.size() + r);
@@ -32,11 +32,13 @@ void curveInsertKnot(unsigned int deg, std::vector<T> &knots, std::vector<glm::v
     for (int i = k - s; i < cp.size(); ++i) {
         new_cp[i + r] = cp[i];
     }
+    // Copy affected control points
     std::vector<glm::vec<dim, T>> tmp;
     tmp.resize(deg - s + 1);
     for (int i = 0; i < deg - s + 1; ++i) {
         tmp[i] = cp[k - deg + i];
     }
+    // Modify affected control points
     for (int j = 1; j < r + 1; ++j) {
         int L = k - deg + j;
         for (int i = 0; i < deg - j - s + 1; ++i) {

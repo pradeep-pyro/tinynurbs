@@ -45,9 +45,9 @@ void testRationalCurvePoint() {
     controlPoints.push_back(glm::vec2(0, 1));
     RationalCurve2f crv {degree, knots, controlPoints, std::vector<float> {1, 1, 2}};
     glm::vec2 pt1, pt2, pt3;
-    rationalCurvePoint(crv, 0.f, pt1);
-    rationalCurvePoint(crv, 0.5f, pt2);
-    rationalCurvePoint(crv, 1.f, pt3);
+    curvePoint(crv, 0.f, pt1);
+    curvePoint(crv, 0.5f, pt2);
+    curvePoint(crv, 1.f, pt3);
     cout << glm::to_string(pt1) << endl;
     cout << glm::to_string(pt2) << endl;
     cout << glm::to_string(pt3) << endl;
@@ -75,9 +75,9 @@ void testRationalSurfacePoint() {
     w(1, 2) = 2;
     RationalSurface3f srf(degreeU, degreeV, knotsU, knotsV, cp, w);
     glm::vec3 pt1, pt2, pt3;
-    rationalSurfacePoint(srf, 0.f, 0.f, pt1);
-    rationalSurfacePoint(srf, 0.5f, 0.5f, pt2);
-    rationalSurfacePoint(srf, 1.f, 1.f, pt3);
+    surfacePoint(srf, 0.f, 0.f, pt1);
+    surfacePoint(srf, 0.5f, 0.5f, pt2);
+    surfacePoint(srf, 1.f, 1.f, pt3);
     cout << glm::to_string(pt1) << endl;
     cout << glm::to_string(pt2) << endl;
     cout << glm::to_string(pt3) << endl;
@@ -111,8 +111,9 @@ void testCurveClosed() {
     cp.push_back(glm::vec2(10, 0));
     cp.push_back(glm::vec2(20, 10));
     cp.push_back(glm::vec2(30, 20));
+    std::vector<float> w(7, 1.0f);
 
-    Curve2f crv {deg, knots, cp};
+    RationalCurve2f crv {deg, knots, cp, w};
     cout << isCurveClosed(crv) << endl;
 }
 
@@ -146,12 +147,12 @@ void testKnotInsert() {
 }
 
 int main() {
-    /*testCurvePoint();
+    testCurvePoint();
     testRationalCurvePoint();
     testCurveDeriv();
     testCurveClosed();
     testRationalSurfacePoint();
-    testIO();*/
+    // testIO();
     testKnotInsert();
     return 0;
 }
