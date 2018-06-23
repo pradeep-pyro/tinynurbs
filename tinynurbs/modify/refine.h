@@ -3,14 +3,17 @@
 
 #include <vector>
 #include "glm/glm.hpp"
+#include "../core/check.h"
+#include "../util/util.h"
+#include "../geometry/curve.h"
 
 namespace tinynurbs {
 
 template <int dim, typename T>
-void curveInsertKnot(unsigned int deg, std::vector<T> &knots, std::vector<glm::vec<dim, T>> &cp,
+void curveKnotRefine(unsigned int deg, std::vector<T> &knots, std::vector<glm::vec<dim, T>> &cp,
                      T u, unsigned int r=1) {
     int k = findSpan(deg, knots, u);
-    int s = 0; // TODO: compute multiplicity
+    unsigned int s = knotMultiplicity(knots, k);
     // Insert new knots between span and (span + 1)
     std::vector<T> new_knots;
     new_knots.resize(knots.size() + r);
@@ -55,6 +58,30 @@ void curveInsertKnot(unsigned int deg, std::vector<T> &knots, std::vector<glm::v
     // Update original control points and knots
     cp = new_cp;
     knots = new_knots;
+}
+
+template <int dim, typename T>
+void curveKnotRefine(Curve<dim, T> &crv, T u, unsigned int r=1) {
+    curveKnotRefine(crv.degree, crv.knots, crv.control_points, u, r);
+}
+
+template <int dim, typename T>
+void curveKnotRefine(RationalCurve<dim, T> &crv, T u, unsigned int r=1) {
+    std::vector<glm::vec<dim + 1, T>> Cw;
+    Cw.reserve(crv.control_points.size());
+    for (int i = 0; i < crv.control_points.size(); ++i) {
+        Cw.push_back(util::cartesianToHomogenous(crv.control_points[i], crv.weights[i]));
+    }
+    curveKnotRefine(crv.degree, crv.knots, Cw, u, r);
+    std::vector<glm::vec<dim, T>> new_cp, new_w;
+    new_cp.reserve(Cw.size());
+    new_w.reserve(Cw.size());
+    for (int i = 0; i < crv.control_points.size(); ++i) {
+        new_cp.push_back(util::homogenousToCartesian(Cw[i]));
+        new_w.push_back(Cw[dim - 1]);
+    }
+    crv.control_points = new_cp;
+    crv.weights = new_w;
 }
 
 } // namespace tinynurbs

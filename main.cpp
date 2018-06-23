@@ -139,7 +139,7 @@ void testKnotInsert() {
     glm::vec2 pt;
     curvePoint(crv, u, pt);
     cout << glm::to_string(pt) << endl;
-    curveInsertKnot(crv.degree, crv.knots, crv.control_points, u);
+    curveKnotRefine(crv, u, 2);
     curvePoint(crv, u, pt);
     cout << glm::to_string(pt) << endl;
     // Evaluation result

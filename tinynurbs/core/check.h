@@ -27,6 +27,19 @@ bool isKnotVectorMonotonic(const std::vector<T> &knots) {
     return std::is_sorted(knots.begin(), knots.end());
 }
 
+template <typename T>
+unsigned int knotMultiplicity(const std::vector<T> &knots, unsigned int index) {
+    T u = knots[index];
+    T eps = std::numeric_limits<T>::epsilon();
+    unsigned int mult = 1;
+    for (unsigned int i = index; i < knots.size(); ++i) {
+        if (std::abs(u - knots[index + 1]) < eps) {
+            ++mult;
+        }
+    }
+    return mult;
+}
+
 template <int dim, typename T>
 bool isCurveValid(unsigned int degree, const std::vector<T> &knots, const std::vector<glm::vec<dim, T>> &control_points) {
     if (degree < 1 || degree > 9) {
@@ -43,7 +56,7 @@ bool isCurveValid(unsigned int degree, const std::vector<T> &knots, const std::v
 
 template <int dim, typename T>
 bool isCurveValid(unsigned int degree, const std::vector<T> &knots, const std::vector<glm::vec<dim, T>> &control_points,
-                          const std::vector<T> &weights) {
+                  const std::vector<T> &weights) {
     if (!isValid(degree, knots, control_points)) {
         return false;
     }
