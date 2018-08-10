@@ -50,7 +50,7 @@ struct Surface {
 \tparam T Data type of control points and weights (float or double)
 */
 template <int dim, typename T>
-struct RationalSurface { //: public Surface<dim, T> {
+struct RationalSurface {
     unsigned int degree_u, degree_v;
     std::vector<T> knots_u, knots_v;
     array2<glm::vec<dim, T>> control_points;

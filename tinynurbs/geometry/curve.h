@@ -17,15 +17,9 @@ the LICENSE.txt file.
 
 namespace tinynurbs {
 
-/**
-Checks if the relation between degree, number of knots, and
-number of control points is valid
-@param degree Degree of the NURBS curve
-@param num_knots Number of knot values
-@param num_ctrl_pts Number of control points
-@return Whether the relationship is valid
-*/
-bool isValidRelation(unsigned int degree, size_t num_knots, size_t num_ctrl_pts);
+// Forward declaration
+template <int dim, typename T>
+struct RationalCurve;
 
 /**
 @brief Struct for holding a polynomial B-spline curve
@@ -38,6 +32,9 @@ struct Curve {
     std::vector<T> knots;
     std::vector<glm::vec<dim, T>> control_points;
 
+    Curve() = default;
+    Curve(const RationalCurve<dim, T> &crv) : Curve(crv.degree, crv.knots, crv.control_points) {
+    }
     Curve(unsigned int degree, const std::vector<T> &knots,
           const std::vector<glm::vec<dim, T>> &control_points)
         : degree(degree), knots(knots), control_points(control_points) {
@@ -50,13 +47,24 @@ struct Curve {
 @tparam T Data type of control points and knots (float or double)
 */
 template <int dim, typename T>
-struct RationalCurve : public Curve<dim, T> {
+struct RationalCurve {
+    unsigned int degree;
+    std::vector<T> knots;
+    std::vector<glm::vec<dim, T>> control_points;
     std::vector<T> weights;
 
+    RationalCurve() = default;
+    RationalCurve(const Curve<dim, T> &crv)
+        : RationalCurve(crv, std::vector<T>(crv.control_points.size(), 1.0)) {
+    }
+    RationalCurve(const Curve<dim, T> &crv, const std::vector<T> &weights)
+        : RationalCurve(crv.degree, crv.knots, crv.control_points, weights) {
+    }
     RationalCurve(unsigned int degree, const std::vector<T> &knots,
                   const std::vector<glm::vec<dim, T>> &control_points,
                   const std::vector<T> weights)
-        : weights(weights), Curve<dim, T>(degree, knots, control_points) {
+        : degree(degree), knots(knots), control_points(control_points),
+          weights(weights) {
     }
 };
 

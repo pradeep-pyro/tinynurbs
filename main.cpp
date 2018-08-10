@@ -4,10 +4,12 @@
 #include "tinynurbs/core/check.h"
 #include "tinynurbs/geometry/surface.h"
 #include "tinynurbs/io/obj.h"
+#include "tinynurbs/modify/refine.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/glm.hpp"
 #include "glm/gtx/string_cast.hpp"
+#include <cmath>
 
 using namespace std;
 
@@ -43,9 +45,9 @@ void testRationalCurvePoint() {
     controlPoints.push_back(glm::vec2(0, 1));
     RationalCurve2f crv {degree, knots, controlPoints, std::vector<float> {1, 1, 2}};
     glm::vec2 pt1, pt2, pt3;
-    rationalCurvePoint(crv, 0.f, pt1);
-    rationalCurvePoint(crv, 0.5f, pt2);
-    rationalCurvePoint(crv, 1.f, pt3);
+    curvePoint(crv, 0.f, pt1);
+    curvePoint(crv, 0.5f, pt2);
+    curvePoint(crv, 1.f, pt3);
     cout << glm::to_string(pt1) << endl;
     cout << glm::to_string(pt2) << endl;
     cout << glm::to_string(pt3) << endl;
@@ -73,9 +75,9 @@ void testRationalSurfacePoint() {
     w(1, 2) = 2;
     RationalSurface3f srf(degreeU, degreeV, knotsU, knotsV, cp, w);
     glm::vec3 pt1, pt2, pt3;
-    rationalSurfacePoint(srf, 0.f, 0.f, pt1);
-    rationalSurfacePoint(srf, 0.5f, 0.5f, pt2);
-    rationalSurfacePoint(srf, 1.f, 1.f, pt3);
+    surfacePoint(srf, 0.f, 0.f, pt1);
+    surfacePoint(srf, 0.5f, 0.5f, pt2);
+    surfacePoint(srf, 1.f, 1.f, pt3);
     cout << glm::to_string(pt1) << endl;
     cout << glm::to_string(pt2) << endl;
     cout << glm::to_string(pt3) << endl;
@@ -109,9 +111,39 @@ void testCurveClosed() {
     cp.push_back(glm::vec2(10, 0));
     cp.push_back(glm::vec2(20, 10));
     cp.push_back(glm::vec2(30, 20));
+    std::vector<float> w(7, 1.0f);
 
-    Curve2f crv {deg, knots, cp};
+    RationalCurve2f crv {deg, knots, cp, w};
     cout << isCurveClosed(crv) << endl;
+}
+
+void testIO() {
+    unsigned int degu, degv;
+    std::vector<float> knotsu, knotsv;
+    tinynurbs::array2<glm::vec3> cp;
+    tinynurbs::array2<float> w;
+    bool rat;
+    tinynurbs::readOBJ("/home/pradeep/Downloads/car50_100.obj", degu, degv, knotsu, knotsv, cp, w, rat);
+    tinynurbs::saveOBJ("/home/pradeep/Downloads/car50_1002.obj", degu, degv, knotsu, knotsv, cp, w, rat);
+}
+
+void testKnotInsert() {
+    using namespace tinynurbs;
+    Curve2f crv;
+    crv.degree = 3;
+    crv.control_points = {{5.0, 5.0}, {10.0, 10.0}, {20.0, 15.0}, {35.0, 15.0}, {45.0, 10.0}, {50.0, 5.0}};
+    crv.knots = {0.0, 0.0, 0.0, 0.0, 0.33, 0.66, 1.0, 1.0, 1.0, 1.0};
+
+    // Set evaluation parameter
+    float u = 0.3f;
+    glm::vec2 pt;
+    curvePoint(crv, u, pt);
+    cout << glm::to_string(pt) << endl;
+    curveKnotRefine(crv, u, 2);
+    curvePoint(crv, u, pt);
+    cout << glm::to_string(pt) << endl;
+    // Evaluation result
+    glm::vec2 res(18.617, 13.377);
 }
 
 int main() {
@@ -120,5 +152,7 @@ int main() {
     testCurveDeriv();
     testCurveClosed();
     testRationalSurfacePoint();
+    // testIO();
+    testKnotInsert();
     return 0;
 }

@@ -55,13 +55,29 @@ inline glm::vec<nd - 1, T> truncateHomogenous(const glm::vec<nd, T> &pt) {
 Compute the binomial coefficient (nCk) using the formula
 \product_{i=0}^k (n + 1 - i) / i
 */
-unsigned int binomial(unsigned int n, unsigned int k);
+inline unsigned int binomial(unsigned int n, unsigned int k) {
+    unsigned int result = 1;
+    if (k > n) {
+        return 0;
+    }
+    for (unsigned int i = 1; i <= k; ++i) {
+        result *= (n + 1 - i);
+        result /= i;
+    }
+    return result;
+}
 
+/**
+Check if two numbers are close enough within eps
+*/
 template <typename T>
 inline bool close(T a, T b, double eps = std::numeric_limits<T>::epsilon()) {
     return (std::abs(a - b) < eps) ? true : false;
 }
 
+/**
+Map numbers from one interval to another
+*/
 template <typename T>
 inline T mapToRange(T val, T old_min, T old_max, T new_min, T new_max) {
     T old_range = old_max - old_min;
