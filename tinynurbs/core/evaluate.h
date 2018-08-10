@@ -1,5 +1,5 @@
 /*
-@file nurbstk/evaluate.h
+@file tinynurbs/core/evaluate.h
 @author Pradeep Kumar Jayaraman <pradeep.pyro@gmail.com>
 
 Core functionality for evaluating points and derivatives on NURBS curves and

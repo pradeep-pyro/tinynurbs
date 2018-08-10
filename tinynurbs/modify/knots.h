@@ -1,8 +1,8 @@
 /*
-@file nurbstk/nurbs_knots.h
+@file tinynurbs/modify/nurbs_knots.h
 @author Pradeep Kumar Jayaraman <pradeep.pyro@gmail.com>
 
-Helper functions for creating and modifying knot vectors.
+Functions to modify knot vectors
 
 Use of this source code is governed by a BSD-style license that can be found in
 the LICENSE.txt file.
