@@ -139,12 +139,56 @@ void testKnotInsert() {
     glm::vec2 pt;
     curvePoint(crv, u, pt);
     cout << glm::to_string(pt) << endl;
-    curveKnotRefine(crv, u, 2);
+    curveKnotInsert(crv, u, 2);
     curvePoint(crv, u, pt);
     cout << glm::to_string(pt) << endl;
     // Evaluation result
     glm::vec2 res(18.617, 13.377);
 }
+
+void testSrfKnotInsert() {
+    using namespace tinynurbs;
+    Surface3f srf;
+    srf.degree_u = 3;
+    srf.degree_v = 2;
+    srf.knots_u = {0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0};
+    srf.knots_v = {0.0, 0.0, 0.0, 0.5, 1.0, 1.0, 1.0};
+    array2<glm::vec3> cp(4, 4);
+    cp(0, 0) = glm::vec3(-1, -2, 1);
+    cp(0, 1) = glm::vec3(0, -2, 1);
+    cp(0, 2) = glm::vec3(1, -2, 2);
+    cp(0, 3) = glm::vec3(2, -2, 2);
+
+    cp(1, 0) = glm::vec3(-1, -1, 1);
+    cp(1, 1) = glm::vec3(0, -1, 1);
+    cp(1, 2) = glm::vec3(1, -1, 2);
+    cp(1, 3) = glm::vec3(2, -1, 2);
+
+    cp(2, 0) = glm::vec3(-1, 0, 1);
+    cp(2, 1) = glm::vec3(0, 0, 1);
+    cp(2, 2) = glm::vec3(1, 0, 2);
+    cp(2, 3) = glm::vec3(2, 0, 2);
+
+    cp(3, 0) = glm::vec3(-1, 1, 1);
+    cp(3, 1) = glm::vec3(0, 1, 1);
+    cp(3, 2) = glm::vec3(1, 1, 2);
+    cp(3, 3) = glm::vec3(2, 1, 2);
+    srf.control_points = cp;
+    // Set evaluation parameter
+    float u = 2.f / 5.f;
+    surfaceKnotInsertU(srf.degree_u, srf.degree_v, srf.knots_u, srf.knots_v, srf.control_points, u, 1);
+
+    for (int i = 0; i < srf.control_points.rows(); ++i) {
+        for (int j = 0; j < srf.control_points.cols(); ++j) {
+            cout << glm::to_string(srf.control_points(i, j)) << " ";
+        }
+        cout << endl;
+    }
+
+    // Evaluation result
+
+}
+
 
 int main() {
     testCurvePoint();
@@ -154,5 +198,6 @@ int main() {
     testRationalSurfacePoint();
     // testIO();
     testKnotInsert();
+    testSrfKnotInsert();
     return 0;
 }
