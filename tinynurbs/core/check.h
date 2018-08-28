@@ -31,7 +31,7 @@ template <typename T>
 unsigned int knotMultiplicity(const std::vector<T> &knots, unsigned int index) {
     T u = knots[index];
     T eps = std::numeric_limits<T>::epsilon();
-    unsigned int mult = 1;
+    unsigned int mult = 0;
     for (unsigned int i = index; i < knots.size(); ++i) {
         if (std::abs(u - knots[index + 1]) < eps) {
             ++mult;
