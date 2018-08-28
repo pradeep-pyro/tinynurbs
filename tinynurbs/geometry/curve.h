@@ -1,5 +1,5 @@
 /*
-@file nurbstk/curve.h
+@file tinynurbs/geometry/curve.h
 @author Pradeep Kumar Jayaraman <pradeep.pyro@gmail.com>
 
 The Curve class represents a non-uniform polynomial B-spline curve, while the RationalCurve class
