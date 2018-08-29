@@ -103,11 +103,6 @@ void surfaceKnotInsert(unsigned int degree, const std::vector<T> &knots,
     for(int i = span + 1; i < knots.size(); ++i) {
         new_knots[i + r] = knots[i];
     }
-    // Create new control points
-    new_cp.resize(cp.rows() + r, cp.cols());
-    // Create a temporary container for affected control points per row
-    std::vector<glm::vec<dim, T>> tmp(degree + 1);
-
     // Compute alpha
     array2<T> alpha(degree - s, r + 1, T(0));
     for (int j = 1; j <= r; ++j) {
@@ -116,33 +111,76 @@ void surfaceKnotInsert(unsigned int degree, const std::vector<T> &knots,
             alpha(i, j) = (knot - knots[L + i]) / (knots[i + span + 1] - knots[L + i]);
         }
     }
-    // Update control points
-    // Each row is a u-isocurve, each col is a v-isocurve
-    for (int col = 0; col < cp.cols(); ++col) {
-        // Copy unaffected control points
-        for (int i = 0; i <= span - degree; ++i) {
-            new_cp(i, col) = cp(i, col);
-        }
-        for (int i = span - s; i < cp.rows(); ++i) {
-            new_cp(i + r, col) = cp(i, col);
-        }
-        // Copy affected control points to temp array
-        for (int i = 0; i < degree - s + 1; ++i) {
-            tmp[i] = cp(span - degree + i, col);
-        }
-        // Insert knot
-        for (int j = 1; j <= r; ++j) {
-            int L = span - degree + j;
-            for (int i = 0; i <= degree - j - s; ++i) {
-                T a = alpha(i, j);
-                tmp[i] = (1 - a) * tmp[i] + a * tmp[i + 1];
+
+    // Create a temporary container for affected control points per row/column
+    std::vector<glm::vec<dim, T>> tmp(degree + 1);
+
+    if (along_u) {
+        // Create new control points with additional rows
+        new_cp.resize(cp.rows() + r, cp.cols());
+
+        // Update control points
+        // Each row is a u-isocurve, each col is a v-isocurve
+        for (int col = 0; col < cp.cols(); ++col) {
+            // Copy unaffected control points
+            for (int i = 0; i <= span - degree; ++i) {
+                new_cp(i, col) = cp(i, col);
             }
-            new_cp(L, col) = tmp[0];
-            new_cp(span + r - j - s, col) = tmp[degree - j - s];
+            for (int i = span - s; i < cp.rows(); ++i) {
+                new_cp(i + r, col) = cp(i, col);
+            }
+            // Copy affected control points to temp array
+            for (int i = 0; i < degree - s + 1; ++i) {
+                tmp[i] = cp(span - degree + i, col);
+            }
+            // Insert knot
+            for (int j = 1; j <= r; ++j) {
+                int L = span - degree + j;
+                for (int i = 0; i <= degree - j - s; ++i) {
+                    T a = alpha(i, j);
+                    tmp[i] = (1 - a) * tmp[i] + a * tmp[i + 1];
+                }
+                new_cp(L, col) = tmp[0];
+                new_cp(span + r - j - s, col) = tmp[degree - j - s];
+            }
+            int L = span - degree + r;
+            for (int i = L + 1; i < span - s; ++i) {
+                new_cp(i, col) = tmp[i - L];
+            }
         }
-        int L = span - degree + r;
-        for (int i = L + 1; i < span - s; ++i) {
-            new_cp(i, col) = tmp[i - L];
+    }
+    else {
+        // Create new control points with additional columns
+        new_cp.resize(cp.rows(), cp.cols() + r);
+
+        // Update control points
+        // Each row is a u-isocurve, each col is a v-isocurve
+        for (int row = 0; row < cp.rows(); ++row) {
+            // Copy unaffected control points
+            for (int i = 0; i <= span - degree; ++i) {
+                new_cp(row, i) = cp(row, i);
+            }
+            for (int i = span - s; i < cp.cols(); ++i) {
+                new_cp(row, i + r) = cp(row, i);
+            }
+            // Copy affected control points to temp array
+            for (int i = 0; i < degree - s + 1; ++i) {
+                tmp[i] = cp(row, span - degree + i);
+            }
+            // Insert knot
+            for (int j = 1; j <= r; ++j) {
+                int L = span - degree + j;
+                for (int i = 0; i <= degree - j - s; ++i) {
+                    T a = alpha(i, j);
+                    tmp[i] = (1 - a) * tmp[i] + a * tmp[i + 1];
+                }
+                new_cp(row, L) = tmp[0];
+                new_cp(row, span + r - j - s) = tmp[degree - j - s];
+            }
+            int L = span - degree + r;
+            for (int i = L + 1; i < span - s; ++i) {
+                new_cp(row, i) = tmp[i - L];
+            }
         }
     }
 }
@@ -154,6 +192,16 @@ void surfaceKnotInsertU(Surface<dim, T> &srf, T u, unsigned int repeat=1) {
     surfaceKnotInsert(srf.degree_u, srf.knots_u, srf.control_points, u, repeat, true,
                       new_knots_u, new_cp);
     srf.knots_u = new_knots_u;
+    srf.control_points = new_cp;
+}
+
+template <int dim, typename T>
+void surfaceKnotInsertV(Surface<dim, T> &srf, T u, unsigned int repeat=1) {
+    std::vector<T> new_knots_v;
+    array2<glm::vec<dim, T>> new_cp;
+    surfaceKnotInsert(srf.degree_u, srf.knots_u, srf.control_points, u, repeat, false,
+                      new_knots_v, new_cp);
+    srf.knots_v = new_knots_v;
     srf.control_points = new_cp;
 }
 
