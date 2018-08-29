@@ -1,9 +1,9 @@
-#ifndef REFINE_H
-#define REFINE_H
+#ifndef MODIFY_H
+#define MODIFY_H
 
 #include <vector>
 #include "glm/glm.hpp"
-#include "../core/check.h"
+#include "check.h"
 #include "../util/util.h"
 #include "../geometry/curve.h"
 
@@ -270,4 +270,4 @@ void surfaceKnotInsertV(RationalSurface<dim, T> &srf, T u, unsigned int repeat=1
 
 } // namespace tinynurbs
 
-#endif // REFINE_H
+#endif // MODIFY_H
