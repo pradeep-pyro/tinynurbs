@@ -1,15 +1,14 @@
-/*
-@file tinynurbs/core/evaluate.h
-@author Pradeep Kumar Jayaraman <pradeep.pyro@gmail.com>
-
-Core functionality for evaluating points and derivatives on NURBS curves and
-surfaces
+/**
+@file
+@brief Core functionality for evaluating points, derivatives and related quantities
+ on NURBS curves and surfaces.
 
 Use of this source code is governed by a BSD-style license that can be found in
-the LICENSE.txt file.
+the LICENSE file.
 */
 
-#pragma once
+#ifndef TINYNURBS_EVALUATE_H
+#define TINYNURBS_EVALUATE_H
 
 #include <vector>
 
@@ -78,7 +77,7 @@ void curvePoint(const RationalCurve<dim, T> &crv, T u, glm::vec<dim, T> &point) 
     Cw.reserve(crv.control_points.size());
     for (int i = 0; i < crv.control_points.size(); i++) {
         Cw.push_back(tvecnp1(util::cartesianToHomogenous(crv.control_points[i],
-                                                         crv.weights[i])));
+                             crv.weights[i])));
     }
     // Compute point using homogenous coordinates
     tvecnp1 pointw;
@@ -156,7 +155,7 @@ E.g. curve_ders[n] is the nth derivative at u, where n is between 0 and num_ders
 */
 template <int dim, typename T>
 void curveDerivatives(const RationalCurve<dim, T> &crv, int num_ders,
-                              T u, std::vector<glm::vec<dim, T>> &curve_ders) {
+                      T u, std::vector<glm::vec<dim, T>> &curve_ders) {
 
     typedef glm::vec<dim, T> tvecn;
     typedef glm::vec<dim + 1, T> tvecnp1;
@@ -170,7 +169,7 @@ void curveDerivatives(const RationalCurve<dim, T> &crv, int num_ders,
     Cw.reserve(crv.control_points.size());
     for (int i = 0; i < crv.control_points.size(); i++) {
         Cw.push_back(tvecnp1(util::cartesianToHomogenous(crv.control_points[i],
-                                                         crv.weights[i])));
+                             crv.weights[i])));
     }
 
     // Derivatives of Cw
@@ -523,3 +522,5 @@ void surfaceNormal(const RationalSurface<dim, T> &srf, T u, T v, glm::vec<dim, T
 }
 
 } // namespace tinynurbs
+
+#endif // TINYNURBS_EVALUATE_H

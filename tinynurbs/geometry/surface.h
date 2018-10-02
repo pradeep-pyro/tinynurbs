@@ -1,14 +1,15 @@
-/*
-@file nurbstk/surface.h
-@author Pradeep Kumar Jayaraman <pradeep.pyro@gmail.com>
-
-The Surface and RationalSurface classes represent non-rational and rational NURBS surfaces, respectively.
+/**
+@file
+@brief The Surface and RationalSurface classes represent non-rational and rational
+NURBS surfaces, respectively.
 
 Use of this source code is governed by a BSD-style license that can be found in
-the LICENSE.txt file.
+the LICENSE file.
 */
 
-#pragma once
+#ifndef TINYNURBS_SURFACE_H
+#define TINYNURBS_SURFACE_H
+
 #include <vector>
 #include <stdexcept>
 #include "../util/array2.h"
@@ -80,3 +81,5 @@ typedef RationalSurface<3, float> RationalSurface3f;
 typedef RationalSurface<3, double> RationalSurface3d;
 
 } // namespace tinynurbs
+
+#endif // TINYNURBS_SURFACE_H

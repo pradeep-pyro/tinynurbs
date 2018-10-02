@@ -1,15 +1,13 @@
-/*
-@file tinynurbs/core/check.h
-@author Pradeep Kumar Jayaraman <pradeep.pyro@gmail.com>
-
-Functionality for checking validity and properties of NURBS curves and surfaces
+/**
+@file
+@brief Functionality for checking validity and properties of NURBS curves and surfaces
 
 Use of this source code is governed by a BSD-style license that can be found in
-the LICENSE.txt file.
+the LICENSE file.
 */
 
-#ifndef CHECK_H
-#define CHECK_H
+#ifndef TINYNURBS_CHECK_H
+#define TINYNURBS_CHECK_H
 
 #include <vector>
 #include <limits>
@@ -227,4 +225,4 @@ bool isSurfaceClosedV(const RationalSurface<dim, T> &srf) {
 
 } // namespace tinynurbs
 
-#endif // CHECK_H
+#endif // TINYNURBS_CHECK_H

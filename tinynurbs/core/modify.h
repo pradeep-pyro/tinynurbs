@@ -1,11 +1,20 @@
-#ifndef MODIFY_H
-#define MODIFY_H
+/**
+@file
+@brief Functions for modifying NURBS curves and surfaces.
+
+Use of this source code is governed by a BSD-style license that can be found in
+the LICENSE file.
+*/
+
+#ifndef TINYNURBS_MODIFY_H
+#define TINYNURBS_MODIFY_H
 
 #include <vector>
 #include "glm/glm.hpp"
 #include "check.h"
 #include "../util/util.h"
 #include "../geometry/curve.h"
+#include "../geometry/surface.h"
 
 namespace tinynurbs {
 
@@ -270,4 +279,4 @@ void surfaceKnotInsertV(RationalSurface<dim, T> &srf, T u, unsigned int repeat=1
 
 } // namespace tinynurbs
 
-#endif // MODIFY_H
+#endif // TINYNURBS_MODIFY_H

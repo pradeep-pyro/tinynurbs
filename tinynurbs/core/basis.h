@@ -1,4 +1,13 @@
-#pragma once
+/**
+@file
+@brief Low-level functions for evaluating B-spline basis functions and their derivatives
+
+Use of this source code is governed by a BSD-style license that can be found in
+the LICENSE file.
+*/
+
+#ifndef TINYNURBS_BASIS_H
+#define TINYNURBS_BASIS_H
 
 #include <vector>
 #include "../util/util.h"
@@ -234,3 +243,5 @@ void bsplineDerBasis(unsigned int deg, int span, const std::vector<T> &knots,
 
 
 } // namespace tinynurbs
+
+#endif // TINYNURBS_BASIS_H

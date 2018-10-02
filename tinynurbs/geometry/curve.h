@@ -1,15 +1,15 @@
-/*
-@file tinynurbs/geometry/curve.h
-@author Pradeep Kumar Jayaraman <pradeep.pyro@gmail.com>
-
-The Curve class represents a non-uniform polynomial B-spline curve, while the RationalCurve class
+/**
+@file
+@brief The Curve class represents a non-uniform polynomial B-spline curve, while the RationalCurve class
 represents a non-uniform rational B-spline (NURBS) curve.
 
 Use of this source code is governed by a BSD-style license that can be found in
-the LICENSE.txt file.
+the LICENSE file.
 */
 
-#pragma once
+#ifndef TINYNURBS_CURVE_H
+#define TINYNURBS_CURVE_H
+
 #include <vector>
 #include <exception>
 #include <stdexcept>
@@ -79,3 +79,5 @@ typedef RationalCurve<3, float> RationalCurve3f;
 typedef RationalCurve<3, double> RationalCurve3d;
 
 } // namespace tinynurbs
+
+#endif // TINYNURBS_CURVE_H

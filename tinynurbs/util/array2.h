@@ -1,15 +1,14 @@
-/*
-@file tinynurbs/core/check.h
-@author Pradeep Kumar Jayaraman <pradeep.pyro@gmail.com>
-
-A simple class for 2D runtime arrays. Mainly used for control points and weights of surfaces.
+/**
+@file
+@brief A simple class for 2D runtime arrays. Mainly used for control points and
+weights of surfaces.
 
 Use of this source code is governed by a BSD-style license that can be found in
-the LICENSE.txt file.
+the LICENSE file.
 */
 
-#ifndef ARRAY2_H
-#define ARRAY2_H
+#ifndef TINYNURBS_ARRAY2_H
+#define TINYNURBS_ARRAY2_H
 
 #include <vector>
 
@@ -71,4 +70,4 @@ private:
 
 }
 
-#endif // ARRAY2_H
+#endif // TINYNURBS_ARRAY2_H

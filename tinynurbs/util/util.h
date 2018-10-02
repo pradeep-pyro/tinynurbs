@@ -1,14 +1,13 @@
-/*
-@file tinynurbs/core/check.h
-@author Pradeep Kumar Jayaraman <pradeep.pyro@gmail.com>
-
-Helper functions
+/**
+@file
+@brief Helper functions
 
 Use of this source code is governed by a BSD-style license that can be found in
-the LICENSE.txt file.
+the LICENSE file.
 */
 
-#pragma once
+#ifndef TINYNURBS_UTIL
+#define TINYNURBS_UTIL
 
 #include <glm/glm.hpp>
 #include <stdexcept>
@@ -86,4 +85,7 @@ inline T mapToRange(T val, T old_min, T old_max, T new_min, T new_max) {
 }
 
 } // namespace util
+
 } // namespace tinynurbs
+
+#endif // TINYNURBS_UTIL

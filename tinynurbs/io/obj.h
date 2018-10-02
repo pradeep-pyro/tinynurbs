@@ -1,5 +1,13 @@
-#ifndef OBJ_H
-#define OBJ_H
+/**
+@file
+@brief Wavefront OBJ realted I/O functionality for curves and surfaces.
+
+Use of this source code is governed by a BSD-style license that can be found in
+the LICENSE file.
+*/
+
+#ifndef TINYNURBS_OBJ_H
+#define TINYNURBS_OBJ_H
 
 #include <sstream>
 #include <fstream>
@@ -458,4 +466,4 @@ void surfaceSaveOBJ(const std::string &filename, RationalSurface<dim, T> &srf) {
 
 } // namespace tinynurbs
 
-#endif // OBJ_H
+#endif // TINYNURBS_OBJ_H
