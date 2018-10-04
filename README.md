@@ -1,8 +1,21 @@
 # tinynurbs
 
-This is a lightweight C++ library for Non-Uniform Rational B-Spline curves and surfaces. The API is simple to use and the code is quite readable while being efficient.
+This is a lightweight header-only C++ library for Non-Uniform Rational B-Spline curves and surfaces. The API is simple to use and the code is readable while being efficient.
 
-Current features mainly focus on point & derivative evaluations, and Wavefront OBJ file reading/writing (for single NURBS surface). The library is under active development.
+Some of the main features include:
+
+- Point & derivative evaluations upto any order
+- Support for clamped and unclamped curves/surfaces
+- Knot insertion
+- Wavefront OBJ file I/O
+
+The library is under active development.
+
+## Usage
+
+The entire API consists of free functions named as `curve*` and `surface*` for curve- and surface-based  functionalities.
+
+`Examples coming soon...`
 
 ## Dependencies
 
