@@ -22,7 +22,7 @@ template <int dim, typename T>
 struct RationalCurve;
 
 /**
-@brief Struct for holding a polynomial B-spline curve
+Struct for holding a polynomial B-spline curve
 @tparam dim Dimension of the curve (2 or 3)
 @tparam T Data type of control points and knots (float or double)
 */
@@ -42,7 +42,7 @@ struct Curve {
 };
 
 /**
-@brief Struct for holding a rational B-spline curve
+Struct for holding a rational B-spline curve
 @tparam dim Dimension of the curve (2 or 3)
 @tparam T Data type of control points and knots (float or double)
 */

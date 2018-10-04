@@ -18,6 +18,16 @@ the LICENSE file.
 
 namespace tinynurbs {
 
+/**
+ * Insert knots in the curve
+ * @param deg Degree of the curve
+ * @param knots Knot vector of the curve
+ * @param cp Control points of the curve
+ * @param u Parameter to insert knot(s) at
+ * @param r Number of times to insert knot
+ * @param[inout] new_knots Updated knot vector
+ * @param[inout] new_cp Updated control points
+ */
 template <int dim, typename T>
 void curveKnotInsert(unsigned int deg, const std::vector<T> &knots, const std::vector<glm::vec<dim, T>> &cp, T u,
                      unsigned int r, const std::vector<T> &new_knots, const std::vector<glm::vec<dim, T>> &new_cp) {
@@ -64,6 +74,12 @@ void curveKnotInsert(unsigned int deg, const std::vector<T> &knots, const std::v
     }
 }
 
+/**
+ * Insert knots in the curve
+ * @param[inout] crv Curve object
+ * @param u Parameter to insert knot at
+ * @param repeat Number of times to insert
+ */
 template <int dim, typename T>
 void curveKnotInsert(Curve<dim, T> &crv, T u, unsigned int repeat=1) {
     std::vector<T> new_knots;
@@ -73,6 +89,12 @@ void curveKnotInsert(Curve<dim, T> &crv, T u, unsigned int repeat=1) {
     crv.control_points = new_cp;
 }
 
+/**
+ * Insert knots in the rational curve
+ * @param[inout] crv RationalCurve object
+ * @param u Parameter to insert knot at
+ * @param repeat Number of times to insert
+ */
 template <int dim, typename T>
 void curveKnotInsert(RationalCurve<dim, T> &crv, T u, unsigned int repeat=1) {
     std::vector<glm::vec<dim + 1, T>> Cw;
@@ -92,6 +114,17 @@ void curveKnotInsert(RationalCurve<dim, T> &crv, T u, unsigned int repeat=1) {
     crv.weights = new_w;
 }
 
+/**
+ * Insert knots in the surface along one direction
+ * @param degree Degree of the surface along which to insert knot
+ * @param knots Knot vector
+ * @param cp 2D array of control points
+ * @param knot Knot value to insert
+ * @param r Number of times to insert
+ * @param along_u Whether inserting along u-direction
+ * @param[inout] new_knots Updated knot vector
+ * @param[inout] new_cp Updated control points
+ */
 template <int dim, typename T>
 void surfaceKnotInsert(unsigned int degree, const std::vector<T> &knots,
                        const array2<glm::vec<dim, T>> &cp, T knot,
@@ -193,6 +226,12 @@ void surfaceKnotInsert(unsigned int degree, const std::vector<T> &knots,
     }
 }
 
+/**
+ * Insert knots in the surface along u-direction
+ * @param[inout] srf Surface object
+ * @param u Knot value to insert
+ * @param repeat Number of times to insert
+ */
 template <int dim, typename T>
 void surfaceKnotInsertU(Surface<dim, T> &srf, T u, unsigned int repeat=1) {
     // New knots and new control points after knot insertion
@@ -205,6 +244,12 @@ void surfaceKnotInsertU(Surface<dim, T> &srf, T u, unsigned int repeat=1) {
     srf.control_points = new_cp;
 }
 
+/**
+ * Insert knots in the rational surface along u-direction
+ * @param[inout] srf RationalSurface object
+ * @param u Knot value to insert
+ * @param repeat Number of times to insert
+ */
 template <int dim, typename T>
 void surfaceKnotInsertU(RationalSurface<dim, T> &srf, T u, unsigned int repeat=1) {
     // Original control points in homogenous coordinates
@@ -235,20 +280,32 @@ void surfaceKnotInsertU(RationalSurface<dim, T> &srf, T u, unsigned int repeat=1
     srf.weights = new_w;
 }
 
+/**
+ * Insert knots in the surface along v-direction
+ * @param[inout] srf Surface object
+ * @param v Knot value to insert
+ * @param repeat Number of times to insert
+ */
 template <int dim, typename T>
-void surfaceKnotInsertV(Surface<dim, T> &srf, T u, unsigned int repeat=1) {
+void surfaceKnotInsertV(Surface<dim, T> &srf, T v, unsigned int repeat=1) {
     // New knots and new control points after knot insertion
     std::vector<T> new_knots_v;
     array2<glm::vec<dim, T>> new_cp;
-    surfaceKnotInsert(srf.degree_u, srf.knots_u, srf.control_points, u, repeat, false,
+    surfaceKnotInsert(srf.degree_u, srf.knots_u, srf.control_points, v, repeat, false,
                       new_knots_v, new_cp);
     // Copy to given surface
     srf.knots_v = new_knots_v;
     srf.control_points = new_cp;
 }
 
+/**
+ * Insert knots in the rational surface along v-direction
+ * @param[inout] srf RationalSurface object
+ * @param v Knot value to insert
+ * @param repeat Number of times to insert
+ */
 template <int dim, typename T>
-void surfaceKnotInsertV(RationalSurface<dim, T> &srf, T u, unsigned int repeat=1) {
+void surfaceKnotInsertV(RationalSurface<dim, T> &srf, T v, unsigned int repeat=1) {
     // Original control points in homogenous coordinates
     array2<glm::vec<dim + 1, T>> Cw(srf.control_points.rows(), srf.control_points.cols());
     for (int i = 0; i < srf.control_points.rows(); ++i) {
@@ -260,7 +317,7 @@ void surfaceKnotInsertV(RationalSurface<dim, T> &srf, T u, unsigned int repeat=1
     // New knots and new homogenous control points after knot insertion
     std::vector<T> new_knots_v;
     array2<glm::vec<dim + 1, T>> new_Cw;
-    surfaceKnotInsert(srf.degree_u, srf.knots_u, Cw, u, repeat, false,
+    surfaceKnotInsert(srf.degree_u, srf.knots_u, Cw, v, repeat, false,
                       new_knots_v, new_Cw);
 
     // Convert back to cartesian coordinates

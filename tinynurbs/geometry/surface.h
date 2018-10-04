@@ -22,7 +22,7 @@ template <int dim, typename T>
 struct RationalSurface;
 
 /**
-\brief Struct for representing a non-rational NURBS surface
+Struct for representing a non-rational NURBS surface
 \tparam dim Dimension of the surface (always 3)
 \tparam T Data type of control points and weights (float or double)
 */
@@ -46,7 +46,7 @@ struct Surface {
 };
 
 /**
-\brief Struct for representing a non-rational NURBS surface
+Struct for representing a non-rational NURBS surface
 \tparam dim Dimension of the surface (always 3)
 \tparam T Data type of control points and weights (float or double)
 */

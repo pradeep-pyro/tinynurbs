@@ -30,11 +30,24 @@ inline bool isValidRelation(unsigned int degree, size_t num_knots, size_t num_ct
     return (num_knots - degree - 1) == num_ctrl_pts;
 }
 
+/**
+ * isKnotVectorMonotonic returns whether the knots are in ascending order
+ * @tparam Type of knot values
+ * @param knots Knot vector
+ * @return Whether monotonic
+ */
 template <typename T>
 bool isKnotVectorMonotonic(const std::vector<T> &knots) {
     return std::is_sorted(knots.begin(), knots.end());
 }
 
+/**
+ * Returns the mulitplicity of the knot at index
+ * @tparam Type of knot values
+ * @param knots Knot vector
+ * @param index Index of knot of interest
+ * @return Multiplicity (>= 1)
+ */
 template <typename T>
 unsigned int knotMultiplicity(const std::vector<T> &knots, unsigned int index) {
     T u = knots[index];
@@ -48,6 +61,15 @@ unsigned int knotMultiplicity(const std::vector<T> &knots, unsigned int index) {
     return mult;
 }
 
+/**
+ * Returns whether the curve is valid
+ * @tparam dim Dimension of the curve (2 or 3 in general)
+ * @tparam T Type of control point coordinates, knot values
+ * @param degree Degree of curve
+ * @param knots Knot vector of curve
+ * @param control_points Control points of curve
+ * @return Whether valid
+ */
 template <int dim, typename T>
 bool isCurveValid(unsigned int degree, const std::vector<T> &knots, const std::vector<glm::vec<dim, T>> &control_points) {
     if (degree < 1 || degree > 9) {
@@ -62,6 +84,15 @@ bool isCurveValid(unsigned int degree, const std::vector<T> &knots, const std::v
     return true;
 }
 
+/**
+ * Returns whether the curve is valid
+ * @tparam dim Dimension of the curve (2 or 3 in general)
+ * @tparam T Type of control point coordinates, knot values and weights
+ * @param degree Degree of curve
+ * @param knots Knot vector of curve
+ * @param control_points Control points of curve
+ * @return Whether valid
+ */
 template <int dim, typename T>
 bool isCurveValid(unsigned int degree, const std::vector<T> &knots, const std::vector<glm::vec<dim, T>> &control_points,
                   const std::vector<T> &weights) {
@@ -74,16 +105,41 @@ bool isCurveValid(unsigned int degree, const std::vector<T> &knots, const std::v
     return true;
 }
 
+/**
+ * Returns whether the curve is valid
+ * @tparam dim Dimension of the curve (2 or 3 in general)
+ * @tparam T Type of control point coordinates, knot values
+ * @param crv Curve object
+ * @return Whether valid
+ */
 template <int dim, typename T>
 bool isCurveValid(const Curve<dim, T> &crv) {
     return isCurveValid(crv.degree, crv.knots, crv.control_points);
 }
 
+/**
+ * Returns whether the curve is valid
+ * @tparam dim Dimension of the curve (2 or 3 in general)
+ * @tparam T Type of control point coordinates, knot values
+ * @param crv RationalCurve object
+ * @return Whether valid
+ */
 template <int dim, typename T>
 bool isCurveValid(const RationalCurve<dim, T> &crv) {
     return isCurveValid(crv.degree, crv.knots, crv.control_points, crv.weights);
 }
 
+/**
+ * Returns whether the surface is valid
+ * @tparam dim Dimension of the surface (3 in general)
+ * @tparam T Type of control point coordinates, knot values
+ * @param degree_u Degree of surface along u-direction
+ * @param degree_v Degree of surface along v-direction
+ * @param knots_u Knot vector of surface along u-direction
+ * @param knots_v Knot vector of surface along v-direction
+ * @param control_points Control points grid of surface
+ * @return Whether valid
+ */
 template <int dim, typename T>
 bool isSurfaceValid(unsigned int degree_u, unsigned int degree_v, const std::vector<T> &knots_u, const std::vector<T> &knots_v,
                     const array2<glm::vec<dim, T>> &control_points) {
@@ -100,6 +156,18 @@ bool isSurfaceValid(unsigned int degree_u, unsigned int degree_v, const std::vec
     return true;
 }
 
+/**
+ * Returns whether the rational surface is valid
+ * @tparam dim Dimension of the surface (3 in general)
+ * @tparam T Type of control point coordinates, knot values
+ * @param degree_u Degree of surface along u-direction
+ * @param degree_v Degree of surface along v-direction
+ * @param knots_u Knot vector of surface along u-direction
+ * @param knots_v Knot vector of surface along v-direction
+ * @param control_points Control points grid of surface
+ * @param weights Weights corresponding to control point grid of surface
+ * @return Whether valid
+ */
 template <int dim, typename T>
 bool isSurfaceValid(unsigned int degree_u, unsigned int degree_v, const std::vector<T> &knots_u,
                     const std::vector<T> &knots_v, const array2<glm::vec<dim, T>> &control_points,
@@ -113,16 +181,37 @@ bool isSurfaceValid(unsigned int degree_u, unsigned int degree_v, const std::vec
     return true;
 }
 
+/**
+ * Returns whether the surface is valid
+ * @tparam dim Dimension of the surface (3 in general)
+ * @tparam T Type of control point coordinates, knot values
+ * @param srf Surface object
+ * @return Whether valid
+ */
 template <int dim, typename T>
 bool isSurfaceValid(const Surface<dim, T> &srf) {
     return isSurfaceValid(srf.degree_u, srf.degree_v, srf.knots_u, srf.knots_v, srf.control_points);
 }
 
+/**
+ * Returns whether the rational surface is valid
+ * @tparam dim Dimension of the surface (3 in general)
+ * @tparam T Type of control point coordinates, knot values
+ * @param srf RationalSurface object
+ * @return Whether valid
+ */
 template <int dim, typename T>
 bool isSurfaceValid(const RationalSurface<dim, T> &srf) {
     return isSurfaceValid(srf.degree_u, srf.degree_v, srf.knots_u, srf.knots_v, srf.control_points, srf.weights);
 }
 
+/**
+ * Returns whether the given knot vector is closed by checking the
+ * periodicity of knot vectors near the start and end
+ * @param degree Degree of curve/surface
+ * @param knots Knot vector of curve/surface
+ * @return Whether knot vector is closed
+ */
 template <typename T>
 bool isKnotVectorClosed(unsigned int degree, const std::vector<T> &knots) {
     for (int i = 0; i < degree - 1; ++i) {
@@ -135,6 +224,13 @@ bool isKnotVectorClosed(unsigned int degree, const std::vector<T> &knots) {
     return true;
 }
 
+/**
+ * Returns whether the given knot vector is closed by checking the
+ * periodicity of knot vectors near the start and end
+ * @param degree Degree of curve/surface
+ * @param vec Array of any control points/weights
+ * @return Whether knot vector is closed
+ */
 template <typename T>
 bool isArray1Closed(unsigned int degree, const std::vector<T> &vec) {
     for (int i = 0; i < degree; ++i) {
@@ -146,6 +242,13 @@ bool isArray1Closed(unsigned int degree, const std::vector<T> &vec) {
     return true;
 }
 
+/**
+ * Returns whether the 2D array is closed along the u-direction
+ * i.e., along rows.
+ * @param degree_u Degree along u-direction
+ * @param arr 2D array of control points / weights
+ * @return Whether closed along u-direction
+ */
 template <typename T>
 bool isArray2ClosedU(unsigned int degree_u, const array2<T> &arr) {
     for (int i = 0; i < degree_u; ++i) {
@@ -159,6 +262,13 @@ bool isArray2ClosedU(unsigned int degree_u, const array2<T> &arr) {
     return true;
 }
 
+/**
+ * Returns whether the 2D array is closed along the v-direction
+ * i.e., along columns.
+ * @param degree_v Degree along v-direction
+ * @param arr 2D array of control points / weights
+ * @return Whether closed along v-direction
+ */
 template <typename T>
 bool isArray2ClosedV(unsigned int degree_v, const array2<T> &arr) {
     for (int i = 0; i < arr.rows(); ++i) {
@@ -172,12 +282,22 @@ bool isArray2ClosedV(unsigned int degree_v, const array2<T> &arr) {
     return true;
 }
 
+/**
+ * Checks whether the curve is closed
+ * @param crv Curve object
+ * @return  Whether closed
+ */
 template <int dim, typename T>
 bool isCurveClosed(const Curve<dim, T> &crv) {
     return isArray1Closed(crv.degree, crv.control_points) &&
            isKnotVectorClosed(crv.degree, crv.knots);
 }
 
+/**
+ * Checks whether the rational curve is closed
+ * @param crv RationalCurve object
+ * @return  Whether closed
+ */
 template <int dim, typename T>
 bool isCurveClosed(const RationalCurve<dim, T> &crv) {
     return isArray1Closed(crv.degree, crv.control_points) &&
@@ -186,7 +306,9 @@ bool isCurveClosed(const RationalCurve<dim, T> &crv) {
 }
 
 /**
-Returns whether the surface is closed along the u-direction
+ * Checks whether the surface is closed along u-direction
+ * @param srf Surface object
+ * @return  Whether closed along u-direction
 */
 template <int dim, typename T>
 bool isSurfaceClosedU(const Surface<dim, T> &srf) {
@@ -195,7 +317,9 @@ bool isSurfaceClosedU(const Surface<dim, T> &srf) {
 }
 
 /**
-Returns whether the surface is closed along the v-direction
+ * Checks whether the surface is closed along v-direction
+ * @param srf Surface object
+ * @return  Whether closed along v-direction
 */
 template <int dim, typename T>
 bool isSurfaceClosedV(const Surface<dim, T> &srf) {
@@ -204,7 +328,9 @@ bool isSurfaceClosedV(const Surface<dim, T> &srf) {
 }
 
 /**
-Returns whether the rational surface is closed along the u-direction
+ * Checks whether the rational surface is closed along u-direction
+ * @param srf RationalSurface object
+ * @return  Whether closed along u-direction
 */
 template <int dim, typename T>
 bool isSurfaceClosedU(const RationalSurface<dim, T> &srf) {
@@ -214,7 +340,9 @@ bool isSurfaceClosedU(const RationalSurface<dim, T> &srf) {
 }
 
 /**
-Returns whether the rational surface is closed along the v-direction
+ * Checks whether the rational surface is closed along v-direction
+ * @param srf RationalSurface object
+ * @return  Whether closed along v-direction
 */
 template <int dim, typename T>
 bool isSurfaceClosedV(const RationalSurface<dim, T> &srf) {

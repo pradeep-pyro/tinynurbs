@@ -15,8 +15,8 @@ the LICENSE file.
 namespace tinynurbs {
 
 /**
-// A simple class for representing 2D runtime arrays.
-*/
+ * A simple class for representing 2D runtime arrays.
+ */
 template <typename T>
 class array2 {
 public:
@@ -68,6 +68,6 @@ private:
     std::vector<T> data_;
 };
 
-}
+} // namespace tinynurbs
 
 #endif // TINYNURBS_ARRAY2_H

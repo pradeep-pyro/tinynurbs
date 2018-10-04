@@ -10,7 +10,6 @@ the LICENSE file.
 #define TINYNURBS_UTIL
 
 #include <glm/glm.hpp>
-#include <stdexcept>
 #include <vector>
 
 namespace tinynurbs {
