@@ -21,7 +21,7 @@ namespace tinynurbs {
 /**
 Checks if the relation between degree, number of knots, and
 number of control points is valid
-@param degree Degree of the NURBS curve
+@param degree Degree
 @param num_knots Number of knot values
 @param num_ctrl_pts Number of control points
 @return Whether the relationship is valid
@@ -71,7 +71,7 @@ unsigned int knotMultiplicity(const std::vector<T> &knots, unsigned int index) {
  * @return Whether valid
  */
 template <int dim, typename T>
-bool isCurveValid(unsigned int degree, const std::vector<T> &knots, const std::vector<glm::vec<dim, T>> &control_points) {
+bool curveIsValid(unsigned int degree, const std::vector<T> &knots, const std::vector<glm::vec<dim, T>> &control_points) {
     if (degree < 1 || degree > 9) {
         return false;
     }
@@ -94,7 +94,7 @@ bool isCurveValid(unsigned int degree, const std::vector<T> &knots, const std::v
  * @return Whether valid
  */
 template <int dim, typename T>
-bool isCurveValid(unsigned int degree, const std::vector<T> &knots, const std::vector<glm::vec<dim, T>> &control_points,
+bool curveIsValid(unsigned int degree, const std::vector<T> &knots, const std::vector<glm::vec<dim, T>> &control_points,
                   const std::vector<T> &weights) {
     if (!isValid(degree, knots, control_points)) {
         return false;
@@ -113,8 +113,8 @@ bool isCurveValid(unsigned int degree, const std::vector<T> &knots, const std::v
  * @return Whether valid
  */
 template <int dim, typename T>
-bool isCurveValid(const Curve<dim, T> &crv) {
-    return isCurveValid(crv.degree, crv.knots, crv.control_points);
+bool curveIsValid(const Curve<dim, T> &crv) {
+    return curveIsValid(crv.degree, crv.knots, crv.control_points);
 }
 
 /**
@@ -125,8 +125,8 @@ bool isCurveValid(const Curve<dim, T> &crv) {
  * @return Whether valid
  */
 template <int dim, typename T>
-bool isCurveValid(const RationalCurve<dim, T> &crv) {
-    return isCurveValid(crv.degree, crv.knots, crv.control_points, crv.weights);
+bool curveIsValid(const RationalCurve<dim, T> &crv) {
+    return curveIsValid(crv.degree, crv.knots, crv.control_points, crv.weights);
 }
 
 /**
@@ -141,7 +141,7 @@ bool isCurveValid(const RationalCurve<dim, T> &crv) {
  * @return Whether valid
  */
 template <int dim, typename T>
-bool isSurfaceValid(unsigned int degree_u, unsigned int degree_v, const std::vector<T> &knots_u, const std::vector<T> &knots_v,
+bool surfaceIsValid(unsigned int degree_u, unsigned int degree_v, const std::vector<T> &knots_u, const std::vector<T> &knots_v,
                     const array2<glm::vec<dim, T>> &control_points) {
     if (degree_u < 1 || degree_u > 9 || degree_v < 1 || degree_v > 9) {
         return false;
@@ -169,10 +169,10 @@ bool isSurfaceValid(unsigned int degree_u, unsigned int degree_v, const std::vec
  * @return Whether valid
  */
 template <int dim, typename T>
-bool isSurfaceValid(unsigned int degree_u, unsigned int degree_v, const std::vector<T> &knots_u,
+bool surfaceIsValid(unsigned int degree_u, unsigned int degree_v, const std::vector<T> &knots_u,
                     const std::vector<T> &knots_v, const array2<glm::vec<dim, T>> &control_points,
                     const array2<T> &weights) {
-    if (!isSurfaceValid(degree_u, degree_v, knots_u, knots_v, control_points)) {
+    if (!surfaceIsValid(degree_u, degree_v, knots_u, knots_v, control_points)) {
         return false;
     }
     if (control_points.rows() != weights.rows() || control_points.cols() != weights.cols()) {
@@ -189,8 +189,8 @@ bool isSurfaceValid(unsigned int degree_u, unsigned int degree_v, const std::vec
  * @return Whether valid
  */
 template <int dim, typename T>
-bool isSurfaceValid(const Surface<dim, T> &srf) {
-    return isSurfaceValid(srf.degree_u, srf.degree_v, srf.knots_u, srf.knots_v, srf.control_points);
+bool surfaceIsValid(const Surface<dim, T> &srf) {
+    return surfaceIsValid(srf.degree_u, srf.degree_v, srf.knots_u, srf.knots_v, srf.control_points);
 }
 
 /**
@@ -201,8 +201,8 @@ bool isSurfaceValid(const Surface<dim, T> &srf) {
  * @return Whether valid
  */
 template <int dim, typename T>
-bool isSurfaceValid(const RationalSurface<dim, T> &srf) {
-    return isSurfaceValid(srf.degree_u, srf.degree_v, srf.knots_u, srf.knots_v, srf.control_points, srf.weights);
+bool surfaceIsValid(const RationalSurface<dim, T> &srf) {
+    return surfaceIsValid(srf.degree_u, srf.degree_v, srf.knots_u, srf.knots_v, srf.control_points, srf.weights);
 }
 
 /**
@@ -288,7 +288,7 @@ bool isArray2ClosedV(unsigned int degree_v, const array2<T> &arr) {
  * @return  Whether closed
  */
 template <int dim, typename T>
-bool isCurveClosed(const Curve<dim, T> &crv) {
+bool curveIsClosed(const Curve<dim, T> &crv) {
     return isArray1Closed(crv.degree, crv.control_points) &&
            isKnotVectorClosed(crv.degree, crv.knots);
 }
@@ -299,7 +299,7 @@ bool isCurveClosed(const Curve<dim, T> &crv) {
  * @return  Whether closed
  */
 template <int dim, typename T>
-bool isCurveClosed(const RationalCurve<dim, T> &crv) {
+bool curveIsClosed(const RationalCurve<dim, T> &crv) {
     return isArray1Closed(crv.degree, crv.control_points) &&
            isArray1Closed(crv.degree, crv.weights) &&
            isKnotVectorClosed(crv.degree, crv.knots);
@@ -311,7 +311,7 @@ bool isCurveClosed(const RationalCurve<dim, T> &crv) {
  * @return  Whether closed along u-direction
 */
 template <int dim, typename T>
-bool isSurfaceClosedU(const Surface<dim, T> &srf) {
+bool surfaceIsClosedU(const Surface<dim, T> &srf) {
     return isArray2ClosedU(srf.degree_u, srf.control_points) &&
            isKnotVectorClosed(srf.degree_u, srf.knots_u);
 }
@@ -322,7 +322,7 @@ bool isSurfaceClosedU(const Surface<dim, T> &srf) {
  * @return  Whether closed along v-direction
 */
 template <int dim, typename T>
-bool isSurfaceClosedV(const Surface<dim, T> &srf) {
+bool surfaceIsClosedV(const Surface<dim, T> &srf) {
     return isArray2ClosedV(srf.degree_v, srf.control_points) &&
            isKnotVectorClosed(srf.degree_v, srf.knots_v);
 }
@@ -333,7 +333,7 @@ bool isSurfaceClosedV(const Surface<dim, T> &srf) {
  * @return  Whether closed along u-direction
 */
 template <int dim, typename T>
-bool isSurfaceClosedU(const RationalSurface<dim, T> &srf) {
+bool surfaceIsClosedU(const RationalSurface<dim, T> &srf) {
     return isArray2ClosedU(srf.degree_u, srf.control_points) &&
            isKnotVectorClosed(srf.degree_u, srf.knots_u) &&
            isArray2ClosedU(srf.degree_u, srf.weights);
@@ -345,7 +345,7 @@ bool isSurfaceClosedU(const RationalSurface<dim, T> &srf) {
  * @return  Whether closed along v-direction
 */
 template <int dim, typename T>
-bool isSurfaceClosedV(const RationalSurface<dim, T> &srf) {
+bool surfaceIsClosedV(const RationalSurface<dim, T> &srf) {
     return isArray2ClosedV(srf.degree_v, srf.control_points) &&
            isKnotVectorClosed(srf.degree_v, srf.knots_v) &&
            isArray2ClosedV(srf.degree_v, srf.weights);
