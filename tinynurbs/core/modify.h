@@ -37,6 +37,9 @@ void curveKnotInsert(unsigned int deg, const std::vector<T> &knots, const std::v
                      unsigned int r, std::vector<T> &new_knots, std::vector<glm::vec<dim, T>> &new_cp) {
     int k = findSpan(deg, knots, u);
     unsigned int s = knotMultiplicity(knots, k);
+    /*if ((r + s) > deg) {
+        r = deg - s;
+    }*/
 
     // Insert new knots between span and (span + 1)
     new_knots.resize(knots.size() + r);
@@ -237,6 +240,60 @@ void curveUnclamp(unsigned int degree, std::vector<T> &knots,
 }
 
 
+/**
+ * Split the curve into two
+ * @param degree Degree of curve
+ * @param knots Knot vector
+ * @param control_points Array of control points
+ * @param u Parameter to split curve
+ * @param left_knots Knots of the left part of the curve
+ * @param left_control_points Control points of the left part of the curve
+ * @param right_knots Knots of the right part of the curve
+ * @param right_control_points Control points of the right part of the curve
+ */
+template <int dim, typename T>
+void curveSplit(unsigned int degree, const std::vector<T> &knots,
+                const std::vector<glm::vec<dim, T>> &control_points, T u,
+                std::vector<T> &left_knots,
+                std::vector<glm::vec<dim, T>> &left_control_points,
+                std::vector<T> &right_knots,
+                std::vector<glm::vec<dim, T>> &right_control_points) {
+    std::vector<T> tmp_knots;
+    std::vector<glm::vec<dim, T>> tmp_cp;
+
+    int span = findSpan(degree, knots, u);
+    int r = degree - knotMultiplicity(knots, span);
+
+    internal::curveKnotInsert(degree, knots, control_points, u, r,
+                              tmp_knots, tmp_cp);
+
+    left_knots.clear();
+    right_knots.clear();
+    left_control_points.clear();
+    right_control_points.clear();
+
+    int ks = span - degree + 1;
+
+    int span_l = findSpan(degree, tmp_knots, u) + 1;
+    for (int i = 0; i < span_l; ++i) {
+        left_knots.push_back(tmp_knots[i]);
+    }
+    left_knots.push_back(u);
+
+    for (int i = 0; i < degree + 1; ++i) {
+        right_knots.push_back(u);
+    }
+    for (int i = span_l; i < tmp_knots.size(); ++i) {
+        right_knots.push_back(tmp_knots[i]);
+    }
+
+    for (int i = 0; i < ks + r; ++i) {
+        left_control_points.push_back(tmp_cp[i]);
+    }
+    for (int i = ks + r - 1; i < tmp_cp.size(); ++i) {
+        right_control_points.push_back(tmp_cp[i]);
+    }
+}
 
 } // namespace internal
 
@@ -403,69 +460,49 @@ void surfaceKnotInsertV(RationalSurface<dim, T> &srf, T v, unsigned int repeat=1
 }
 
 /**
- * Unclamp the curve by removing knots and trying to retain original shape
+ * Split a curve into two
  * @param crv Curve object
- * @param start Whether to unclamp at start of curve
- * @param end Whether to unclamp at end of curve
+ * @param u Parameter to split at
+ * @param left First half of the curve
+ * @param right Second half of the curve
  */
 template <int dim, typename T>
-void curveUnclamp(Curve<dim, T> &crv, bool start=true, bool end=true) {
-    curveUnclamp(crv.degree, crv.knots, crv.control_points, start, end);
+void curveSplit(const Curve<dim, T> &crv, T u, Curve<dim, T> &left, Curve<dim,T> &right) {
+    left.degree = crv.degree;
+    right.degree = crv.degree;
+    internal::curveSplit(crv.degree, crv.knots, crv.control_points, u,
+                         left.knots, left.control_points, right.knots, right.control_points);
 }
 
 /**
- * Unclamp the rational curve by removing knots and trying to retain original shape
+ * Split a rational curve into two
  * @param crv RationalCurve object
- * @param start Whether to unclamp at start of curve
- * @param end Whether to unclamp at end of curve
+ * @param u Parameter to split at
+ * @param left First half of the curve
+ * @param right Second half of the curve
  */
 template <int dim, typename T>
-void curveUnclamp(RationalCurve<dim, T> &crv, bool start=true, bool end=true) {
-    std::vector<glm::vec<dim + 1, T>> Cw;
+void curveSplit(const RationalCurve<dim, T> &crv, T u, RationalCurve<dim, T> &left,
+                RationalCurve<dim,T> &right) {
+    std::vector<glm::vec<dim + 1, T>> Cw, left_Cw, right_Cw;
+
     Cw.reserve(crv.control_points.size());
     for (int i = 0; i < crv.control_points.size(); ++i) {
         Cw.push_back(util::cartesianToHomogenous(crv.control_points[i], crv.weights[i]));
     }
-    curveUnclamp(crv.degree, crv.knots, Cw, start, end);
-    for (int i = 0; i < crv.control_points.size(); ++i) {
-        crv.control_points[i] = util::homogenousToCartesian(Cw[i]);
-        crv.weights[i] = Cw[dim];
-    }
-}
 
-/**
- * Clamp the curve by adding knots while retaining original shape
- * @param crv Curve object
- * @param start Whether to clamp at start of curve
- * @param end Whether to clamp at end of curve
- */
-template <int dim, typename T>
-void curveClamp(Curve<dim, T> &crv, bool start=true, bool end=true) {
-    if (start) {
-        T u = crv.knots[crv.degree];
-        curveKnotInsert(crv, u, crv.degree - 1);
-    }
-    if (end) {
-        T u = crv.knots[crv.knots.size() - crv.degree - 1];
-        curveKnotInsert(crv, u, crv.degree - 1);
-    }
-}
+    left.degree = crv.degree;
+    right.degree = crv.degree;
+    internal::curveSplit(crv.degree, crv.knots, Cw, u,
+                         left.knots, left_Cw, right.knots, right_Cw);
 
-/**
- * Clamp the rational curve by adding knots while retaining original shape
- * @param crv RationalCurve object
- * @param start Whether to clamp at start of curve
- * @param end Whether to clamp at end of curve
- */
-template <int dim, typename T>
-void curveClamp(RationalCurve<dim, T> &crv, bool start=true, bool end=true) {
-    if (start) {
-        T u = crv.knots[crv.degree];
-        curveKnotInsert(crv, u, crv.degree - 1);
+    for (int i = 0; i < left_Cw.size(); ++i) {
+        left.control_points.push_back(util::homogenousToCartesian(left_Cw[i]));
+        left.weights.push_back(left_Cw[i][dim]);
     }
-    if (end) {
-        T u = crv.knots[crv.knots.size() - crv.degree - 1];
-        curveKnotInsert(crv, u, crv.degree - 1);
+    for (int i = 0; i < right_Cw.size(); ++i) {
+        right.control_points.push_back(util::homogenousToCartesian(right_Cw[i]));
+        right.weights.push_back(right_Cw[i][dim]);
     }
 }
 

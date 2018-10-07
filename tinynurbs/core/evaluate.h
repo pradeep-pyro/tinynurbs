@@ -9,9 +9,7 @@ the LICENSE file.
 
 #ifndef TINYNURBS_EVALUATE_H
 #define TINYNURBS_EVALUATE_H
-#include <iostream>
-using std::cout;
-using std::endl;
+
 #include <vector>
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/glm.hpp"
@@ -238,6 +236,7 @@ void curvePoint(const RationalCurve<dim, T> &crv, T u, glm::vec<dim, T> &point) 
         Cw.push_back(tvecnp1(util::cartesianToHomogenous(crv.control_points[i],
                              crv.weights[i])));
     }
+
     // Compute point using homogenous coordinates
     tvecnp1 pointw;
     internal::curvePoint(crv.degree, crv.knots, Cw, u, pointw);
