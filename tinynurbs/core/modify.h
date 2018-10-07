@@ -18,6 +18,10 @@ the LICENSE file.
 
 namespace tinynurbs {
 
+/////////////////////////////////////////////////////////////////////
+
+namespace internal {
+
 /**
  * Insert knots in the curve
  * @param deg Degree of the curve
@@ -30,9 +34,10 @@ namespace tinynurbs {
  */
 template <int dim, typename T>
 void curveKnotInsert(unsigned int deg, const std::vector<T> &knots, const std::vector<glm::vec<dim, T>> &cp, T u,
-                     unsigned int r, const std::vector<T> &new_knots, const std::vector<glm::vec<dim, T>> &new_cp) {
+                     unsigned int r, std::vector<T> &new_knots, std::vector<glm::vec<dim, T>> &new_cp) {
     int k = findSpan(deg, knots, u);
     unsigned int s = knotMultiplicity(knots, k);
+
     // Insert new knots between span and (span + 1)
     new_knots.resize(knots.size() + r);
     for (int i = 0; i < k + 1; ++i) {
@@ -74,45 +79,6 @@ void curveKnotInsert(unsigned int deg, const std::vector<T> &knots, const std::v
     }
 }
 
-/**
- * Insert knots in the curve
- * @param[inout] crv Curve object
- * @param u Parameter to insert knot at
- * @param repeat Number of times to insert
- */
-template <int dim, typename T>
-void curveKnotInsert(Curve<dim, T> &crv, T u, unsigned int repeat=1) {
-    std::vector<T> new_knots;
-    std::vector<glm::vec<dim, T>> new_cp;
-    curveKnotInsert(crv.degree, crv.knots, crv.control_points, u, repeat, new_knots, new_cp);
-    crv.knots = new_knots;
-    crv.control_points = new_cp;
-}
-
-/**
- * Insert knots in the rational curve
- * @param[inout] crv RationalCurve object
- * @param u Parameter to insert knot at
- * @param repeat Number of times to insert
- */
-template <int dim, typename T>
-void curveKnotInsert(RationalCurve<dim, T> &crv, T u, unsigned int repeat=1) {
-    std::vector<glm::vec<dim + 1, T>> Cw;
-    Cw.reserve(crv.control_points.size());
-    for (int i = 0; i < crv.control_points.size(); ++i) {
-        Cw.push_back(util::cartesianToHomogenous(crv.control_points[i], crv.weights[i]));
-    }
-    curveKnotInsert(crv.degree, crv.knots, Cw, u, repeat);
-    std::vector<glm::vec<dim, T>> new_cp, new_w;
-    new_cp.reserve(Cw.size());
-    new_w.reserve(Cw.size());
-    for (int i = 0; i < crv.control_points.size(); ++i) {
-        new_cp.push_back(util::homogenousToCartesian(Cw[i]));
-        new_w.push_back(Cw[i][dim]);
-    }
-    crv.control_points = new_cp;
-    crv.weights = new_w;
-}
 
 /**
  * Insert knots in the surface along one direction
@@ -227,6 +193,108 @@ void surfaceKnotInsert(unsigned int degree, const std::vector<T> &knots,
 }
 
 /**
+ * Unclamp the curve by removing knots and try to retain original shape
+ * @param degree Degree of the curve
+ * @param knots Knot vector of the curve
+ * @param control_points Array of control points of the curve
+ * @param start Whether to unclamp at start of curve
+ * @param end Whether to unclamp at end of curve
+ */
+template <int dim, typename T>
+void curveUnclamp(unsigned int degree, std::vector<T> &knots,
+                  std::vector<glm::vec<dim, T>> control_points,
+                  bool start=true, bool end=true) {
+    int n = knots.size() - degree - 2;
+    int p = degree;
+    if (start) {
+        for (int i = 0; i < p - 1; ++i)  {
+            // Incrementally update knot spacing such the result would be a uniform knot vector when
+            // wrapped around
+            knots[p - i - 1] = knots[p - i] - (knots[p - i + 1] - knots[n - i]);
+            // Update control points to retain shape
+            int k = p - 1;
+            for (int j = i; j >=0; --j) {
+                T alpha = (knots[p] - knots[k]) / (knots[p + j + 1] - knots[k]);
+                control_points[j] = (control_points[j] - alpha * control_points[j + 1]) /
+                                    (T(1) - alpha);
+                --k;
+            }
+        }
+        // Update first knot value
+        knots[0] = knots[1] - (knots[n - p + 2] - knots[n - p + 1]);
+    }
+    if (end) {
+        for (int i = 0; i < p - 1; ++i) {
+            knots[n + i + 2] = knots[n + i + 1] + (knots[p + i + 1] - knots[p + i]);
+            for (int j = i; j >= 0; --j) {
+                T alpha = (knots[n + 1] - knots[n + j]) / (knots[n - j + i + 2] - knots[n - j]);
+                control_points[j] = (control_points[n - j] - (T(1) - alpha) * control_points[n - j - 1]) / alpha;
+            }
+        }
+        // Update last knot value
+        knots[n + p + 1] = knots[n + p] + (knots[2 * p] - knots[2 * p - 1]);
+    }
+}
+
+
+
+} // namespace internal
+
+/////////////////////////////////////////////////////////////////////
+
+/**
+ * Insert knots in the curve
+ * @param[inout] crv Curve object
+ * @param u Parameter to insert knot at
+ * @param repeat Number of times to insert
+ */
+template <int dim, typename T>
+void curveKnotInsert(Curve<dim, T> &crv, T u, unsigned int repeat=1) {
+    std::vector<T> new_knots;
+    std::vector<glm::vec<dim, T>> new_cp;
+    internal::curveKnotInsert(crv.degree, crv.knots, crv.control_points, u,
+                              repeat, new_knots, new_cp);
+    crv.knots = new_knots;
+    crv.control_points = new_cp;
+}
+
+/**
+ * Insert knots in the rational curve
+ * @param[inout] crv RationalCurve object
+ * @param u Parameter to insert knot at
+ * @param repeat Number of times to insert
+ */
+template <int dim, typename T>
+void curveKnotInsert(RationalCurve<dim, T> &crv, T u, unsigned int repeat=1) {
+    // Convert to homogenous coordinates
+    std::vector<glm::vec<dim + 1, T>> Cw;
+    Cw.reserve(crv.control_points.size());
+    for (int i = 0; i < crv.control_points.size(); ++i) {
+        Cw.push_back(util::cartesianToHomogenous(crv.control_points[i], crv.weights[i]));
+    }
+
+    // Perform knot insertion and get new knots and control points
+    std::vector<glm::vec<dim + 1, T>> new_Cw;
+    std::vector<T> new_knots;
+    internal::curveKnotInsert(crv.degree, crv.knots, Cw, u, repeat, new_knots, new_Cw);
+
+    // Convert back to cartesian coordinates
+    std::vector<glm::vec<dim, T>> new_cp;
+    std::vector<T> new_w;
+    new_cp.reserve(new_Cw.size());
+    new_w.reserve(new_Cw.size());
+    for (int i = 0; i < new_Cw.size(); ++i) {
+        new_cp.push_back(util::homogenousToCartesian(new_Cw[i]));
+        new_w.push_back(new_Cw[i][dim]);
+    }
+
+    // Copy to crv
+    crv.knots = new_knots;
+    crv.control_points = new_cp;
+    crv.weights = new_w;
+}
+
+/**
  * Insert knots in the surface along u-direction
  * @param[inout] srf Surface object
  * @param u Knot value to insert
@@ -269,8 +337,8 @@ void surfaceKnotInsertU(RationalSurface<dim, T> &srf, T u, unsigned int repeat=1
     // Convert back to cartesian coordinates
     array2<glm::vec<dim, T>> new_cp(new_Cw.rows(), new_Cw.cols());
     array2<T> new_w(new_Cw.rows(), new_Cw.cols());
-    for (int i = 0; i < srf.control_points.rows(); ++i) {
-        for (int j = 0; j < srf.control_points.cols(); ++j) {
+    for (int i = 0; i < new_Cw.rows(); ++i) {
+        for (int j = 0; j < new_Cw.cols(); ++j) {
             new_cp(i, j) = util::homogenousToCartesian(new_Cw(i, j));
             new_w(i, j) = new_Cw(i, j)[dim];
         }
@@ -323,8 +391,8 @@ void surfaceKnotInsertV(RationalSurface<dim, T> &srf, T v, unsigned int repeat=1
     // Convert back to cartesian coordinates
     array2<glm::vec<dim, T>> new_cp(new_Cw.rows(), new_Cw.cols());
     array2<T> new_w(new_Cw.rows(), new_Cw.cols());
-    for (int i = 0; i < srf.control_points.rows(); ++i) {
-        for (int j = 0; j < srf.control_points.cols(); ++j) {
+    for (int i = 0; i < new_Cw.rows(); ++i) {
+        for (int j = 0; j < new_Cw.cols(); ++j) {
             new_cp(i, j) = util::homogenousToCartesian(new_Cw(i, j));
             new_w(i, j) = new_Cw(i, j)[dim];
         }
@@ -332,6 +400,73 @@ void surfaceKnotInsertV(RationalSurface<dim, T> &srf, T v, unsigned int repeat=1
     srf.knots_v = new_knots_v;
     srf.control_points = new_cp;
     srf.weights = new_w;
+}
+
+/**
+ * Unclamp the curve by removing knots and trying to retain original shape
+ * @param crv Curve object
+ * @param start Whether to unclamp at start of curve
+ * @param end Whether to unclamp at end of curve
+ */
+template <int dim, typename T>
+void curveUnclamp(Curve<dim, T> &crv, bool start=true, bool end=true) {
+    curveUnclamp(crv.degree, crv.knots, crv.control_points, start, end);
+}
+
+/**
+ * Unclamp the rational curve by removing knots and trying to retain original shape
+ * @param crv RationalCurve object
+ * @param start Whether to unclamp at start of curve
+ * @param end Whether to unclamp at end of curve
+ */
+template <int dim, typename T>
+void curveUnclamp(RationalCurve<dim, T> &crv, bool start=true, bool end=true) {
+    std::vector<glm::vec<dim + 1, T>> Cw;
+    Cw.reserve(crv.control_points.size());
+    for (int i = 0; i < crv.control_points.size(); ++i) {
+        Cw.push_back(util::cartesianToHomogenous(crv.control_points[i], crv.weights[i]));
+    }
+    curveUnclamp(crv.degree, crv.knots, Cw, start, end);
+    for (int i = 0; i < crv.control_points.size(); ++i) {
+        crv.control_points[i] = util::homogenousToCartesian(Cw[i]);
+        crv.weights[i] = Cw[dim];
+    }
+}
+
+/**
+ * Clamp the curve by adding knots while retaining original shape
+ * @param crv Curve object
+ * @param start Whether to clamp at start of curve
+ * @param end Whether to clamp at end of curve
+ */
+template <int dim, typename T>
+void curveClamp(Curve<dim, T> &crv, bool start=true, bool end=true) {
+    if (start) {
+        T u = crv.knots[crv.degree];
+        curveKnotInsert(crv, u, crv.degree - 1);
+    }
+    if (end) {
+        T u = crv.knots[crv.knots.size() - crv.degree - 1];
+        curveKnotInsert(crv, u, crv.degree - 1);
+    }
+}
+
+/**
+ * Clamp the rational curve by adding knots while retaining original shape
+ * @param crv RationalCurve object
+ * @param start Whether to clamp at start of curve
+ * @param end Whether to clamp at end of curve
+ */
+template <int dim, typename T>
+void curveClamp(RationalCurve<dim, T> &crv, bool start=true, bool end=true) {
+    if (start) {
+        T u = crv.knots[crv.degree];
+        curveKnotInsert(crv, u, crv.degree - 1);
+    }
+    if (end) {
+        T u = crv.knots[crv.knots.size() - crv.degree - 1];
+        curveKnotInsert(crv, u, crv.degree - 1);
+    }
 }
 
 } // namespace tinynurbs

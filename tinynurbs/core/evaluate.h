@@ -9,11 +9,13 @@ the LICENSE file.
 
 #ifndef TINYNURBS_EVALUATE_H
 #define TINYNURBS_EVALUATE_H
-
+#include <iostream>
+using std::cout;
+using std::endl;
 #include <vector>
-
+#define GLM_ENABLE_EXPERIMENTAL
 #include "glm/glm.hpp"
-
+#include "glm/gtx/string_cast.hpp"
 #include "basis.h"
 #include "../util/array2.h"
 #include "../util/util.h"
@@ -21,6 +23,10 @@ the LICENSE file.
 #include "../geometry/surface.h"
 
 namespace tinynurbs {
+
+/////////////////////////////////////////////////////////////////////
+
+namespace internal {
 
 /**
 Evaluate point on a nonrational NURBS curve
@@ -50,42 +56,6 @@ void curvePoint(unsigned int degree, const std::vector<T> &knots,
     }
 }
 
-/**
-Evaluate point on a nonrational NURBS curve
-@param[in] crv Curve object
-@param[in] u Parameter to evaluate the curve at.
-@param[inout] point Resulting point on the curve at parameter u.
-*/
-template <int dim, typename T>
-void curvePoint(const Curve<dim, T> &crv, T u, glm::vec<dim, T> &point) {
-    curvePoint(crv.degree, crv.knots, crv.control_points, u, point);
-}
-
-/**
-Evaluate point on a rational NURBS curve
-@param[in] crv RationalCurve object
-@param[in] u Parameter to evaluate the curve at.
-@param[inout] point Resulting point on the curve.
-*/
-template <int dim, typename T>
-void curvePoint(const RationalCurve<dim, T> &crv, T u, glm::vec<dim, T> &point) {
-
-    typedef glm::vec<dim + 1, T> tvecnp1;
-
-    // Compute homogenous coordinates of control points
-    std::vector<tvecnp1> Cw;
-    Cw.reserve(crv.control_points.size());
-    for (int i = 0; i < crv.control_points.size(); i++) {
-        Cw.push_back(tvecnp1(util::cartesianToHomogenous(crv.control_points[i],
-                             crv.weights[i])));
-    }
-    // Compute point using homogenous coordinates
-    tvecnp1 pointw;
-    curvePoint(crv.degree, crv.knots, Cw, u, pointw);
-
-    // Convert back to cartesian coordinates
-    point = util::homogenousToCartesian(pointw);
-}
 
 /**
 Evaluate derivatives of a non-rational NURBS curve
@@ -129,98 +99,6 @@ void curveDerivatives(unsigned int degree, const std::vector<T> &knots,
     }
 }
 
-/**
-Evaluate derivatives of a non-rational NURBS curve
-@param[in] crv Curve object
-@param[in] num_ders Number of times to derivate.
-@param[in] u Parameter to evaluate the derivatives at.
-@param[inout] curve_ders Derivatives of the curve at u.
-E.g. curve_ders[n] is the nth derivative at u, where 0 <= n <= num_ders.
-*/
-template <int dim, typename T>
-void curveDerivatives(const Curve<dim, T> &crv, int num_ders, T u,
-                      std::vector<glm::vec<dim, T>> &curve_ders) {
-    curveDerivatives(crv.degree, crv.knots, crv.control_points, num_ders, u, curve_ders);
-}
-
-/**
-Evaluate derivatives of a rational NURBS curve
-@param[in] u Parameter to evaluate the derivatives at.
-@param[in] knots Knot vector of the curve.
-@param[in] control_points Control points of the curve.
-@param[in] weights Weights corresponding to each control point.
-@param[in] num_ders Number of times to differentiate.
-@param[inout] curve_ders Derivatives of the curve at u.
-E.g. curve_ders[n] is the nth derivative at u, where n is between 0 and num_ders-1.
-*/
-template <int dim, typename T>
-void curveDerivatives(const RationalCurve<dim, T> &crv, int num_ders,
-                      T u, std::vector<glm::vec<dim, T>> &curve_ders) {
-
-    typedef glm::vec<dim, T> tvecn;
-    typedef glm::vec<dim + 1, T> tvecnp1;
-    using std::vector;
-
-    curve_ders.clear();
-    curve_ders.resize(num_ders + 1);
-
-    // Compute homogenous coordinates of control points
-    vector<tvecnp1> Cw;
-    Cw.reserve(crv.control_points.size());
-    for (int i = 0; i < crv.control_points.size(); i++) {
-        Cw.push_back(tvecnp1(util::cartesianToHomogenous(crv.control_points[i],
-                             crv.weights[i])));
-    }
-
-    // Derivatives of Cw
-    vector<tvecnp1> Cwders;
-    curveDerivatives(u, crv.degree, crv.knots, Cw, num_ders, Cwders);
-
-    // Split Cwders into coordinates and weights
-    vector<tvecn> Aders;
-    vector<T> wders;
-    for (const auto &val : Cwders) {
-        tvecn Aderi;
-        for (int i = 0; i < dim - 1; i++) {
-            Aderi[i] = val[i];
-        }
-        Aders.push_back(Aderi);
-        wders.push_back(val[dim - 1]);
-    }
-
-    // Compute rational derivatives
-    for (int k = 0; k <= num_ders; k++) {
-        tvecn v = Aders[k];
-        for (int i = 1; i <= k; i++) {
-            v -= static_cast<T>(util::binomial(k, i)) * wders[i] * curve_ders[k - i];
-        }
-        curve_ders[k] = v / wders[0];
-    }
-}
-
-/**
-Evaluate the tangent of a B-spline curve
-@param[in] crv Curve object
-@param[inout] tgt Unit tangent of the curve at u.
-*/
-template <int dim, typename T>
-void curveTangent(const Curve<dim, T> &crv, T u, glm::vec<dim, T> &tgt) {
-    std::vector<glm::vec<dim, T>> ders;
-    curveDerivatives(crv, 1, u, ders);
-    tgt = glm::normalize(ders[1]);
-}
-
-/**
-Evaluate the tangent of a rational B-spline curve
-@param[in] crv RationalCurve object
-@param[inout] tgt Unit tangent of the curve at u.
-*/
-template <int dim, typename T>
-void curveTangent(const RationalCurve<dim, T> &crv, T u, glm::vec<dim, T> &tgt) {
-    std::vector<glm::vec<dim, T>> ders;
-    rationalCurveDerivatives(crv, 1, u, ders);
-    tgt = glm::normalize(ders[1]);
-}
 
 /**
 Evaluate point on a nonrational NURBS surface
@@ -262,50 +140,6 @@ void surfacePoint(unsigned int degree_u, unsigned int degree_v,
     }
 }
 
-/**
-Evaluate point on a nonrational NURBS surface
-@param[in] srf Surface object
-@param[in] u Parameter to evaluate the surface at.
-@param[in] v Parameter to evaluate the surface at.
-@param[inout] point Resulting point on the surface at (u, v).
-*/
-template <int dim, typename T>
-void surfacePoint(const Surface<dim, T> &srf, T u, T v, glm::vec<dim, T> &point) {
-    surfacePoint(srf.degree_u, srf.degree_v, srf.knots_u, srf.knots_v, srf.control_points,
-                 u, v, point);
-}
-
-
-/**
-Evaluate point on a non-rational NURBS surface
-@param[in] srf RationalSurface object
-@param[in] u Parameter to evaluate the surface at.
-@param[in] v Parameter to evaluate the surface at.
-@param[inout] point Resulting point on the surface at (u, v).
-*/
-template <int dim, typename T>
-void surfacePoint(const RationalSurface<dim, T> &srf, T u, T v,
-                  glm::vec<dim, T> &point) {
-
-    typedef glm::vec<dim + 1, T> tvecnp1;
-
-    // Compute homogenous coordinates of control points
-    array2<tvecnp1> Cw;
-    Cw.resize(srf.control_points.rows(), srf.control_points.cols());
-    for (int i = 0; i < srf.control_points.rows(); i++) {
-        for (int j = 0; j < srf.control_points.cols(); j++) {
-            Cw(i, j) = tvecnp1(util::cartesianToHomogenous(srf.control_points(i, j),
-                               srf.weights(i, j)));
-        }
-    }
-
-    // Compute point using homogenous coordinates
-    tvecnp1 pointw;
-    surfacePoint(srf.degree_u, srf.degree_v, srf.knots_u, srf.knots_v, Cw, u, v, pointw);
-
-    // Convert back to cartesian coordinates
-    point = util::homogenousToCartesian(pointw);
-}
 
 /**
 Evaluate derivatives on a non-rational NURBS surface
@@ -371,6 +205,187 @@ void surfaceDerivatives(unsigned int degree_u, unsigned int degree_v,
     }
 }
 
+} // namespace internal
+
+/////////////////////////////////////////////////////////////////////
+
+/**
+Evaluate point on a nonrational NURBS curve
+@param[in] crv Curve object
+@param[in] u Parameter to evaluate the curve at.
+@param[inout] point Resulting point on the curve at parameter u.
+*/
+template <int dim, typename T>
+void curvePoint(const Curve<dim, T> &crv, T u, glm::vec<dim, T> &point) {
+    internal::curvePoint(crv.degree, crv.knots, crv.control_points, u, point);
+}
+
+/**
+Evaluate point on a rational NURBS curve
+@param[in] crv RationalCurve object
+@param[in] u Parameter to evaluate the curve at.
+@param[inout] point Resulting point on the curve.
+*/
+template <int dim, typename T>
+void curvePoint(const RationalCurve<dim, T> &crv, T u, glm::vec<dim, T> &point) {
+
+    typedef glm::vec<dim + 1, T> tvecnp1;
+
+    // Compute homogenous coordinates of control points
+    std::vector<tvecnp1> Cw;
+    Cw.reserve(crv.control_points.size());
+    for (int i = 0; i < crv.control_points.size(); i++) {
+        Cw.push_back(tvecnp1(util::cartesianToHomogenous(crv.control_points[i],
+                             crv.weights[i])));
+    }
+    // Compute point using homogenous coordinates
+    tvecnp1 pointw;
+    internal::curvePoint(crv.degree, crv.knots, Cw, u, pointw);
+
+    // Convert back to cartesian coordinates
+    point = util::homogenousToCartesian(pointw);
+}
+
+/**
+Evaluate derivatives of a non-rational NURBS curve
+@param[in] crv Curve object
+@param[in] num_ders Number of times to derivate.
+@param[in] u Parameter to evaluate the derivatives at.
+@param[inout] curve_ders Derivatives of the curve at u.
+E.g. curve_ders[n] is the nth derivative at u, where 0 <= n <= num_ders.
+*/
+template <int dim, typename T>
+void curveDerivatives(const Curve<dim, T> &crv, int num_ders, T u,
+                      std::vector<glm::vec<dim, T>> &curve_ders) {
+    internal::curveDerivatives(crv.degree, crv.knots, crv.control_points,
+                               num_ders, u, curve_ders);
+}
+
+/**
+Evaluate derivatives of a rational NURBS curve
+@param[in] u Parameter to evaluate the derivatives at.
+@param[in] knots Knot vector of the curve.
+@param[in] control_points Control points of the curve.
+@param[in] weights Weights corresponding to each control point.
+@param[in] num_ders Number of times to differentiate.
+@param[inout] curve_ders Derivatives of the curve at u.
+E.g. curve_ders[n] is the nth derivative at u, where n is between 0 and num_ders-1.
+*/
+template <int dim, typename T>
+void curveDerivatives(const RationalCurve<dim, T> &crv, int num_ders,
+                      T u, std::vector<glm::vec<dim, T>> &curve_ders) {
+
+    typedef glm::vec<dim, T> tvecn;
+    typedef glm::vec<dim + 1, T> tvecnp1;
+    using std::vector;
+
+    curve_ders.clear();
+    curve_ders.reserve(num_ders + 1);
+
+    // Compute homogenous coordinates of control points
+    vector<tvecnp1> Cw;
+    Cw.reserve(crv.control_points.size());
+    for (int i = 0; i < crv.control_points.size(); i++) {
+        Cw.push_back(tvecnp1(util::cartesianToHomogenous(crv.control_points[i],
+                             crv.weights[i])));
+    }
+
+    // Derivatives of Cw
+    vector<tvecnp1> Cwders;
+    internal::curveDerivatives(crv.degree, crv.knots, Cw, num_ders, u, Cwders);
+
+    // Split Cwders into coordinates and weights
+    vector<tvecn> Aders;
+    vector<T> wders;
+    for (const auto &val : Cwders) {
+        tvecn Aderi;
+        for (int i = 0; i < dim; i++) {
+            Aderi[i] = val[i];
+        }
+        Aders.push_back(Aderi);
+        wders.push_back(val[dim]);
+    }
+
+    // Compute rational derivatives
+    for (int k = 0; k <= num_ders; k++) {
+        tvecn v = Aders[k];
+        for (int i = 1; i <= k; i++) {
+            v -= static_cast<T>(util::binomial(k, i)) * wders[i] * curve_ders[k - i];
+        }
+        curve_ders.push_back(v / wders[0]);
+    }
+}
+
+/**
+Evaluate the tangent of a B-spline curve
+@param[in] crv Curve object
+@param[inout] tgt Unit tangent of the curve at u.
+*/
+template <int dim, typename T>
+void curveTangent(const Curve<dim, T> &crv, T u, glm::vec<dim, T> &tgt) {
+    std::vector<glm::vec<dim, T>> ders;
+    curveDerivatives(crv, 1, u, ders);
+    tgt = glm::normalize(ders[1]);
+}
+
+/**
+Evaluate the tangent of a rational B-spline curve
+@param[in] crv RationalCurve object
+@param[inout] tgt Unit tangent of the curve at u.
+*/
+template <int dim, typename T>
+void curveTangent(const RationalCurve<dim, T> &crv, T u, glm::vec<dim, T> &tgt) {
+    std::vector<glm::vec<dim, T>> ders;
+    curveDerivatives(crv, 1, u, ders);
+    tgt = glm::normalize(ders[1]);
+}
+
+/**
+Evaluate point on a nonrational NURBS surface
+@param[in] srf Surface object
+@param[in] u Parameter to evaluate the surface at.
+@param[in] v Parameter to evaluate the surface at.
+@param[inout] point Resulting point on the surface at (u, v).
+*/
+template <int dim, typename T>
+void surfacePoint(const Surface<dim, T> &srf, T u, T v, glm::vec<dim, T> &point) {
+    internal::surfacePoint(srf.degree_u, srf.degree_v, srf.knots_u, srf.knots_v,
+                           srf.control_points, u, v, point);
+}
+
+
+/**
+Evaluate point on a non-rational NURBS surface
+@param[in] srf RationalSurface object
+@param[in] u Parameter to evaluate the surface at.
+@param[in] v Parameter to evaluate the surface at.
+@param[inout] point Resulting point on the surface at (u, v).
+*/
+template <int dim, typename T>
+void surfacePoint(const RationalSurface<dim, T> &srf, T u, T v,
+                  glm::vec<dim, T> &point) {
+
+    typedef glm::vec<dim + 1, T> tvecnp1;
+
+    // Compute homogenous coordinates of control points
+    array2<tvecnp1> Cw;
+    Cw.resize(srf.control_points.rows(), srf.control_points.cols());
+    for (int i = 0; i < srf.control_points.rows(); i++) {
+        for (int j = 0; j < srf.control_points.cols(); j++) {
+            Cw(i, j) = tvecnp1(util::cartesianToHomogenous(srf.control_points(i, j),
+                               srf.weights(i, j)));
+        }
+    }
+
+    // Compute point using homogenous coordinates
+    tvecnp1 pointw;
+    internal::surfacePoint(srf.degree_u, srf.degree_v, srf.knots_u, srf.knots_v,
+                           Cw, u, v, pointw);
+
+    // Convert back to cartesian coordinates
+    point = util::homogenousToCartesian(pointw);
+}
+
 /**
 Evaluate derivatives on a non-rational NURBS surface
 @param[in] degree_u Degree of the given surface in u-direction.
@@ -384,9 +399,11 @@ Evaluate derivatives on a non-rational NURBS surface
 @param[inout] surf_ders Derivatives of the surface at (u, v).
 */
 template <int dim, typename T>
-void surfaceDerivatives(const Surface<dim, T> &srf, int num_ders, T u, T v, array2<glm::vec<dim, T>> &surf_ders) {
-    surfaceDerivatives(srf.degree_u, srf.degree_v, srf.knots_u, srf.knots_v, srf.control_points,
-                       num_ders, u, v, surf_ders);
+void surfaceDerivatives(const Surface<dim, T> &srf, int num_ders, T u, T v,
+                        array2<glm::vec<dim, T>> &surf_ders) {
+    internal::surfaceDerivatives(srf.degree_u, srf.degree_v, srf.knots_u,
+                                 srf.knots_v, srf.control_points, num_ders,
+                                 u, v, surf_ders);
 }
 
 /**
@@ -411,12 +428,14 @@ void surfaceDerivatives(const RationalSurface<dim, T> &srf, int num_ders, T u, T
     homo_cp.resize(srf.control_points.rows(), srf.control_points.cols());
     for (int i = 0; i < srf.control_points.rows(); ++i) {
         for (int j = 0; j < srf.control_points.cols(); ++j) {
-            homo_cp(i, j) = util::cartesianToHomogenous(srf.control_points(i, j), srf.weights(i, j));
+            homo_cp(i, j) = util::cartesianToHomogenous(srf.control_points(i, j),
+                            srf.weights(i, j));
         }
     }
 
     array2<tvecnp1> homo_ders;
-    surfaceDerivatives(u, v, srf.degree_u, srf.degree_v, srf.knots_u, srf.knots_v, homo_cp, num_ders, homo_ders);
+    internal::surfaceDerivatives(srf.degree_u, srf.degree_v, srf.knots_u, srf.knots_v,
+                                 homo_cp, num_ders, u, v, homo_ders);
 
     array2<tvecn> Aders;
     Aders.resize(num_ders + 1, num_ders + 1);

@@ -20,6 +20,10 @@ the LICENSE file.
 
 namespace tinynurbs {
 
+/////////////////////////////////////////////////////////////////////
+
+namespace internal {
+
 /**
  * Read rational curve data from a Wavefront OBJ file.
  * @param filename Name of the file
@@ -30,8 +34,8 @@ namespace tinynurbs {
  * @param[inout] rational Whether rational
  */
 template <typename T>
-void readOBJ(const std::string &filename, unsigned int &deg, std::vector<T> &knots,
-             std::vector<glm::vec<3, T>> &ctrlPts, std::vector<T> &weights, bool &rational) {
+void curveReadOBJ(const std::string &filename, unsigned int &deg, std::vector<T> &knots,
+                  std::vector<glm::vec<3, T>> &ctrlPts, std::vector<T> &weights, bool &rational) {
     T knot_min = 0, knot_max = 1;
     std::vector<glm::vec<3, T>> ctrl_pts_buf;
     std::vector<T> weights_buf;
@@ -168,9 +172,9 @@ void readOBJ(const std::string &filename, unsigned int &deg, std::vector<T> &kno
  * @param[inout] rational Whether rational
  */
 template <typename T>
-void readOBJ(const std::string &filename, unsigned int &deg_u, unsigned int &deg_v,
-             std::vector<T> &knots_u, std::vector<T> &knots_v,
-             array2<glm::vec<3, T>> &ctrlPts, array2<T> &weights, bool &rational) {
+void surfaceReadOBJ(const std::string &filename, unsigned int &deg_u, unsigned int &deg_v,
+                    std::vector<T> &knots_u, std::vector<T> &knots_v,
+                    array2<glm::vec<3, T>> &ctrlPts, array2<T> &weights, bool &rational) {
     T uknot_min = 0, uknot_max = 1;
     T vknot_min = 0, vknot_max = 1;
 
@@ -325,9 +329,9 @@ void readOBJ(const std::string &filename, unsigned int &deg_u, unsigned int &deg
  * @param rational Whether rational
  */
 template <typename T>
-void saveOBJ(const std::string &filename, unsigned int degree,
-             const std::vector<T>& knots, const std::vector<glm::vec<3, T>> &ctrlPts,
-             const std::vector<T> &weights, bool rational) {
+void curveSaveOBJ(const std::string &filename, unsigned int degree,
+                  const std::vector<T>& knots, const std::vector<glm::vec<3, T>> &ctrlPts,
+                  const std::vector<T> &weights, bool rational) {
     using std::endl;
     std::ofstream fout(filename);
 
@@ -375,8 +379,8 @@ void saveOBJ(const std::string &filename, unsigned int degree,
  * @param rational Whether rational
  */
 template <typename T>
-void saveOBJ(const std::string &filename, unsigned int deg_u, unsigned int deg_v, const std::vector<T>& knots_u, const std::vector<T>& knots_v,
-             const array2<glm::vec<3, T>> &ctrlPts, const array2<T> &weights, bool rational) {
+void surfaceSaveOBJ(const std::string &filename, unsigned int deg_u, unsigned int deg_v, const std::vector<T>& knots_u, const std::vector<T>& knots_v,
+                    const array2<glm::vec<3, T>> &ctrlPts, const array2<T> &weights, bool rational) {
 
     using std::endl;
     std::ofstream fout(filename);
@@ -421,6 +425,10 @@ void saveOBJ(const std::string &filename, unsigned int deg_u, unsigned int deg_v
     fout.close();
 }
 
+} // namespace internal
+
+/////////////////////////////////////////////////////////////////////
+
 /**
  * Read curve data from a Wavefront OBJ file and populate a Curve object
  * @param filename Name of the file
@@ -430,7 +438,7 @@ template <int dim, typename T>
 void curveReadOBJ(const std::string &filename, Curve<dim, T> &crv) {
     std::vector<glm::vec<3, T>> control_points;
     std::vector<T> weights;
-    readOBJ(filename, crv.degree, crv.knots, control_points, weights);
+    curveReadOBJ(filename, crv.degree, crv.knots, control_points, weights);
     // weights will be ignored
 
     // Copy 0 to dim - 1 coordinates into crv
@@ -451,7 +459,7 @@ template <int dim, typename T>
 void curveReadOBJ(const std::string &filename, RationalCurve<dim, T> &crv) {
     std::vector<glm::vec<3, T>> control_points;
 
-    readOBJ(filename, crv.degree, crv.knots, control_points, crv.weights);
+    curveReadOBJ(filename, crv.degree, crv.knots, control_points, crv.weights);
 
     // Copy 0 to dim - 1 coordinates into crv
     crv.control_points.resize(control_points.size());
@@ -469,8 +477,8 @@ void curveReadOBJ(const std::string &filename, RationalCurve<dim, T> &crv) {
  */
 template <int dim, typename T>
 void surfaceReadOBJ(const std::string &filename, RationalSurface<3, T> &srf) {
-    readOBJ(filename, srf.degree_u, srf.degree_v, srf.knots_u,
-            srf.knots_v, srf.control_points, srf.weights);
+    surfaceReadOBJ(filename, srf.degree_u, srf.degree_v, srf.knots_u,
+                   srf.knots_v, srf.control_points, srf.weights);
 }
 
 /**
@@ -481,8 +489,8 @@ void surfaceReadOBJ(const std::string &filename, RationalSurface<3, T> &srf) {
 template <int dim, typename T>
 void surfaceReadOBJ(const std::string &filename, Surface<3, T> &srf) {
     array2<glm::vec<3, T>> weights;
-    readOBJ(filename, srf.degree_u, srf.degree_v, srf.knots_u,
-            srf.knots_v, srf.control_points, weights);
+    surfaceReadOBJ(filename, srf.degree_u, srf.degree_v, srf.knots_u,
+                   srf.knots_v, srf.control_points, weights);
     // weights will be ignored
 }
 
@@ -501,7 +509,7 @@ void curveSaveOBJ(const std::string &filename, Curve<dim, T> &crv) {
         }
     }
     std::vector<T> w(crv.control_points.size(), T(1));
-    saveOBJ(filename, crv.degree, crv.knots, cp, w, false);
+    curveSaveOBJ(filename, crv.degree, crv.knots, cp, w, false);
 }
 
 /**
@@ -518,7 +526,7 @@ void curveSaveOBJ(const std::string &filename, RationalCurve<dim, T> &crv) {
             cp[i][j] = crv.control_points[i][j];
         }
     }
-    saveOBJ(filename, crv.degree, crv.knots, cp, crv.weights, true);
+    curveSaveOBJ(filename, crv.degree, crv.knots, cp, crv.weights, true);
 }
 
 /**
@@ -529,8 +537,8 @@ void curveSaveOBJ(const std::string &filename, RationalCurve<dim, T> &crv) {
 template <int dim, typename T>
 void surfaceSaveOBJ(const std::string &filename, Surface<dim, T> &srf) {
     array2<T> w(srf.control_points.rows(), srf.control_points.cols(), T(1));
-    saveOBJ(filename, srf.degree_u, srf.degree_v, srf.knots_u, srf.knots_v,
-            srf.control_points, w, false);
+    surfaceSaveOBJ(filename, srf.degree_u, srf.degree_v, srf.knots_u, srf.knots_v,
+                   srf.control_points, w, false);
 }
 
 /**
@@ -540,8 +548,8 @@ void surfaceSaveOBJ(const std::string &filename, Surface<dim, T> &srf) {
  */
 template <int dim, typename T>
 void surfaceSaveOBJ(const std::string &filename, RationalSurface<dim, T> &srf) {
-    saveOBJ(filename, srf.degree_u, srf.degree_v, srf.knots_u, srf.knots_v,
-            srf.control_points, srf.weights, true);
+    surfaceSaveOBJ(filename, srf.degree_u, srf.degree_v, srf.knots_u, srf.knots_v,
+                   srf.control_points, srf.weights, true);
 }
 
 } // namespace tinynurbs
