@@ -433,7 +433,9 @@ template <int dim, typename T>
 void curveReadOBJ(const std::string &filename, Curve<dim, T> &crv) {
     std::vector<glm::vec<3, T>> control_points;
     std::vector<T> weights;
-    curveReadOBJ(filename, crv.degree, crv.knots, control_points, weights);
+    bool rat;
+    internal::curveReadOBJ(filename, crv.degree, crv.knots, control_points,
+                           weights, rat);
     // weights will be ignored
 
     // Copy 0 to dim - 1 coordinates into crv
@@ -453,7 +455,6 @@ void curveReadOBJ(const std::string &filename, Curve<dim, T> &crv) {
 template <int dim, typename T>
 void curveReadOBJ(const std::string &filename, RationalCurve<dim, T> &crv) {
     std::vector<glm::vec<3, T>> control_points;
-
     bool rat;
     internal::curveReadOBJ(filename, crv.degree, crv.knots, control_points,
                            crv.weights, rat);
@@ -474,8 +475,9 @@ void curveReadOBJ(const std::string &filename, RationalCurve<dim, T> &crv) {
  */
 template <int dim, typename T>
 void surfaceReadOBJ(const std::string &filename, RationalSurface<3, T> &srf) {
+    bool rat;
     internal::surfaceReadOBJ(filename, srf.degree_u, srf.degree_v, srf.knots_u,
-                             srf.knots_v, srf.control_points, srf.weights);
+                             srf.knots_v, srf.control_points, srf.weights, rat);
 }
 
 /**
@@ -485,9 +487,10 @@ void surfaceReadOBJ(const std::string &filename, RationalSurface<3, T> &srf) {
  */
 template <int dim, typename T>
 void surfaceReadOBJ(const std::string &filename, Surface<3, T> &srf) {
-    array2<glm::vec<3, T>> weights;
+    array2<T> weights;
+    bool rat;
     internal::surfaceReadOBJ(filename, srf.degree_u, srf.degree_v, srf.knots_u,
-                             srf.knots_v, srf.control_points, weights);
+                             srf.knots_v, srf.control_points, weights, rat);
     // weights will be ignored
 }
 
