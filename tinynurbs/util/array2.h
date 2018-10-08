@@ -24,6 +24,7 @@ public:
     array2(const array2<T> &arr) = default;
     array2 & operator=(const array2 &arr) = default;
     array2(array2<T> &&arr) = default;
+    array2 & operator=(array2 &&arr) = default;
     array2(size_t rows, size_t cols, T default_value = T()) {
         resize(rows, cols, default_value);
     }

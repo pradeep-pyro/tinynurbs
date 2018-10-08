@@ -304,15 +304,15 @@ void curveSplit(unsigned int degree, const std::vector<T> &knots,
  * @param[inout] crv Curve object
  * @param u Parameter to insert knot at
  * @param repeat Number of times to insert
+ * @return New curve with #repeat knots inserted at u
  */
 template <int dim, typename T>
-void curveKnotInsert(Curve<dim, T> &crv, T u, unsigned int repeat=1) {
-    std::vector<T> new_knots;
-    std::vector<glm::vec<dim, T>> new_cp;
+Curve<dim, T> curveKnotInsert(const Curve<dim, T> &crv, T u, unsigned int repeat=1) {
+    Curve<dim, T> new_crv;
+    new_crv.degree = crv.degree;
     internal::curveKnotInsert(crv.degree, crv.knots, crv.control_points, u,
-                              repeat, new_knots, new_cp);
-    crv.knots = new_knots;
-    crv.control_points = new_cp;
+                              repeat, new_crv.knots, new_crv.control_points);
+    return new_crv;
 }
 
 /**
@@ -320,9 +320,14 @@ void curveKnotInsert(Curve<dim, T> &crv, T u, unsigned int repeat=1) {
  * @param[inout] crv RationalCurve object
  * @param u Parameter to insert knot at
  * @param repeat Number of times to insert
+ * @return New RationalCurve object with #repeat knots inserted at u
  */
 template <int dim, typename T>
-void curveKnotInsert(RationalCurve<dim, T> &crv, T u, unsigned int repeat=1) {
+RationalCurve<dim, T> curveKnotInsert(const RationalCurve<dim, T> &crv, T u,
+                                      unsigned int repeat=1) {
+    RationalCurve<dim, T> new_crv;
+    new_crv.degree = crv.degree;
+
     // Convert to homogenous coordinates
     std::vector<glm::vec<dim + 1, T>> Cw;
     Cw.reserve(crv.control_points.size());
@@ -333,22 +338,16 @@ void curveKnotInsert(RationalCurve<dim, T> &crv, T u, unsigned int repeat=1) {
     // Perform knot insertion and get new knots and control points
     std::vector<glm::vec<dim + 1, T>> new_Cw;
     std::vector<T> new_knots;
-    internal::curveKnotInsert(crv.degree, crv.knots, Cw, u, repeat, new_knots, new_Cw);
+    internal::curveKnotInsert(crv.degree, crv.knots, Cw, u, repeat, new_crv.knots, new_Cw);
 
     // Convert back to cartesian coordinates
-    std::vector<glm::vec<dim, T>> new_cp;
-    std::vector<T> new_w;
-    new_cp.reserve(new_Cw.size());
-    new_w.reserve(new_Cw.size());
+    new_crv.control_points.reserve(new_Cw.size());
+    new_crv.weights.reserve(new_Cw.size());
     for (int i = 0; i < new_Cw.size(); ++i) {
-        new_cp.push_back(util::homogenousToCartesian(new_Cw[i]));
-        new_w.push_back(new_Cw[i][dim]);
+        new_crv.control_points.push_back(util::homogenousToCartesian(new_Cw[i]));
+        new_crv.weights.push_back(new_Cw[i][dim]);
     }
-
-    // Copy to crv
-    crv.knots = new_knots;
-    crv.control_points = new_cp;
-    crv.weights = new_w;
+    return new_crv;
 }
 
 /**
@@ -463,39 +462,45 @@ void surfaceKnotInsertV(RationalSurface<dim, T> &srf, T v, unsigned int repeat=1
  * Split a curve into two
  * @param crv Curve object
  * @param u Parameter to split at
- * @param left First half of the curve
- * @param right Second half of the curve
+ * @return Tuple with first half and second half of the curve
  */
 template <int dim, typename T>
-void curveSplit(const Curve<dim, T> &crv, T u, Curve<dim, T> &left, Curve<dim,T> &right) {
+std::tuple<Curve<dim, T>, Curve<dim,T>>
+curveSplit(const Curve<dim, T> &crv, T u) {
+    Curve<dim, T> left, right;
     left.degree = crv.degree;
     right.degree = crv.degree;
     internal::curveSplit(crv.degree, crv.knots, crv.control_points, u,
                          left.knots, left.control_points, right.knots, right.control_points);
+    return std::make_tuple(left, right);
 }
 
 /**
  * Split a rational curve into two
  * @param crv RationalCurve object
  * @param u Parameter to split at
- * @param left First half of the curve
- * @param right Second half of the curve
+ * @return Tuple with first half and second half of the curve
  */
 template <int dim, typename T>
-void curveSplit(const RationalCurve<dim, T> &crv, T u, RationalCurve<dim, T> &left,
-                RationalCurve<dim,T> &right) {
-    std::vector<glm::vec<dim + 1, T>> Cw, left_Cw, right_Cw;
+std::tuple<RationalCurve<dim, T>, RationalCurve<dim, T>>
+curveSplit(const RationalCurve<dim, T> &crv, T u) {
+    RationalCurve<dim, T> left, right;
+    left.degree = crv.degree;
+    right.degree = crv.degree;
 
+    std::vector<glm::vec<dim + 1, T>> Cw, left_Cw, right_Cw;
     Cw.reserve(crv.control_points.size());
     for (int i = 0; i < crv.control_points.size(); ++i) {
         Cw.push_back(util::cartesianToHomogenous(crv.control_points[i], crv.weights[i]));
     }
 
-    left.degree = crv.degree;
-    right.degree = crv.degree;
     internal::curveSplit(crv.degree, crv.knots, Cw, u,
                          left.knots, left_Cw, right.knots, right_Cw);
 
+    left.control_points.reserve(left_Cw.size());
+    left.weights.reserve(left_Cw.size());
+    right.control_points.reserve(right_Cw.size());
+    right.weights.reserve(right_Cw.size());
     for (int i = 0; i < left_Cw.size(); ++i) {
         left.control_points.push_back(util::homogenousToCartesian(left_Cw[i]));
         left.weights.push_back(left_Cw[i][dim]);
@@ -504,6 +509,7 @@ void curveSplit(const RationalCurve<dim, T> &crv, T u, RationalCurve<dim, T> &le
         right.control_points.push_back(util::homogenousToCartesian(right_Cw[i]));
         right.weights.push_back(right_Cw[i][dim]);
     }
+    return std::make_tuple(left, right);
 }
 
 } // namespace tinynurbs

@@ -109,13 +109,13 @@ T bsplineOneBasis(int i, unsigned int deg, const std::vector<T> &U, T u) {
 @param[in] span Index obtained from findSpan() corresponding the u and knots.
 @param[in] knots Knot vector corresponding to the basis functions.
 @param[in] u Parameter to evaluate the basis functions at.
-@param[in, out] N Values of (deg+1) non-zero basis functions.
+@return N Values of (deg+1) non-zero basis functions.
 */
 template <typename T>
-void bsplineBasis(unsigned int deg, int span, const std::vector<T> &knots,
-                  T u, std::vector<T> &N) {
-    N.clear();
-    N.resize(deg + 1, 0.0);
+std::vector<T> bsplineBasis(unsigned int deg, int span, const std::vector<T> &knots,
+                            T u) {
+    std::vector<T> N;
+    N.resize(deg + 1, T(0));
     std::vector<T> left, right;
     left.resize(deg + 1, static_cast<T>(0.0));
     right.resize(deg + 1, static_cast<T>(0.0));
@@ -134,6 +134,7 @@ void bsplineBasis(unsigned int deg, int span, const std::vector<T> &knots,
         }
         N[j] = saved;
     }
+    return N;
 }
 
 /**
@@ -143,11 +144,11 @@ void bsplineBasis(unsigned int deg, int span, const std::vector<T> &knots,
 @param[in] knots Knot vector corresponding to the basis functions.
 @param[in] u Parameter to evaluate the basis functions at.
 @param[in] num_ders Number of derivatives to compute (num_ders <= deg)
-@param[in, out] ders Values of non-zero derivatives of basis functions.
+@return ders Values of non-zero derivatives of basis functions.
 */
 template <typename T>
-void bsplineDerBasis(unsigned int deg, int span, const std::vector<T> &knots,
-                     T u, int num_ders, array2<T> &ders) {
+array2<T> bsplineDerBasis(unsigned int deg, int span, const std::vector<T> &knots,
+                         T u, int num_ders) {
     std::vector<T> left, right;
     left.resize(deg + 1, 0.0);
     right.resize(deg + 1, 0.0);
@@ -173,8 +174,7 @@ void bsplineDerBasis(unsigned int deg, int span, const std::vector<T> &knots,
         ndu(j, j) = saved;
     }
 
-    ders.clear();
-    ders.resize(num_ders + 1, deg + 1, 0.0);
+    array2<T> ders(num_ders + 1, deg + 1, T(0));
 
     for (int j = 0; j <= deg; j++) {
         ders(0, j) = ndu(j, deg);
@@ -239,6 +239,8 @@ void bsplineDerBasis(unsigned int deg, int span, const std::vector<T> &knots,
         }
         fac *= static_cast<T>(deg - k);
     }
+
+    return ders;
 }
 
 
