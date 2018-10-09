@@ -473,7 +473,7 @@ curveSplit(const Curve<dim, T> &crv, T u) {
     right.degree = crv.degree;
     internal::curveSplit(crv.degree, crv.knots, crv.control_points, u,
                          left.knots, left.control_points, right.knots, right.control_points);
-    return std::make_tuple(left, right);
+    return std::make_tuple(std::move(left), std::move(right));
 }
 
 /**
@@ -510,7 +510,7 @@ curveSplit(const RationalCurve<dim, T> &crv, T u) {
         right.control_points.push_back(util::homogenousToCartesian(right_Cw[i]));
         right.weights.push_back(right_Cw[i][dim]);
     }
-    return std::make_tuple(left, right);
+    return std::make_tuple(std::move(left), std::move(right));
 }
 
 } // namespace tinynurbs

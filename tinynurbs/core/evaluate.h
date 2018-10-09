@@ -475,7 +475,7 @@ surfaceTangent(const Surface<dim, T> &srf, T u, T v) {
     array2<glm::vec<dim, T>> ptder = surfaceDerivatives(srf, 1, u, v);
     glm::vec<dim, T> du = glm::normalize(ptder(1, 0));
     glm::vec<dim, T> dv = glm::normalize(ptder(0, 1));
-    return std::make_tuple(du, dv);
+    return std::make_tuple(std::move(du), std::move(dv));
 }
 
 /**
@@ -491,7 +491,7 @@ surfaceTangent(const RationalSurface<dim, T> &srf, T u, T v) {
     array2<glm::vec<dim, T>> ptder = surfaceDerivatives(srf, 1, u, v);
     glm::vec<dim, T> du = glm::normalize(ptder(1, 0));
     glm::vec<dim, T> dv = glm::normalize(ptder(0, 1));
-    return std::make_tuple(du, dv);
+    return std::make_tuple(std::move(du), std::move(dv));
 }
 
 
