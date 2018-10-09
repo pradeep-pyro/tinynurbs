@@ -353,30 +353,37 @@ RationalCurve<dim, T> curveKnotInsert(const RationalCurve<dim, T> &crv, T u,
 
 /**
  * Insert knots in the surface along u-direction
- * @param[inout] srf Surface object
+ * @param srf Surface object
  * @param u Knot value to insert
  * @param repeat Number of times to insert
+ * @return New Surface object after knot insertion
  */
 template <int dim, typename T>
-void surfaceKnotInsertU(Surface<dim, T> &srf, T u, unsigned int repeat=1) {
-    // New knots and new control points after knot insertion
-    std::vector<T> new_knots_u;
-    array2<glm::vec<dim, T>> new_cp;
-    surfaceKnotInsert(srf.degree_u, srf.knots_u, srf.control_points, u, repeat, true,
-                      new_knots_u, new_cp);
-    // Copy to given surface
-    srf.knots_u = new_knots_u;
-    srf.control_points = new_cp;
+Surface<dim, T> surfaceKnotInsertU(const Surface<dim, T> &srf, T u, unsigned int repeat=1) {
+    Surface<dim, T> new_srf;
+    new_srf.degree_u = srf.degree_u;
+    new_srf.degree_v = srf.degree_v;
+    new_srf.knots_v = srf.knots_v;
+    surfaceKnotInsert(new_srf.degree_u, srf.knots_u, srf.control_points, u, repeat, true,
+                      new_srf.knots_u, new_srf.control_points);
+    return new_srf;
 }
 
 /**
  * Insert knots in the rational surface along u-direction
- * @param[inout] srf RationalSurface object
+ * @param srf RationalSurface object
  * @param u Knot value to insert
  * @param repeat Number of times to insert
+ * @return New RationalSurface object after knot insertion
  */
 template <int dim, typename T>
-void surfaceKnotInsertU(RationalSurface<dim, T> &srf, T u, unsigned int repeat=1) {
+RationalSurface<dim, T> surfaceKnotInsertU(const RationalSurface<dim, T> &srf, T u,
+                                           unsigned int repeat=1) {
+    RationalSurface<dim, T> new_srf;
+    new_srf.degree_u = srf.degree_u;
+    new_srf.degree_v = srf.degree_v;
+    new_srf.knots_v = srf.knots_v;
+
     // Original control points in homogenous coordinates
     array2<glm::vec<dim + 1, T>> Cw(srf.control_points.rows(), srf.control_points.cols());
     for (int i = 0; i < srf.control_points.rows(); ++i) {
@@ -388,49 +395,54 @@ void surfaceKnotInsertU(RationalSurface<dim, T> &srf, T u, unsigned int repeat=1
     // New knots and new homogenous control points after knot insertion
     std::vector<T> new_knots_u;
     array2<glm::vec<dim + 1, T>> new_Cw;
-    surfaceKnotInsert(srf.degree_u, srf.knots_u, Cw, u, repeat, true,
-                      new_knots_u, new_Cw);
+    internal::surfaceKnotInsert(srf.degree_u, srf.knots_u, Cw, u, repeat, true,
+                                new_srf.knots_u, new_Cw);
 
     // Convert back to cartesian coordinates
-    array2<glm::vec<dim, T>> new_cp(new_Cw.rows(), new_Cw.cols());
-    array2<T> new_w(new_Cw.rows(), new_Cw.cols());
+    new_srf.control_points.resize(new_Cw.rows(), new_Cw.cols());
+    new_srf.weights.resize(new_Cw.rows(), new_Cw.cols());
     for (int i = 0; i < new_Cw.rows(); ++i) {
         for (int j = 0; j < new_Cw.cols(); ++j) {
-            new_cp(i, j) = util::homogenousToCartesian(new_Cw(i, j));
-            new_w(i, j) = new_Cw(i, j)[dim];
+            new_srf.control_points(i, j) = util::homogenousToCartesian(new_Cw(i, j));
+            new_srf.weights(i, j) = new_Cw(i, j)[dim];
         }
     }
-    srf.knots_u = new_knots_u;
-    srf.control_points = new_cp;
-    srf.weights = new_w;
+    return new_srf;
 }
 
 /**
  * Insert knots in the surface along v-direction
- * @param[inout] srf Surface object
+ * @param srf Surface object
  * @param v Knot value to insert
  * @param repeat Number of times to insert
+ * @return New Surface object after knot insertion
  */
 template <int dim, typename T>
-void surfaceKnotInsertV(Surface<dim, T> &srf, T v, unsigned int repeat=1) {
+Surface<dim, T> surfaceKnotInsertV(const Surface<dim, T> &srf, T v, unsigned int repeat=1) {
+    Surface<dim, T> new_srf;
+    new_srf.degree_u = srf.degree_u;
+    new_srf.degree_v = srf.degree_v;
+    new_srf.knots_u = srf.knots_u;
     // New knots and new control points after knot insertion
-    std::vector<T> new_knots_v;
-    array2<glm::vec<dim, T>> new_cp;
     surfaceKnotInsert(srf.degree_u, srf.knots_u, srf.control_points, v, repeat, false,
-                      new_knots_v, new_cp);
-    // Copy to given surface
-    srf.knots_v = new_knots_v;
-    srf.control_points = new_cp;
+                      new_srf.knots_v, new_srf.control_points);
+    return new_srf;
 }
 
 /**
  * Insert knots in the rational surface along v-direction
- * @param[inout] srf RationalSurface object
+ * @param srf RationalSurface object
  * @param v Knot value to insert
  * @param repeat Number of times to insert
+ * @return New RationalSurface object after knot insertion
  */
 template <int dim, typename T>
-void surfaceKnotInsertV(RationalSurface<dim, T> &srf, T v, unsigned int repeat=1) {
+RationalSurface<dim, T> surfaceKnotInsertV(const RationalSurface<dim, T> &srf, T v,
+                                           unsigned int repeat=1) {
+    RationalSurface<dim, T> new_srf;
+    new_srf.degree_u = srf.degree_u;
+    new_srf.degree_v = srf.degree_v;
+    new_srf.knots_u = srf.knots_u;
     // Original control points in homogenous coordinates
     array2<glm::vec<dim + 1, T>> Cw(srf.control_points.rows(), srf.control_points.cols());
     for (int i = 0; i < srf.control_points.rows(); ++i) {
@@ -443,20 +455,18 @@ void surfaceKnotInsertV(RationalSurface<dim, T> &srf, T v, unsigned int repeat=1
     std::vector<T> new_knots_v;
     array2<glm::vec<dim + 1, T>> new_Cw;
     surfaceKnotInsert(srf.degree_u, srf.knots_u, Cw, v, repeat, false,
-                      new_knots_v, new_Cw);
+                      new_srf.knots_v, new_Cw);
 
     // Convert back to cartesian coordinates
-    array2<glm::vec<dim, T>> new_cp(new_Cw.rows(), new_Cw.cols());
-    array2<T> new_w(new_Cw.rows(), new_Cw.cols());
+    new_srf.control_points.resize(new_Cw.rows(), new_Cw.cols());
+    new_srf.weights.resize(new_Cw.rows(), new_Cw.cols());
     for (int i = 0; i < new_Cw.rows(); ++i) {
         for (int j = 0; j < new_Cw.cols(); ++j) {
-            new_cp(i, j) = util::homogenousToCartesian(new_Cw(i, j));
-            new_w(i, j) = new_Cw(i, j)[dim];
+            new_srf.control_points(i, j) = util::homogenousToCartesian(new_Cw(i, j));
+            new_srf.weights(i, j) = new_Cw(i, j)[dim];
         }
     }
-    srf.knots_v = new_knots_v;
-    srf.control_points = new_cp;
-    srf.weights = new_w;
+    return new_srf;
 }
 
 /**
