@@ -11,6 +11,7 @@ the LICENSE file.
 #define TINYNURBS_ARRAY2_H
 
 #include <vector>
+#include <stdexcept>
 
 namespace tinynurbs {
 

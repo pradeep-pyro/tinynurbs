@@ -10,6 +10,7 @@ the LICENSE file.
 #define TINYNURBS_MODIFY_H
 
 #include <vector>
+#include <tuple>
 #include "glm/glm.hpp"
 #include "check.h"
 #include "../util/util.h"

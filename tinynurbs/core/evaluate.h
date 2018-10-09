@@ -11,6 +11,7 @@ the LICENSE file.
 #define TINYNURBS_EVALUATE_H
 
 #include <vector>
+#include <tuple>
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/glm.hpp"
 #include "glm/gtx/string_cast.hpp"
@@ -43,8 +44,7 @@ glm::vec<dim, T> curvePoint(unsigned int degree, const std::vector<T> &knots,
 
     // Find span and corresponding non-zero basis functions
     int span = findSpan(degree, knots, u);
-    std::vector<T> N;
-    bsplineBasis(degree, span, knots, u, N);
+    std::vector<T> N = bsplineBasis(degree, span, knots, u);
 
     // Compute point
     for (int j = 0; j <= degree; j++) {
@@ -82,8 +82,7 @@ std::vector<glm::vec<dim, T>> curveDerivatives(unsigned int degree, const std::v
 
     // Find the span and corresponding non-zero basis functions & derivatives
     int span = findSpan(degree, knots, u);
-    array2<T> ders;
-    bsplineDerBasis<T>(degree, span, knots, u, num_ders, ders);
+    array2<T> ders = bsplineDerBasis<T>(degree, span, knots, u, num_ders);
 
     // Compute first num_ders derivatives
     int du = num_ders < degree ? num_ders : degree;
@@ -287,8 +286,7 @@ std::vector<glm::vec<dim, T>> curveDerivatives(const RationalCurve<dim, T> &crv,
     }
 
     // Derivatives of Cw
-    vector<tvecnp1> Cwders;
-    internal::curveDerivatives(crv.degree, crv.knots, Cw, num_ders, u, Cwders);
+    vector<tvecnp1> Cwders = internal::curveDerivatives(crv.degree, crv.knots, Cw, num_ders, u);
 
     // Split Cwders into coordinates and weights
     vector<tvecn> Aders;
@@ -330,7 +328,7 @@ Evaluate the tangent of a rational B-spline curve
 @return Unit tangent of the curve at u.
 */
 template <int dim, typename T>
-void curveTangent(const RationalCurve<dim, T> &crv, T u, glm::vec<dim, T> &tgt) {
+glm::vec<dim, T> curveTangent(const RationalCurve<dim, T> &crv, T u) {
     std::vector<glm::vec<dim, T>> ders = curveDerivatives(crv, 1, u);
     return glm::normalize(ders[1]);
 }
