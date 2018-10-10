@@ -11,6 +11,7 @@ the LICENSE file.
 
 #include <glm/glm.hpp>
 #include <vector>
+#include "array2.h"
 
 namespace tinynurbs {
 namespace util {
@@ -26,6 +27,35 @@ inline glm::vec<nd - 1, T> homogenousToCartesian(const glm::vec<nd, T> &pt) {
     return glm::vec<nd - 1, T>(pt / pt[pt.length() - 1]);
 }
 
+template<int nd, typename T>
+inline void homogenousToCartesian(const std::vector<glm::vec<nd, T>> &ptsws,
+                                  std::vector<glm::vec<nd - 1, T>> &pts, std::vector<T> &ws) {
+    pts.clear();
+    ws.clear();
+    pts.reserve(ptsws.size());
+    ws.reserve(ptsws.size());
+    for (int i = 0; i < ptsws.size(); ++i) {
+        const glm::vec<nd, T> &ptw_i = ptsws[i];
+        pts.push_back(glm::vec<nd - 1, T>(ptw_i / ptw_i[ptw_i.length() - 1]));
+        ws.push_back(ptw_i[ptw_i.length() - 1]);
+    }
+}
+
+template<int nd, typename T>
+inline void homogenousToCartesian(const array2<glm::vec<nd, T>> &ptsws,
+                                  array2<glm::vec<nd - 1, T>> &pts, array2<T> &ws) {
+    pts.resize(ptsws.rows(), ptsws.cols());
+    ws.resize(ptsws.rows(), ptsws.cols());
+    for (int i = 0; i < ptsws.rows(); ++i) {
+        for (int j = 0; j < ptsws.cols(); ++j) {
+            const glm::vec<nd, T> &ptw_ij = ptsws(i, j);
+            T w_ij = ptw_ij[nd - 1];
+            pts(i, j) = glm::vec<nd - 1, T>(ptw_ij / w_ij);
+            ws(i, j) = w_ij;
+        }
+    }
+}
+
 /**
 Convert an nd point in cartesian coordinates to an (n+1)d point in homogenous
 coordinates
@@ -36,6 +66,29 @@ coordinates
 template<int nd, typename T>
 inline glm::vec<nd + 1, T> cartesianToHomogenous(const glm::vec<nd, T> &pt, T w) {
     return glm::vec<nd + 1, T>(pt * w, w);
+}
+
+template<int nd, typename T>
+inline std::vector<glm::vec<nd + 1, T>>
+cartesianToHomogenous(const std::vector<glm::vec<nd, T>> &pts, const std::vector<T> &ws) {
+    std::vector<glm::vec<nd + 1, T>> Cw;
+    Cw.reserve(pts.size());
+    for (int i = 0; i < pts.size(); ++i) {
+        Cw.push_back(cartesianToHomogenous(pts[i], ws[i]));
+    }
+    return Cw;
+}
+
+template<int nd, typename T>
+inline array2<glm::vec<nd + 1, T>>
+cartesianToHomogenous(const array2<glm::vec<nd, T>> &pts, const array2<T> &ws) {
+    array2<glm::vec<nd + 1, T>> Cw(pts.rows(), pts.cols());
+    for (int i = 0; i < pts.rows(); ++i) {
+        for (int j = 0; j < pts.cols(); ++j) {
+            Cw(i, j) = util::cartesianToHomogenous(pts(i, j), ws(i, j));
+        }
+    }
+    return Cw;
 }
 
 /**

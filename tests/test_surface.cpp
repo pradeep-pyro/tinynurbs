@@ -142,6 +142,80 @@ TEST_CASE("surfaceInsertKnotV", "[surface, modify]")
     REQUIRE(pt.z == Approx(new_pt.z));
 }
 
+TEST_CASE("surfaceSplitU", "[surface, modify]")
+{
+    auto srf = getHemisphere();
+    float u = 0.25f;
+    tinynurbs::RationalSurface3f left, right;
+    std::tie(left, right) = tinynurbs::surfaceSplitU(srf, u);
+
+    bool is_valid_l = tinynurbs::surfaceIsValid(left);
+    bool is_valid_r = tinynurbs::surfaceIsValid(right);
+
+    REQUIRE(is_valid_l == true);
+    REQUIRE(is_valid_r == true);
+
+    REQUIRE(left.degree_u == srf.degree_u);
+    REQUIRE(right.degree_u == srf.degree_u);
+    REQUIRE(left.degree_v == srf.degree_v);
+    REQUIRE(right.degree_v == srf.degree_v);
+
+    for (int i = 0; i < left.degree_u + 1; ++i) {
+        int d = left.knots_u.size() - (left.degree_u + 1);
+        REQUIRE(left.knots_u[d+i] == Approx(u));
+    }
+
+    for (int i = 0; i < right.degree_u + 1; ++i) {
+        REQUIRE(right.knots_u[i] == Approx(u));
+    }
+
+    tinynurbs::surfaceSaveOBJ("left_u.obj", left);
+    tinynurbs::surfaceSaveOBJ("right_u.obj", right);
+
+    glm::vec3 pt1 = tinynurbs::surfacePoint(srf, left.knots_u[left.knots_u.size() - 1], 0.f);
+    glm::vec3 pt2 = tinynurbs::surfacePoint(srf, right.knots_u[0], 0.f);
+    REQUIRE(pt1.x == Approx(pt2.x));
+    REQUIRE(pt1.y == Approx(pt2.y));
+    REQUIRE(pt1.z == Approx(pt2.z));
+}
+
+TEST_CASE("surfaceSplitV", "[surface, modify]")
+{
+    auto srf = getHemisphere();
+    float v = 0.25f;
+    tinynurbs::RationalSurface3f left, right;
+    std::tie(left, right) = tinynurbs::surfaceSplitV(srf, v);
+
+    bool is_valid_l = tinynurbs::surfaceIsValid(left);
+    bool is_valid_r = tinynurbs::surfaceIsValid(right);
+
+    REQUIRE(is_valid_l == true);
+    REQUIRE(is_valid_r == true);
+
+    REQUIRE(left.degree_u == srf.degree_u);
+    REQUIRE(right.degree_u == srf.degree_u);
+    REQUIRE(left.degree_v == srf.degree_v);
+    REQUIRE(right.degree_v == srf.degree_v);
+
+    for (int i = 0; i < left.degree_v + 1; ++i) {
+        int d = left.knots_v.size() - (left.degree_v + 1);
+        REQUIRE(left.knots_v[d+i] == Approx(v));
+    }
+
+    for (int i = 0; i < right.degree_v + 1; ++i) {
+        REQUIRE(right.knots_v[i] == Approx(v));
+    }
+
+    tinynurbs::surfaceSaveOBJ("left_v.obj", left);
+    tinynurbs::surfaceSaveOBJ("right_v.obj", right);
+
+    glm::vec3 pt1 = tinynurbs::surfacePoint(srf, left.knots_v[left.knots_v.size() - 1], 0.f);
+    glm::vec3 pt2 = tinynurbs::surfacePoint(srf, right.knots_v[0], 0.f);
+    REQUIRE(pt1.x == Approx(pt2.x));
+    REQUIRE(pt1.y == Approx(pt2.y));
+    REQUIRE(pt1.z == Approx(pt2.z));
+}
+
 TEST_CASE("surfaceReadOBJ and surfaceSaveOBJ", "[surface, obj]")
 {
     auto srf = getHemisphere();

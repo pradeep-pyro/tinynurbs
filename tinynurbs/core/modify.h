@@ -273,8 +273,6 @@ void curveSplit(unsigned int degree, const std::vector<T> &knots,
     left_control_points.clear();
     right_control_points.clear();
 
-    int ks = span - degree + 1;
-
     int span_l = findSpan(degree, tmp_knots, u) + 1;
     for (int i = 0; i < span_l; ++i) {
         left_knots.push_back(tmp_knots[i]);
@@ -288,11 +286,79 @@ void curveSplit(unsigned int degree, const std::vector<T> &knots,
         right_knots.push_back(tmp_knots[i]);
     }
 
+    int ks = span - degree + 1;
     for (int i = 0; i < ks + r; ++i) {
         left_control_points.push_back(tmp_cp[i]);
     }
     for (int i = ks + r - 1; i < tmp_cp.size(); ++i) {
         right_control_points.push_back(tmp_cp[i]);
+    }
+}
+
+template <int dim, typename T>
+void surfaceSplit(unsigned int degree, const std::vector<T> &knots,
+                  const array2<glm::vec<dim, T>> &control_points, T param,
+                  bool along_u,
+                  std::vector<T> &left_knots,
+                  array2<glm::vec<dim, T>> &left_control_points,
+                  std::vector<T> &right_knots,
+                  array2<glm::vec<dim, T>> &right_control_points) {
+    std::vector<T> tmp_knots;
+    array2<glm::vec<dim, T>> tmp_cp;
+
+    int span = findSpan(degree, knots, param);
+    unsigned int r = degree - knotMultiplicity(knots, span);
+    internal::surfaceKnotInsert(degree, knots, control_points, param, r, along_u,
+                                tmp_knots, tmp_cp);
+
+    left_knots.clear();
+    right_knots.clear();
+
+    int span_l = findSpan(degree, tmp_knots, param) + 1;
+    for (int i = 0; i < span_l; ++i) {
+        left_knots.push_back(tmp_knots[i]);
+    }
+    left_knots.push_back(param);
+
+    for (int i = 0; i < degree + 1; ++i) {
+        right_knots.push_back(param);
+    }
+    for (int i = span_l; i < tmp_knots.size(); ++i) {
+        right_knots.push_back(tmp_knots[i]);
+    }
+
+    int ks = span - degree + 1;
+    if (along_u) {
+        size_t ii = 0;
+        left_control_points.resize(ks + r, tmp_cp.cols());
+        for (int i = 0; i < ks + r; ++i) {
+            for (int j = 0; j < tmp_cp.cols(); ++j) {
+                left_control_points[ii++] = tmp_cp(i, j);
+            }
+        }
+        ii = 0;
+        right_control_points.resize(tmp_cp.rows() - ks - r + 1, tmp_cp.cols());
+        for (int i = ks + r - 1; i < tmp_cp.rows(); ++i) {
+            for (int j = 0; j < tmp_cp.cols(); ++j) {
+                right_control_points[ii++] = tmp_cp(i, j);
+            }
+        }
+    }
+    else {
+        size_t ii = 0;
+        left_control_points.resize(tmp_cp.rows(), ks + r);
+        for (int i = 0; i < tmp_cp.rows(); ++i) {
+            for (int j = 0; j < ks + r; ++j) {
+                left_control_points[ii++] = tmp_cp(i, j);
+            }
+        }
+        ii = 0;
+        right_control_points.resize(tmp_cp.rows(), tmp_cp.cols() - ks - r + 1);
+        for (int i = 0; i < tmp_cp.rows(); ++i) {
+            for (int j = ks + r - 1; j < tmp_cp.cols(); ++j) {
+                right_control_points[ii++] = tmp_cp(i, j);
+            }
+        }
     }
 }
 
@@ -520,6 +586,112 @@ curveSplit(const RationalCurve<dim, T> &crv, T u) {
         right.control_points.push_back(util::homogenousToCartesian(right_Cw[i]));
         right.weights.push_back(right_Cw[i][dim]);
     }
+    return std::make_tuple(std::move(left), std::move(right));
+}
+
+/**
+ * Split a surface into two along u-direction
+ * @param srf Surface object
+ * @param u Parameter along u-direction to split the surface
+ * @return Tuple with first and second half of the surfaces
+ */
+template <int dim, typename T>
+std::tuple<Surface<dim, T>, Surface<dim, T>>
+surfaceSplitU(const Surface<dim, T> &srf, T u) {
+    Surface<dim, T> left, right;
+    left.degree_u = srf.degree_u;
+    left.degree_v = srf.degree_v;
+    left.knots_v = srf.knots_v;
+    right.degree_u = srf.degree_u;
+    right.degree_v = srf.degree_v;
+    right.knots_v = srf.knots_v;
+    internal::surfaceSplit(srf.degree_u, srf.knots_u, srf.control_points, u, true,
+                           left.knots_u, left.control_points, right.knots_u, right.control_points);
+    return std::make_tuple(std::move(left), std::move(right));
+}
+
+/**
+ * Split a rational surface into two along u-direction
+ * @param srf RationalSurface object
+ * @param u Parameter along u-direction to split the surface
+ * @return Tuple with first and second half of the surfaces
+ */
+template <int dim, typename T>
+std::tuple<RationalSurface<dim, T>, RationalSurface<dim, T>>
+surfaceSplitU(const RationalSurface<dim, T> &srf, T u) {
+    RationalSurface<dim, T> left, right;
+    left.degree_u = srf.degree_u;
+    left.degree_v = srf.degree_v;
+    left.knots_v = srf.knots_v;
+    right.degree_u = srf.degree_u;
+    right.degree_v = srf.degree_v;
+    right.knots_v = srf.knots_v;
+
+    // Compute homogenous coordinates of control points and weights
+    array2<glm::vec<dim + 1, T>> Cw = util::cartesianToHomogenous(srf.control_points, srf.weights);
+
+    // Split surface with homogenous coordinates
+    array2<glm::vec<dim + 1, T>> left_Cw, right_Cw;
+    internal::surfaceSplit(srf.degree_u, srf.knots_u, Cw, u, true,
+                           left.knots_u, left_Cw, right.knots_u, right_Cw);
+    
+    // Convert back to cartesian coordinates
+    util::homogenousToCartesian(left_Cw, left.control_points, left.weights);
+    util::homogenousToCartesian(right_Cw, right.control_points, right.weights);
+
+    return std::make_tuple(std::move(left), std::move(right));
+}
+
+/**
+ * Split a surface into two along v-direction
+ * @param srf Surface object
+ * @param v Parameter along v-direction to split the surface
+ * @return Tuple with first and second half of the surfaces
+ */
+template <int dim, typename T>
+std::tuple<Surface<dim, T>, Surface<dim, T>>
+surfaceSplitV(const Surface<dim, T> &srf, T v) {
+    Surface<dim, T> left, right;
+    left.degree_u = srf.degree_u;
+    left.degree_v = srf.degree_v;
+    left.knots_u = srf.knots_u;
+    right.degree_u = srf.degree_u;
+    right.degree_v = srf.degree_v;
+    right.knots_u = srf.knots_u;
+    internal::surfaceSplit(srf.degree_v, srf.knots_v, srf.control_points, v, false,
+                           left.knots_v, left.control_points, right.knots_v, right.control_points);
+    return std::make_tuple(std::move(left), std::move(right));
+}
+
+/**
+ * Split a rational surface into two along v-direction
+ * @param srf RationalSurface object
+ * @param v Parameter along v-direction to split the surface
+ * @return Tuple with first and second half of the surfaces
+ */
+template <int dim, typename T>
+std::tuple<RationalSurface<dim, T>, RationalSurface<dim, T>>
+surfaceSplitV(const RationalSurface<dim, T> &srf, T v) {
+    RationalSurface<dim, T> left, right;
+    left.degree_u = srf.degree_u;
+    left.degree_v = srf.degree_v;
+    left.knots_u = srf.knots_u;
+    right.degree_u = srf.degree_u;
+    right.degree_v = srf.degree_v;
+    right.knots_u = srf.knots_u;
+
+    // Compute homogenous coordinates of control points and weights
+    array2<glm::vec<dim + 1, T>> Cw = util::cartesianToHomogenous(srf.control_points, srf.weights);
+
+    // Split surface with homogenous coordinates
+    array2<glm::vec<dim + 1, T>> left_Cw, right_Cw;
+    internal::surfaceSplit(srf.degree_v, srf.knots_v, Cw, v, false,
+                           left.knots_v, left_Cw, right.knots_v, right_Cw);
+    
+    // Convert back to cartesian coordinates
+    util::homogenousToCartesian(left_Cw, left.control_points, left.weights);
+    util::homogenousToCartesian(right_Cw, right.control_points, right.weights);
+
     return std::make_tuple(std::move(left), std::move(right));
 }
 

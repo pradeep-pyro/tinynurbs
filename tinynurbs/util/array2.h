@@ -45,15 +45,19 @@ public:
         data_.clear();
     }
     T operator()(size_t row, size_t col) const {
+        assert(row < rows_ && col < cols_);
         return data_[row*cols_ + col];
     }
     T& operator()(size_t row, size_t col) {
+        assert(row < rows_ && col < cols_);
         return data_[row*cols_ + col];
     }
     T operator[](size_t idx) const {
+        assert(idx < data_.size());
         return data_[idx];
     }
     T& operator[](size_t idx) {
+        assert(idx < data_.size());
         return data_[idx];
     }
     size_t rows() const {
