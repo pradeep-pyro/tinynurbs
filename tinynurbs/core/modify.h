@@ -454,8 +454,8 @@ RationalSurface<dim, T> surfaceKnotInsertV(const RationalSurface<dim, T> &srf, T
     // New knots and new homogenous control points after knot insertion
     std::vector<T> new_knots_v;
     array2<glm::vec<dim + 1, T>> new_Cw;
-    surfaceKnotInsert(srf.degree_u, srf.knots_u, Cw, v, repeat, false,
-                      new_srf.knots_v, new_Cw);
+    internal::surfaceKnotInsert(srf.degree_v, srf.knots_v, Cw, v, repeat, false,
+                                new_srf.knots_v, new_Cw);
 
     // Convert back to cartesian coordinates
     new_srf.control_points.resize(new_Cw.rows(), new_Cw.cols());
