@@ -14,8 +14,8 @@ the LICENSE file.
 #include "glm/glm.hpp"
 #include "check.h"
 #include "../util/util.h"
-#include "../geometry/curve.h"
-#include "../geometry/surface.h"
+#include "curve.h"
+#include "surface.h"
 
 namespace tinynurbs {
 
@@ -193,6 +193,27 @@ void surfaceKnotInsert(unsigned int degree, const std::vector<T> &knots,
                 new_cp(row, i) = tmp[i - L];
             }
         }
+    }
+}
+
+/**
+ * Remove knots from the curve
+ * @param degree Degree of the curve
+ * @param knots Knot vector of the curve
+ * @param control_points Array of control points of the curve
+ * @param index Index of the knot to remove
+ * @param r Number of times to remove knot
+ * @param[inout] new_knots Knot vector after knot removal
+ * @param[inout] new_cp Control points after knot removal
+ */
+template <int dim, typename T>
+void curveKnotRemove(unsigned int degree, const std::vector<T> &knots,
+                     const std::vector<glm::vec<dim, T>> &cp, unsigned int index,
+                     unsigned int r, std::vector<T> &new_knots,
+                     std::vector<glm::vec<dim, T>> &new_cp) {
+    unsigned int mult = knotMultiplicity(knots, index);
+    for (int i = index - degree, j = index - mult; j - i > 0; ++i, ++j) {
+
     }
 }
 

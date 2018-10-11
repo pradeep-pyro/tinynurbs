@@ -13,8 +13,8 @@ the LICENSE file.
 #include <vector>
 #include <limits>
 #include "glm/glm.hpp"
-#include "../geometry/curve.h"
-#include "../geometry/surface.h"
+#include "curve.h"
+#include "surface.h"
 #include <algorithm>
 
 namespace tinynurbs {

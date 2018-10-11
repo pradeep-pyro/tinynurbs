@@ -13,8 +13,8 @@ the LICENSE file.
 #include <fstream>
 #include <algorithm>
 #include "glm/glm.hpp"
-#include "../geometry/curve.h"
-#include "../geometry/surface.h"
+#include "../core/curve.h"
+#include "../core/surface.h"
 #include "../util/util.h"
 #include "../util/array2.h"
 

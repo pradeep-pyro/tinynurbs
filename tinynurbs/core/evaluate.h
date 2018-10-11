@@ -18,8 +18,8 @@ the LICENSE file.
 #include "basis.h"
 #include "../util/array2.h"
 #include "../util/util.h"
-#include "../geometry/curve.h"
-#include "../geometry/surface.h"
+#include "curve.h"
+#include "surface.h"
 
 namespace tinynurbs {
 
