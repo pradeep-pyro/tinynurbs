@@ -56,7 +56,7 @@ crv = tinynurbs::curveKnotInsert(crv, 0.75, 2);
 ```
 Left: original curve, Right: after knot insertion
 
-![curve knotinsert](docs/curve-knot-insert.png)
+![curve knotinsert](curve-knot-insert.png)
 
 Write the curve to an OBJ file:
 ```cpp
@@ -111,7 +111,7 @@ std::tie(left, right) = tinynurbs::surfaceSplitV(srf, 0.25);
 ```
 Left: original surface, Right: after splitting
 
-![split surface](docs/split-surface.png)
+![split surface](split-surface.png)
 
 Write the surface to an OBJ file:
 ```
