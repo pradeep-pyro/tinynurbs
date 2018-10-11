@@ -32,7 +32,7 @@ tinynurbs::RationalSurface3f getHemisphere() {
     return srf;
 }
 
-TEST_CASE("surfacePoint", "[surface, evaluate]")
+TEST_CASE("surfacePoint (rational)", "[surface, rational, evaluate]")
 {
     auto srf = getHemisphere();
     glm::vec3 pt1 = tinynurbs::surfacePoint(srf, 0.f, 0.f);
@@ -45,7 +45,7 @@ TEST_CASE("surfacePoint", "[surface, evaluate]")
     REQUIRE(pt2.z == Approx(-1));
 }
 
-TEST_CASE("surfaceTangent", "[surface, evaluate]")
+TEST_CASE("surfaceTangent (rational)", "[surface, rational, evaluate]")
 {
     auto srf = getHemisphere();
     glm::vec3 tgt_u, tgt_v;
@@ -62,7 +62,7 @@ TEST_CASE("surfaceTangent", "[surface, evaluate]")
 }
 
 
-TEST_CASE("surfaceNormal", "[surface, evaluate]")
+TEST_CASE("surfaceNormal (rational)", "[surface, rational, evaluate]")
 {
     auto srf = getHemisphere();
     glm::vec3 n = tinynurbs::surfaceNormal(srf, 0.5f, 0.5f);
@@ -79,7 +79,7 @@ TEST_CASE("surfaceNormal", "[surface, evaluate]")
     REQUIRE(n.z == Approx(0));
 }
 
-TEST_CASE("surfaceIsValid", "[surface, check]")
+TEST_CASE("surfaceIsValid (rational)", "[surface, rational, check]")
 {
     auto srf = getHemisphere();
     bool is_valid = tinynurbs::surfaceIsValid(srf);
@@ -96,7 +96,7 @@ TEST_CASE("surfaceIsValid", "[surface, check]")
     REQUIRE(is_valid == false);
 }
 
-TEST_CASE("surfaceInsertKnotU", "[surface, modify]")
+TEST_CASE("surfaceInsertKnotU (rational)", "[surface, rational, modify]")
 {
     auto srf = getHemisphere();
     unsigned int repeat = 2;
@@ -119,7 +119,7 @@ TEST_CASE("surfaceInsertKnotU", "[surface, modify]")
     REQUIRE(pt.z == Approx(new_pt.z));
 }
 
-TEST_CASE("surfaceInsertKnotV", "[surface, modify]")
+TEST_CASE("surfaceInsertKnotV (rational)", "[surface, rational, modify]")
 {
     auto srf = getHemisphere();
     unsigned int repeat = 2;
@@ -142,7 +142,7 @@ TEST_CASE("surfaceInsertKnotV", "[surface, modify]")
     REQUIRE(pt.z == Approx(new_pt.z));
 }
 
-TEST_CASE("surfaceSplitU", "[surface, modify]")
+TEST_CASE("surfaceSplitU (rational)", "[surface, rational, modify]")
 {
     auto srf = getHemisphere();
     float u = 0.25f;
@@ -179,7 +179,7 @@ TEST_CASE("surfaceSplitU", "[surface, modify]")
     REQUIRE(pt1.z == Approx(pt2.z));
 }
 
-TEST_CASE("surfaceSplitV", "[surface, modify]")
+TEST_CASE("surfaceSplitV (rational)", "[surface, rational, modify]")
 {
     auto srf = getHemisphere();
     float v = 0.25f;

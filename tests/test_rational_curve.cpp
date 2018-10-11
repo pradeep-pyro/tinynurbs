@@ -35,7 +35,7 @@ tinynurbs::RationalCurve3f getCircle() {
     return crv;
 }
 
-TEST_CASE("curvePoint", "[curve, evaluate]")
+TEST_CASE("curvePoint (rational)", "[curve, rational, evaluate]")
 {
     auto crv = getCircle();
     glm::vec3 pt1 = tinynurbs::curvePoint(crv, 0.f);
@@ -48,7 +48,7 @@ TEST_CASE("curvePoint", "[curve, evaluate]")
     REQUIRE(pt2.z == Approx(0));
 }
 
-TEST_CASE("curveTangent", "[curve, evaluate]")
+TEST_CASE("curveTangent (rational)", "[curve, rational, evaluate]")
 {
     auto crv = getCircle();
     glm::vec3 tgt1 = tinynurbs::curveTangent(crv, 0.f);
@@ -61,7 +61,7 @@ TEST_CASE("curveTangent", "[curve, evaluate]")
     REQUIRE(tgt2.z == Approx(0));
 }
 
-TEST_CASE("curveIsValid", "[curve, check]")
+TEST_CASE("curveIsValid (rational)", "[curve, rational, check]")
 {
     auto crv = getCircle();
     bool is_valid = tinynurbs::curveIsValid(crv);
@@ -73,7 +73,7 @@ TEST_CASE("curveIsValid", "[curve, check]")
     REQUIRE(is_valid == false);
 }
 
-TEST_CASE("curveInsertKnot", "[curve, modify]")
+TEST_CASE("curveInsertKnot (rational)", "[curve, rational, modify]")
 {
     auto crv = getCircle();
     glm::vec3 pt = tinynurbs::curvePoint(crv, 0.25f);
@@ -93,7 +93,7 @@ TEST_CASE("curveInsertKnot", "[curve, modify]")
     REQUIRE(pt.z == Approx(new_pt.z));
 }
 
-TEST_CASE("curveSplit", "[curve, modify]")
+TEST_CASE("curveSplit (rational)", "[curve, rational, modify]")
 {
     auto crv = getCircle();
     float u = glm::pi<float>();

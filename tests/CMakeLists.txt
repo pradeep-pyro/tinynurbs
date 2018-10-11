@@ -1,2 +1,2 @@
-add_executable(unittests catch.hpp test_curve.cpp test_surface.cpp)
+add_executable(unittests catch.hpp test_rational_curve.cpp test_rational_surface.cpp)
 add_test(NAME unittests COMMAND unittests)
