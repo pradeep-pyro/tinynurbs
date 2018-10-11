@@ -38,9 +38,12 @@ void curveKnotInsert(unsigned int deg, const std::vector<T> &knots, const std::v
                      unsigned int r, std::vector<T> &new_knots, std::vector<glm::vec<dim, T>> &new_cp) {
     int k = findSpan(deg, knots, u);
     unsigned int s = knotMultiplicity(knots, k);
-    /*if ((r + s) > deg) {
+    if (s == deg) {
+        return;
+    }
+    if ((r + s) > deg) {
         r = deg - s;
-    }*/
+    }
 
     // Insert new knots between span and (span + 1)
     new_knots.resize(knots.size() + r);
@@ -102,6 +105,12 @@ void surfaceKnotInsert(unsigned int degree, const std::vector<T> &knots,
                        std::vector<T> &new_knots, array2<glm::vec<dim, T>> &new_cp) {
     int span = findSpan(degree, knots, knot);
     unsigned int s = knotMultiplicity(knots, span);
+    if (s == degree) {
+        return;
+    }
+    if ((r + s) > degree) {
+        r = degree - s;
+    }
 
     // Create a new knot vector
     new_knots.resize(knots.size() + r);
@@ -451,8 +460,8 @@ Surface<dim, T> surfaceKnotInsertU(const Surface<dim, T> &srf, T u, unsigned int
     new_srf.degree_u = srf.degree_u;
     new_srf.degree_v = srf.degree_v;
     new_srf.knots_v = srf.knots_v;
-    surfaceKnotInsert(new_srf.degree_u, srf.knots_u, srf.control_points, u, repeat, true,
-                      new_srf.knots_u, new_srf.control_points);
+    internal::surfaceKnotInsert(new_srf.degree_u, srf.knots_u, srf.control_points, u, repeat, true,
+                                new_srf.knots_u, new_srf.control_points);
     return new_srf;
 }
 
@@ -511,8 +520,8 @@ Surface<dim, T> surfaceKnotInsertV(const Surface<dim, T> &srf, T v, unsigned int
     new_srf.degree_v = srf.degree_v;
     new_srf.knots_u = srf.knots_u;
     // New knots and new control points after knot insertion
-    surfaceKnotInsert(srf.degree_u, srf.knots_u, srf.control_points, v, repeat, false,
-                      new_srf.knots_v, new_srf.control_points);
+    internal::surfaceKnotInsert(srf.degree_u, srf.knots_u, srf.control_points, v, repeat, false,
+                                new_srf.knots_v, new_srf.control_points);
     return new_srf;
 }
 

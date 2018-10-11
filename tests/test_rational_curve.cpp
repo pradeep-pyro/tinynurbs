@@ -125,7 +125,7 @@ TEST_CASE("curveSplit (rational)", "[curve, rational, modify]")
     REQUIRE(pt1.z == Approx(pt2.z));
 }
 
-TEST_CASE("curveReadOBJ and curveSaveOBJ", "[curve, obj]")
+TEST_CASE("curveReadOBJ and curveSaveOBJ (rational)", "[curve, rational, obj]")
 {
     auto crv = getCircle();
     tinynurbs::curveSaveOBJ("curve.obj", crv);

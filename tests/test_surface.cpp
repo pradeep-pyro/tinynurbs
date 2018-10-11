@@ -2,104 +2,91 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/constants.hpp"
 #include <cmath>
-
 #include "catch.hpp"
 
 using namespace std;
 
-tinynurbs::RationalSurface3f getHemisphere() {
-    tinynurbs::RationalSurface3f srf;
-    srf.degree_u = 3;
-    srf.degree_v = 3;
-    srf.knots_u = {0, 0, 0, 0, 1, 1, 1, 1};
-    srf.knots_v = {0, 0, 0, 0, 1, 1, 1, 1};
-    // 4x4 grid (tinynurbs::array2) of control points and weights
-    // https://www.geometrictools.com/Documentation/NURBSCircleSphere.pdf
-    srf.control_points = {4, 4, 
-                          {glm::vec3(0, 0, 1), glm::vec3(0, 0, 1), glm::vec3(0, 0, 1), glm::vec3(0, 0, 1),
-                           glm::vec3(2, 0, 1), glm::vec3(2, 4, 1),  glm::vec3(-2, 4, 1),  glm::vec3(-2, 0, 1),
-                           glm::vec3(2, 0, -1), glm::vec3(2, 4, -1), glm::vec3(-2, 4, -1), glm::vec3(-2, 0, -1),
-                           glm::vec3(0, 0, -1), glm::vec3(0, 0, -1), glm::vec3(0, 0, -1), glm::vec3(0, 0, -1)
+tinynurbs::Surface3f getBilinearPatch() {
+    tinynurbs::Surface3f srf;
+    srf.degree_u = 1;
+    srf.degree_v = 1;
+    srf.knots_u = {0, 0, 1, 1};
+    srf.knots_v = {0, 0, 1, 1};
+    // 2x2 grid (tinynurbs::array2) of control points
+    srf.control_points = {2, 2, 
+                          {glm::vec3(-1, 0, 1), glm::vec3(-1, 0, -1),
+                           glm::vec3(1, 0, 1), glm::vec3(1, 0, -1)
                           }
                          };
-    srf.weights = {4, 4,
-                   {1,       1.f/3.f, 1.f/3.f, 1,
-                    1.f/3.f, 1.f/9.f, 1.f/9.f, 1.f/3.f,
-                    1.f/3.f, 1.f/9.f, 1.f/9.f, 1.f/3.f,
-                    1,       1.f/3.f, 1.f/3.f, 1
-                   }
-                 };
     return srf;
 }
 
-TEST_CASE("surfacePoint (rational)", "[surface, rational, evaluate]")
+TEST_CASE("surfacePoint (non-rational)", "[surface, non-rational, evaluate]")
 {
-    auto srf = getHemisphere();
+    auto srf = getBilinearPatch();
     glm::vec3 pt1 = tinynurbs::surfacePoint(srf, 0.f, 0.f);
-    glm::vec3 pt2 = tinynurbs::surfacePoint(srf, 1.f, 1.f);
-    REQUIRE(pt1.x == Approx(0));
+    glm::vec3 pt2 = tinynurbs::surfacePoint(srf, 0.5f, 0.5f);
+    REQUIRE(pt1.x == Approx(-1));
     REQUIRE(pt1.y == Approx(0));
     REQUIRE(pt1.z == Approx(1));
     REQUIRE(pt2.x == Approx(0));
     REQUIRE(pt2.y == Approx(0));
-    REQUIRE(pt2.z == Approx(-1));
+    REQUIRE(pt2.z == Approx(0));
 }
 
-TEST_CASE("surfaceTangent (rational)", "[surface, rational, evaluate]")
+TEST_CASE("surfaceTangent (non-rational)", "[surface, non-rational, evaluate]")
 {
-    auto srf = getHemisphere();
+    auto srf = getBilinearPatch();
     glm::vec3 tgt_u, tgt_v;
-    std::tie(tgt_u, tgt_v) = tinynurbs::surfaceTangent(srf, 0.f, 0.f);
+    std::tie(tgt_u, tgt_v) = tinynurbs::surfaceTangent(srf, 0.5f, 0.25f);
     REQUIRE(glm::length(tgt_u) == Approx(1));
     REQUIRE(tgt_u.x == Approx(1));
     REQUIRE(tgt_u.y == Approx(0));
     REQUIRE(tgt_u.z == Approx(0));
-    // tgt_v should be a zero vector since the pole of the hemisphere is pinched
-    REQUIRE(glm::length(tgt_v) == Approx(0));
+    REQUIRE(glm::length(tgt_v) == Approx(1));
     REQUIRE(tgt_v.x == Approx(0));
     REQUIRE(tgt_v.y == Approx(0));
-    REQUIRE(tgt_v.z == Approx(0));
+    REQUIRE(tgt_v.z == Approx(-1));
 }
 
 
-TEST_CASE("surfaceNormal (rational)", "[surface, rational, evaluate]")
+TEST_CASE("surfaceNormal (non-rational)", "[surface, non-rational, evaluate]")
 {
-    auto srf = getHemisphere();
+    auto srf = getBilinearPatch();
     glm::vec3 n = tinynurbs::surfaceNormal(srf, 0.5f, 0.5f);
     REQUIRE(glm::length(n) == Approx(1));
     REQUIRE(n.x == Approx(0));
     REQUIRE(n.y == Approx(-1));
     REQUIRE(n.z == Approx(0));
 
-    // Normal is zero vector since the pole is pinched
-    n = tinynurbs::surfaceNormal(srf, 0.f, 0.f);
-    REQUIRE(glm::length(n) == Approx(0));
+    n = tinynurbs::surfaceNormal(srf, 0.25f, 0.75f);
+    REQUIRE(glm::length(n) == Approx(1));
     REQUIRE(n.x == Approx(0));
-    REQUIRE(n.y == Approx(0));
+    REQUIRE(n.y == Approx(-1));
     REQUIRE(n.z == Approx(0));
 }
 
-TEST_CASE("surfaceIsValid (rational)", "[surface, rational, check]")
+TEST_CASE("surfaceIsValid (non-rational)", "[surface, check]")
 {
-    auto srf = getHemisphere();
+    auto srf = getBilinearPatch();
     bool is_valid = tinynurbs::surfaceIsValid(srf);
     REQUIRE(is_valid == true);
 
-    srf = getHemisphere();
+    srf = getBilinearPatch();
     srf.degree_u = 5;
     is_valid = tinynurbs::surfaceIsValid(srf);
     REQUIRE(is_valid == false);
 
-    srf = getHemisphere();
+    srf = getBilinearPatch();
     srf.degree_v = 4;
     is_valid = tinynurbs::surfaceIsValid(srf);
     REQUIRE(is_valid == false);
 }
 
-TEST_CASE("surfaceInsertKnotU (rational)", "[surface, rational, modify]")
+TEST_CASE("surfaceInsertKnotU (non-rational)", "[surface, non-rational, modify]")
 {
-    auto srf = getHemisphere();
-    unsigned int repeat = 2;
+    auto srf = getBilinearPatch();
+    unsigned int repeat = 1;
 
     glm::vec3 pt = tinynurbs::surfacePoint(srf, 0.25f, 0.5f);
     
@@ -119,10 +106,10 @@ TEST_CASE("surfaceInsertKnotU (rational)", "[surface, rational, modify]")
     REQUIRE(pt.z == Approx(new_pt.z));
 }
 
-TEST_CASE("surfaceInsertKnotV (rational)", "[surface, rational, modify]")
+TEST_CASE("surfaceInsertKnotV (non-rational)", "[surface, non-rational, modify]")
 {
-    auto srf = getHemisphere();
-    unsigned int repeat = 2;
+    auto srf = getBilinearPatch();
+    unsigned int repeat = 1;
 
     glm::vec3 pt = tinynurbs::surfacePoint(srf, 0.25f, 0.5f);
     
@@ -142,11 +129,11 @@ TEST_CASE("surfaceInsertKnotV (rational)", "[surface, rational, modify]")
     REQUIRE(pt.z == Approx(new_pt.z));
 }
 
-TEST_CASE("surfaceSplitU (rational)", "[surface, rational, modify]")
+TEST_CASE("surfaceSplitU (non-rational)", "[surface, non-rational, modify]")
 {
-    auto srf = getHemisphere();
+    auto srf = getBilinearPatch();
     float u = 0.25f;
-    tinynurbs::RationalSurface3f left, right;
+    tinynurbs::Surface3f left, right;
     std::tie(left, right) = tinynurbs::surfaceSplitU(srf, u);
 
     bool is_valid_l = tinynurbs::surfaceIsValid(left);
@@ -169,8 +156,8 @@ TEST_CASE("surfaceSplitU (rational)", "[surface, rational, modify]")
         REQUIRE(right.knots_u[i] == Approx(u));
     }
 
-    tinynurbs::surfaceSaveOBJ("left_rational_u.obj", left);
-    tinynurbs::surfaceSaveOBJ("right_rational_u.obj", right);
+    tinynurbs::surfaceSaveOBJ("left_nonrational_u.obj", left);
+    tinynurbs::surfaceSaveOBJ("right_nonrational_u.obj", right);
 
     glm::vec3 pt1 = tinynurbs::surfacePoint(srf, left.knots_u[left.knots_u.size() - 1], 0.f);
     glm::vec3 pt2 = tinynurbs::surfacePoint(srf, right.knots_u[0], 0.f);
@@ -179,11 +166,11 @@ TEST_CASE("surfaceSplitU (rational)", "[surface, rational, modify]")
     REQUIRE(pt1.z == Approx(pt2.z));
 }
 
-TEST_CASE("surfaceSplitV (rational)", "[surface, rational, modify]")
+TEST_CASE("surfaceSplitV (non-rational)", "[surface, non-rational, modify]")
 {
-    auto srf = getHemisphere();
+    auto srf = getBilinearPatch();
     float v = 0.25f;
-    tinynurbs::RationalSurface3f left, right;
+    tinynurbs::Surface3f left, right;
     std::tie(left, right) = tinynurbs::surfaceSplitV(srf, v);
 
     bool is_valid_l = tinynurbs::surfaceIsValid(left);
@@ -206,8 +193,8 @@ TEST_CASE("surfaceSplitV (rational)", "[surface, rational, modify]")
         REQUIRE(right.knots_v[i] == Approx(v));
     }
 
-    tinynurbs::surfaceSaveOBJ("left_rational_v.obj", left);
-    tinynurbs::surfaceSaveOBJ("right_rational_v.obj", right);
+    tinynurbs::surfaceSaveOBJ("left_nonrational_v.obj", left);
+    tinynurbs::surfaceSaveOBJ("right_nonrational_v.obj", right);
 
     glm::vec3 pt1 = tinynurbs::surfacePoint(srf, left.knots_v[left.knots_v.size() - 1], 0.f);
     glm::vec3 pt2 = tinynurbs::surfacePoint(srf, right.knots_v[0], 0.f);
@@ -216,12 +203,12 @@ TEST_CASE("surfaceSplitV (rational)", "[surface, rational, modify]")
     REQUIRE(pt1.z == Approx(pt2.z));
 }
 
-TEST_CASE("surfaceReadOBJ and surfaceSaveOBJ (rational)", "[surface, obj]")
+TEST_CASE("surfaceReadOBJ and surfaceSaveOBJ (non-rational)", "[surface, non-rational, obj]")
 {
-    auto srf = getHemisphere();
+    auto srf = getBilinearPatch();
     
-    tinynurbs::surfaceSaveOBJ("surface_rational.obj", srf);
-    auto read_srf = tinynurbs::surfaceReadOBJ<3, float>("surface_rational.obj");
+    tinynurbs::surfaceSaveOBJ("surface_nonrational.obj", srf);
+    auto read_srf = tinynurbs::surfaceReadOBJ<3, float>("surface_nonrational.obj");
     
     REQUIRE(srf.degree_u == read_srf.degree_u);
     REQUIRE(srf.degree_v == read_srf.degree_v);
@@ -240,13 +227,6 @@ TEST_CASE("surfaceReadOBJ and surfaceSaveOBJ (rational)", "[surface, obj]")
             REQUIRE(srf.control_points(i, j).x == Approx(read_srf.control_points(i, j).x));
             REQUIRE(srf.control_points(i, j).y == Approx(read_srf.control_points(i, j).y));
             REQUIRE(srf.control_points(i, j).z == Approx(read_srf.control_points(i, j).z));
-        }
-    }
-    REQUIRE(srf.weights.rows() == read_srf.weights.rows());
-    REQUIRE(srf.weights.cols() == read_srf.weights.cols());
-    for (int i = 0; i < srf.weights.rows(); ++i) {
-        for (int j = 0; j < srf.weights.cols(); ++j) {
-            REQUIRE(srf.weights(i, j) == Approx(read_srf.weights(i, j)));
         }
     }
 }
