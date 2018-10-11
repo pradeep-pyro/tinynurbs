@@ -86,7 +86,6 @@ void curveKnotInsert(unsigned int deg, const std::vector<T> &knots, const std::v
     }
 }
 
-
 /**
  * Insert knots in the surface along one direction
  * @param degree Degree of the surface along which to insert knot
@@ -204,72 +203,6 @@ void surfaceKnotInsert(unsigned int degree, const std::vector<T> &knots,
         }
     }
 }
-
-/**
- * Remove knots from the curve
- * @param degree Degree of the curve
- * @param knots Knot vector of the curve
- * @param control_points Array of control points of the curve
- * @param index Index of the knot to remove
- * @param r Number of times to remove knot
- * @param[inout] new_knots Knot vector after knot removal
- * @param[inout] new_cp Control points after knot removal
- */
-template <int dim, typename T>
-void curveKnotRemove(unsigned int degree, const std::vector<T> &knots,
-                     const std::vector<glm::vec<dim, T>> &cp, unsigned int index,
-                     unsigned int r, std::vector<T> &new_knots,
-                     std::vector<glm::vec<dim, T>> &new_cp) {
-    unsigned int mult = knotMultiplicity(knots, index);
-    for (int i = index - degree, j = index - mult; j - i > 0; ++i, ++j) {
-
-    }
-}
-
-/**
- * Unclamp the curve by removing knots and try to retain original shape
- * @param degree Degree of the curve
- * @param knots Knot vector of the curve
- * @param control_points Array of control points of the curve
- * @param start Whether to unclamp at start of curve
- * @param end Whether to unclamp at end of curve
- */
-template <int dim, typename T>
-void curveUnclamp(unsigned int degree, std::vector<T> &knots,
-                  std::vector<glm::vec<dim, T>> control_points,
-                  bool start=true, bool end=true) {
-    int n = knots.size() - degree - 2;
-    int p = degree;
-    if (start) {
-        for (int i = 0; i < p - 1; ++i)  {
-            // Incrementally update knot spacing such the result would be a uniform knot vector when
-            // wrapped around
-            knots[p - i - 1] = knots[p - i] - (knots[p - i + 1] - knots[n - i]);
-            // Update control points to retain shape
-            int k = p - 1;
-            for (int j = i; j >=0; --j) {
-                T alpha = (knots[p] - knots[k]) / (knots[p + j + 1] - knots[k]);
-                control_points[j] = (control_points[j] - alpha * control_points[j + 1]) /
-                                    (T(1) - alpha);
-                --k;
-            }
-        }
-        // Update first knot value
-        knots[0] = knots[1] - (knots[n - p + 2] - knots[n - p + 1]);
-    }
-    if (end) {
-        for (int i = 0; i < p - 1; ++i) {
-            knots[n + i + 2] = knots[n + i + 1] + (knots[p + i + 1] - knots[p + i]);
-            for (int j = i; j >= 0; --j) {
-                T alpha = (knots[n + 1] - knots[n + j]) / (knots[n - j + i + 2] - knots[n - j]);
-                control_points[j] = (control_points[n - j] - (T(1) - alpha) * control_points[n - j - 1]) / alpha;
-            }
-        }
-        // Update last knot value
-        knots[n + p + 1] = knots[n + p] + (knots[2 * p] - knots[2 * p - 1]);
-    }
-}
-
 
 /**
  * Split the curve into two

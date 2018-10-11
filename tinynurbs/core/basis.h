@@ -104,7 +104,7 @@ T bsplineOneBasis(int i, unsigned int deg, const std::vector<T> &U, T u) {
 }
 
 /**
-// Compute all non-zero B-spline basis functions
+Compute all non-zero B-spline basis functions
 @param[in] deg Degree of the basis function.
 @param[in] span Index obtained from findSpan() corresponding the u and knots.
 @param[in] knots Knot vector corresponding to the basis functions.
@@ -242,7 +242,6 @@ array2<T> bsplineDerBasis(unsigned int deg, int span, const std::vector<T> &knot
 
     return ders;
 }
-
 
 } // namespace tinynurbs
 

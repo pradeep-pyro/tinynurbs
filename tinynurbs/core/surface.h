@@ -73,7 +73,6 @@ struct RationalSurface {
     }
 };
 
-
 // Typedefs for ease of use
 typedef Surface<3, float> Surface3f;
 typedef Surface<3, double> Surface3d;

@@ -93,7 +93,6 @@ bool curveIsValid(unsigned int degree, const std::vector<T> &knots,
     return true;
 }
 
-
 /**
  * Returns whether the surface is valid
  * @tparam dim Dimension of the surface (3 in general)

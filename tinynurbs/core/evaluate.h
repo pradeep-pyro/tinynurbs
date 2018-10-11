@@ -12,9 +12,7 @@ the LICENSE file.
 
 #include <vector>
 #include <tuple>
-#define GLM_ENABLE_EXPERIMENTAL
 #include "glm/glm.hpp"
-#include "glm/gtx/string_cast.hpp"
 #include "basis.h"
 #include "../util/array2.h"
 #include "../util/util.h"
@@ -52,7 +50,6 @@ glm::vec<dim, T> curvePoint(unsigned int degree, const std::vector<T> &knots,
     }
     return point;
 }
-
 
 /**
 Evaluate derivatives of a non-rational NURBS curve
@@ -96,7 +93,6 @@ std::vector<glm::vec<dim, T>> curveDerivatives(unsigned int degree, const std::v
     return curve_ders;
 }
 
-
 /**
 Evaluate point on a nonrational NURBS surface
 @param[in] degree_u Degree of the given surface in u-direction.
@@ -134,7 +130,6 @@ glm::vec<dim, T> surfacePoint(unsigned int degree_u, unsigned int degree_v,
     }
     return point;
 }
-
 
 /**
 Evaluate derivatives on a non-rational NURBS surface
@@ -351,7 +346,6 @@ glm::vec<dim, T> surfacePoint(const Surface<dim, T> &srf, T u, T v) {
                                   srf.control_points, u, v);
 }
 
-
 /**
 Evaluate point on a non-rational NURBS surface
 @param[in] srf RationalSurface object
@@ -514,7 +508,6 @@ surfaceTangent(const RationalSurface<dim, T> &srf, T u, T v) {
     }
     return std::make_tuple(std::move(du), std::move(dv));
 }
-
 
 /**
 Evaluate the normal a non-rational surface at the given parameters
