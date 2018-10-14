@@ -1,0 +1,21 @@
+dist: trusty
+sudo: require
+language: cpp
+
+matrix:
+  include:
+    - compiler: gcc
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+        packages:
+          - g++-6
+          - cmake
+    env: COMPILER=g++-6
+
+script: 
+  - mkdir build
+  - cd build
+  - cmake -DCMAKE_CXX_COMPILER=$COMPILER .. && make
+  - make test
