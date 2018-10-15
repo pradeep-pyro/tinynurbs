@@ -4,15 +4,15 @@ language: cpp
 
 matrix:
   include:
-    - compiler: gcc
-    addons:
-      apt:
-        sources:
-          - ubuntu-toolchain-r-test
-        packages:
-          - g++-6
-          - cmake
-    env: COMPILER=g++-6
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+            - cmake
+      env: COMPILER=g++-6
 
 before_script:
   - wget https://github.com/g-truc/glm/releases/download/0.9.9.0/glm-0.9.9.0.zip -O /tmp/glm.zip
