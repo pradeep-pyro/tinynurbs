@@ -1,5 +1,7 @@
 # tinynurbs
 
+[![Build Status](https://travis-ci.com/pradeep-pyro/tinynurbs.svg?branch=master)](https://travis-ci.com/pradeep-pyro/tinynurbs)
+
 This is a lightweight header-only C++14 library for Non-Uniform Rational B-Spline curves and surfaces. The API is simple to use and the code is readable while being efficient.
 
 Some of the main features include:
