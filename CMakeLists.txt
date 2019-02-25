@@ -14,3 +14,15 @@ if(BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif()
+
+
+file(GLOB HEADER_FILES "tinynurbs/*.*")
+file(GLOB HEADER_FILES_core "tinynurbs/core/*.*")
+file(GLOB HEADER_FILES_io "tinynurbs/io/*.*")
+file(GLOB HEADER_FILES_util "tinynurbs/util/*.*")
+
+INSTALL( FILES ${HEADER_FILES}  DESTINATION include)
+INSTALL( FILES ${HEADER_FILES_core}  DESTINATION include/core)
+INSTALL( FILES ${HEADER_FILES_io}  DESTINATION include/io)
+INSTALL( FILES ${HEADER_FILES_util}  DESTINATION include/util)
+
