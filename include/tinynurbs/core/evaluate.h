@@ -45,7 +45,7 @@ glm::vec<dim, T> curvePoint(unsigned int degree, const std::vector<T> &knots,
     std::vector<T> N = bsplineBasis(degree, span, knots, u);
 
     // Compute point
-    for (int j = 0; j <= degree; j++) {
+    for (unsigned int j = 0; j <= degree; j++) {
         point += static_cast<T>(N[j]) * control_points[span - degree + j];
     }
     return point;

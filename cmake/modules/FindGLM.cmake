@@ -30,6 +30,11 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+if(TARGET glm)
+    set(GLM_FOUND TRUE)
+    return()
+endif()
+
 # default search dirs
 SET(_glm_HEADER_SEARCH_DIRS
     "/usr/include"
@@ -37,7 +42,7 @@ SET(_glm_HEADER_SEARCH_DIRS
 
 # check environment variable
 SET(_glm_ENV_ROOT_DIR "$ENV{GLM_ROOT_DIR}")
-message("test: ${GLM_ROOT_DIR}")
+
 IF(NOT GLM_ROOT_DIR AND _glm_ENV_ROOT_DIR)
     SET(GLM_ROOT_DIR "${_glm_ENV_ROOT_DIR}")
 ENDIF(NOT GLM_ROOT_DIR AND _glm_ENV_ROOT_DIR)
@@ -53,13 +58,15 @@ ENDIF(GLM_ROOT_DIR)
 # locate header
 FIND_PATH(GLM_INCLUDE_DIR "glm/glm.hpp"
     PATHS ${_glm_HEADER_SEARCH_DIRS})
-message("Inlcude pathg: ${GLM_INCLUDE_DIR}")
+
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GLM DEFAULT_MSG
     GLM_INCLUDE_DIR)
 
 IF(GLM_FOUND)
     SET(GLM_INCLUDE_DIRS "${GLM_INCLUDE_DIR}")
-
     MESSAGE(STATUS "GLM_INCLUDE_DIR = ${GLM_INCLUDE_DIR}")
+
+    add_library(glm INTERFACE)
+    target_include_directories(glm INTERFACE ${GLM_INCLUDE_DIR})
 ENDIF(GLM_FOUND)

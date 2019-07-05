@@ -11,11 +11,11 @@ the LICENSE file.
 
 #include <vector>
 #include <tuple>
-#include "glm/glm.hpp"
-#include "check.h"
-#include "../util/util.h"
-#include "curve.h"
-#include "surface.h"
+#include <glm/glm.hpp>
+#include <tinynurbs/core/check.h>
+#include <tinynurbs/util/util.h>
+#include <tinynurbs/core/curve.h>
+#include <tinynurbs/core/surface.h>
 
 namespace tinynurbs {
 
@@ -50,7 +50,7 @@ void curveKnotInsert(unsigned int deg, const std::vector<T> &knots, const std::v
     for (int i = 0; i < k + 1; ++i) {
         new_knots[i] = knots[i];
     }
-    for (int i = 1; i < r + 1; ++i) {
+    for (unsigned int i = 1; i < r + 1; ++i) {
         new_knots[k + i] = u;
     }
     for (int i = k + 1; i < knots.size(); ++i) {
