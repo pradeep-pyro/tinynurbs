@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 project(tinynurbs LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/")
 
 set(BUILD_TESTS ON CACHE BOOL "Build unit tests")
 set(GLM_ROOT_DIR "" CACHE STRING "Root directory of GLM (>=0.9.9)")
