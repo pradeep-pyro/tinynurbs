@@ -1,6 +1,6 @@
-#include "../tinynurbs/tinynurbs.h"
-#include "glm/glm.hpp"
-#include "glm/gtc/constants.hpp"
+#include <tinynurbs/tinynurbs.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
 #include <cmath>
 
 #include "catch.hpp"
@@ -84,12 +84,12 @@ TEST_CASE("curveSplit (non-rational)", "[curve, non-rational, modify]")
     REQUIRE(left.degree == crv.degree);
     REQUIRE(right.degree == crv.degree);
 
-    for (int i = 0; i < left.degree + 1; ++i) {
-        int d = left.knots.size() - (left.degree + 1);
+    for (unsigned int i = 0; i < left.degree + 1; ++i) {
+        int d = static_cast<int>(left.knots.size()) - (left.degree + 1);
         REQUIRE(left.knots[d+i] == Approx(u));
     }
 
-    for (int i = 0; i < right.degree + 1; ++i) {
+    for (unsigned int i = 0; i < right.degree + 1; ++i) {
         REQUIRE(right.knots[i] == Approx(u));
     }
 

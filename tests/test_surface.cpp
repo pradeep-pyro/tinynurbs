@@ -1,6 +1,6 @@
-#include "../tinynurbs/tinynurbs.h"
-#include "glm/glm.hpp"
-#include "glm/gtc/constants.hpp"
+#include <tinynurbs/tinynurbs.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
 #include <cmath>
 #include "catch.hpp"
 
