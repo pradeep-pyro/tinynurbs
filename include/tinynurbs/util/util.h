@@ -9,12 +9,14 @@ the LICENSE file.
 #ifndef TINYNURBS_UTIL
 #define TINYNURBS_UTIL
 
+#include "array2.h"
 #include <glm/glm.hpp>
 #include <vector>
-#include "array2.h"
 
-namespace tinynurbs {
-namespace util {
+namespace tinynurbs
+{
+namespace util
+{
 
 /**
 Convert an nd point in homogenous coordinates to an (n-1)d point in cartesian
@@ -22,32 +24,38 @@ coordinates by perspective division
 @param[in] pt Point in homogenous coordinates
 @return Input point in cartesian coordinates
 */
-template<int nd, typename T>
-inline glm::vec<nd - 1, T> homogenousToCartesian(const glm::vec<nd, T> &pt) {
+template <int nd, typename T>
+inline glm::vec<nd - 1, T> homogenousToCartesian(const glm::vec<nd, T> &pt)
+{
     return glm::vec<nd - 1, T>(pt / pt[pt.length() - 1]);
 }
 
-template<int nd, typename T>
+template <int nd, typename T>
 inline void homogenousToCartesian(const std::vector<glm::vec<nd, T>> &ptsws,
-                                  std::vector<glm::vec<nd - 1, T>> &pts, std::vector<T> &ws) {
+                                  std::vector<glm::vec<nd - 1, T>> &pts, std::vector<T> &ws)
+{
     pts.clear();
     ws.clear();
     pts.reserve(ptsws.size());
     ws.reserve(ptsws.size());
-    for (int i = 0; i < ptsws.size(); ++i) {
+    for (int i = 0; i < ptsws.size(); ++i)
+    {
         const glm::vec<nd, T> &ptw_i = ptsws[i];
         pts.push_back(glm::vec<nd - 1, T>(ptw_i / ptw_i[ptw_i.length() - 1]));
         ws.push_back(ptw_i[ptw_i.length() - 1]);
     }
 }
 
-template<int nd, typename T>
+template <int nd, typename T>
 inline void homogenousToCartesian(const array2<glm::vec<nd, T>> &ptsws,
-                                  array2<glm::vec<nd - 1, T>> &pts, array2<T> &ws) {
+                                  array2<glm::vec<nd - 1, T>> &pts, array2<T> &ws)
+{
     pts.resize(ptsws.rows(), ptsws.cols());
     ws.resize(ptsws.rows(), ptsws.cols());
-    for (int i = 0; i < ptsws.rows(); ++i) {
-        for (int j = 0; j < ptsws.cols(); ++j) {
+    for (int i = 0; i < ptsws.rows(); ++i)
+    {
+        for (int j = 0; j < ptsws.cols(); ++j)
+        {
             const glm::vec<nd, T> &ptw_ij = ptsws(i, j);
             T w_ij = ptw_ij[nd - 1];
             pts(i, j) = glm::vec<nd - 1, T>(ptw_ij / w_ij);
@@ -63,28 +71,34 @@ coordinates
 @param[in] w Weight
 @return Input point in homogenous coordinates
 */
-template<int nd, typename T>
-inline glm::vec<nd + 1, T> cartesianToHomogenous(const glm::vec<nd, T> &pt, T w) {
+template <int nd, typename T>
+inline glm::vec<nd + 1, T> cartesianToHomogenous(const glm::vec<nd, T> &pt, T w)
+{
     return glm::vec<nd + 1, T>(pt * w, w);
 }
 
-template<int nd, typename T>
+template <int nd, typename T>
 inline std::vector<glm::vec<nd + 1, T>>
-cartesianToHomogenous(const std::vector<glm::vec<nd, T>> &pts, const std::vector<T> &ws) {
+cartesianToHomogenous(const std::vector<glm::vec<nd, T>> &pts, const std::vector<T> &ws)
+{
     std::vector<glm::vec<nd + 1, T>> Cw;
     Cw.reserve(pts.size());
-    for (int i = 0; i < pts.size(); ++i) {
+    for (int i = 0; i < pts.size(); ++i)
+    {
         Cw.push_back(cartesianToHomogenous(pts[i], ws[i]));
     }
     return Cw;
 }
 
-template<int nd, typename T>
-inline array2<glm::vec<nd + 1, T>>
-cartesianToHomogenous(const array2<glm::vec<nd, T>> &pts, const array2<T> &ws) {
+template <int nd, typename T>
+inline array2<glm::vec<nd + 1, T>> cartesianToHomogenous(const array2<glm::vec<nd, T>> &pts,
+                                                         const array2<T> &ws)
+{
     array2<glm::vec<nd + 1, T>> Cw(pts.rows(), pts.cols());
-    for (int i = 0; i < pts.rows(); ++i) {
-        for (int j = 0; j < pts.cols(); ++j) {
+    for (int i = 0; i < pts.rows(); ++i)
+    {
+        for (int j = 0; j < pts.cols(); ++j)
+        {
             Cw(i, j) = util::cartesianToHomogenous(pts(i, j), ws(i, j));
         }
     }
@@ -97,8 +111,9 @@ by truncating the last dimension
 @param[in] pt Point in homogenous coordinates
 @return Input point in cartesian coordinates
 */
-template<int nd, typename T>
-inline glm::vec<nd - 1, T> truncateHomogenous(const glm::vec<nd, T> &pt) {
+template <int nd, typename T>
+inline glm::vec<nd - 1, T> truncateHomogenous(const glm::vec<nd, T> &pt)
+{
     return glm::vec<nd - 1, T>(pt);
 }
 
@@ -106,12 +121,15 @@ inline glm::vec<nd - 1, T> truncateHomogenous(const glm::vec<nd, T> &pt) {
 Compute the binomial coefficient (nCk) using the formula
 \product_{i=0}^k (n + 1 - i) / i
 */
-inline unsigned int binomial(unsigned int n, unsigned int k) {
+inline unsigned int binomial(unsigned int n, unsigned int k)
+{
     unsigned int result = 1;
-    if (k > n) {
+    if (k > n)
+    {
         return 0;
     }
-    for (unsigned int i = 1; i <= k; ++i) {
+    for (unsigned int i = 1; i <= k; ++i)
+    {
         result *= (n + 1 - i);
         result /= i;
     }
@@ -121,16 +139,16 @@ inline unsigned int binomial(unsigned int n, unsigned int k) {
 /**
 Check if two numbers are close enough within eps
 */
-template <typename T>
-inline bool close(T a, T b, double eps = std::numeric_limits<T>::epsilon()) {
+template <typename T> inline bool close(T a, T b, double eps = std::numeric_limits<T>::epsilon())
+{
     return (std::abs(a - b) < eps) ? true : false;
 }
 
 /**
 Map numbers from one interval to another
 */
-template <typename T>
-inline T mapToRange(T val, T old_min, T old_max, T new_min, T new_max) {
+template <typename T> inline T mapToRange(T val, T old_min, T old_max, T new_min, T new_max)
+{
     T old_range = old_max - old_min;
     T new_range = new_max - new_min;
     return (((val - old_min) * new_range) / old_range) + new_min;

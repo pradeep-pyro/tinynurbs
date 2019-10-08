@@ -9,20 +9,22 @@ the LICENSE file.
 #ifndef TINYNURBS_OBJ_H
 #define TINYNURBS_OBJ_H
 
-#include <sstream>
-#include <fstream>
-#include <algorithm>
-#include "glm/glm.hpp"
 #include "../core/curve.h"
 #include "../core/surface.h"
-#include "../util/util.h"
 #include "../util/array2.h"
+#include "../util/util.h"
+#include "glm/glm.hpp"
+#include <algorithm>
+#include <fstream>
+#include <sstream>
 
-namespace tinynurbs {
+namespace tinynurbs
+{
 
 /////////////////////////////////////////////////////////////////////
 
-namespace internal {
+namespace internal
+{
 
 /**
  * Read rational curve data from a Wavefront OBJ file.
@@ -35,7 +37,8 @@ namespace internal {
  */
 template <typename T>
 void curveReadOBJ(const std::string &filename, unsigned int &deg, std::vector<T> &knots,
-                  std::vector<glm::vec<3, T>> &ctrlPts, std::vector<T> &weights, bool &rational) {
+                  std::vector<glm::vec<3, T>> &ctrlPts, std::vector<T> &weights, bool &rational)
+{
     T knot_min = 0, knot_max = 1;
     std::vector<glm::vec<3, T>> ctrl_pts_buf;
     std::vector<T> weights_buf;
@@ -46,84 +49,105 @@ void curveReadOBJ(const std::string &filename, unsigned int &deg, std::vector<T>
     std::istringstream ssline;
 
     std::ifstream file(filename);
-    if (!file) {
+    if (!file)
+    {
         throw std::runtime_error("File not found: " + filename);
     }
 
-    struct ToParse {
+    struct ToParse
+    {
         bool deg, cstype, curv, parm;
     };
 
     ToParse parsed;
 
-    while (std::getline(file, sline)) {
-        if (sline.size() == 0) {
+    while (std::getline(file, sline))
+    {
+        if (sline.size() == 0)
+        {
             continue;
         }
         ssline.str(sline);
         ssline >> start;
-        if (start == "v") {
+        if (start == "v")
+        {
             std::vector<double> four_coords;
             four_coords.resize(4, 0.0);
             four_coords[3] = 1.0;
             int index = 0;
-            while (ssline && index <= 3) {
+            while (ssline && index <= 3)
+            {
                 ssline >> four_coords[index++];
             }
             ctrl_pts_buf.emplace_back(four_coords[0], four_coords[1], four_coords[2]);
             weights_buf.push_back(four_coords[3]);
         }
-        else if (start == "cstype") {
+        else if (start == "cstype")
+        {
             std::string token1;
             ssline >> token1;
-            if (token1 == "bspline") {
+            if (token1 == "bspline")
+            {
                 rational = false;
                 parsed.cstype = true;
             }
-            else if (token1 == "rat") {
+            else if (token1 == "rat")
+            {
                 std::string token2;
                 ssline >> token2;
-                if (token2 == "bspline") {
+                if (token2 == "bspline")
+                {
                     rational = true;
                     parsed.cstype = true;
                 }
             }
         }
-        else if (start == "deg") {
+        else if (start == "deg")
+        {
             ssline >> deg;
             parsed.deg = true;
         }
-        else if (start == "curv") {
+        else if (start == "curv")
+        {
             ssline >> knot_min >> knot_max;
-            while (ssline >> token) {
-                if (token == "\\") {
+            while (ssline >> token)
+            {
+                if (token == "\\")
+                {
                     ssline.clear();
                     getline(file, sline);
                     ssline.str(sline);
                 }
-                else {
+                else
+                {
                     indices.push_back(std::stof(token));
                 }
             }
             parsed.curv = true;
         }
-        else if (start == "parm") {
+        else if (start == "parm")
+        {
             ssline >> start;
-            if (start == "u") {
-                while (ssline >> token) {
-                    if (token == "\\") {
+            if (start == "u")
+            {
+                while (ssline >> token)
+                {
+                    if (token == "\\")
+                    {
                         ssline.clear();
                         std::getline(file, sline);
                         ssline.str(sline);
                     }
-                    else {
+                    else
+                    {
                         temp_knots.push_back(std::stof(token));
                     }
                 }
             }
             parsed.parm = true;
         }
-        else if (start == "end") {
+        else if (start == "end")
+        {
             break;
         }
         ssline.clear();
@@ -131,16 +155,20 @@ void curveReadOBJ(const std::string &filename, unsigned int &deg, std::vector<T>
     file.close();
 
     // Check if necessary data was available in file
-    if (!parsed.cstype) {
+    if (!parsed.cstype)
+    {
         throw std::runtime_error("'cstype bspline / cstype rat bspline' line missing in file");
     }
-    if (!parsed.deg) {
+    if (!parsed.deg)
+    {
         throw std::runtime_error("'deg' line missing/incomplete in file");
     }
-    if (!parsed.curv) {
+    if (!parsed.curv)
+    {
         throw std::runtime_error("'curv' line missing/incomplete in file");
     }
-    if (!parsed.parm) {
+    if (!parsed.parm)
+    {
         throw std::runtime_error("'parm' line missing/incomplete in file");
     }
 
@@ -150,7 +178,8 @@ void curveReadOBJ(const std::string &filename, unsigned int &deg, std::vector<T>
     ctrlPts.resize(num_cp);
     weights.resize(num_cp);
     size_t num = 0;
-    for (int i = 0; i < num_cp; ++i) {
+    for (int i = 0; i < num_cp; ++i)
+    {
         assert(i < ctrlPts.size());
         ctrlPts[i] = ctrl_pts_buf[indices[num] - 1];
         weights[i] = weights_buf[indices[num] - 1];
@@ -174,7 +203,8 @@ void curveReadOBJ(const std::string &filename, unsigned int &deg, std::vector<T>
 template <typename T>
 void surfaceReadOBJ(const std::string &filename, unsigned int &deg_u, unsigned int &deg_v,
                     std::vector<T> &knots_u, std::vector<T> &knots_v,
-                    array2<glm::vec<3, T>> &ctrlPts, array2<T> &weights, bool &rational) {
+                    array2<glm::vec<3, T>> &ctrlPts, array2<T> &weights, bool &rational)
+{
     T uknot_min = 0, uknot_max = 1;
     T vknot_min = 0, vknot_max = 1;
 
@@ -188,96 +218,121 @@ void surfaceReadOBJ(const std::string &filename, unsigned int &deg_u, unsigned i
     std::istringstream ssline;
 
     std::ifstream file(filename);
-    if (!file) {
+    if (!file)
+    {
         throw std::runtime_error("File not found: " + filename);
     }
 
-    struct ToParse {
+    struct ToParse
+    {
         bool deg, cstype, surf, parm;
     };
 
     ToParse parsed;
 
-    while (std::getline(file, sline)) {
-        if (sline.size() == 0) {
+    while (std::getline(file, sline))
+    {
+        if (sline.size() == 0)
+        {
             break;
         }
         ssline.str(sline);
         ssline >> start;
-        if (start == "v") {
+        if (start == "v")
+        {
             std::vector<double> four_coords;
             four_coords.resize(4);
             four_coords[3] = 1.0;
             int index = 0;
-            while (ssline && index <= 3) {
+            while (ssline && index <= 3)
+            {
                 ssline >> four_coords[index++];
             }
             ctrl_pts_buf.emplace_back(four_coords[0], four_coords[1], four_coords[2]);
             weights_buf.push_back(four_coords[3]);
         }
-        else if (start == "cstype") {
+        else if (start == "cstype")
+        {
             std::string token1;
             ssline >> token1;
-            if (token1 == "bspline") {
+            if (token1 == "bspline")
+            {
                 rational = false;
                 parsed.cstype = true;
             }
-            else if (token1 == "rat") {
+            else if (token1 == "rat")
+            {
                 std::string token2;
                 ssline >> token2;
-                if (token2 == "bspline") {
+                if (token2 == "bspline")
+                {
                     rational = true;
                     parsed.cstype = true;
                 }
             }
         }
-        else if (start == "deg") {
+        else if (start == "deg")
+        {
             ssline >> deg_u >> deg_v;
             parsed.deg = true;
         }
-        else if (start == "surf") {
+        else if (start == "surf")
+        {
             ssline >> uknot_min >> uknot_max >> vknot_min >> vknot_max;
-            while (ssline >> token) {
-                if (token == "\\") {
+            while (ssline >> token)
+            {
+                if (token == "\\")
+                {
                     ssline.clear();
                     getline(file, sline);
                     ssline.str(sline);
                 }
-                else {
+                else
+                {
                     indices.push_back(std::stof(token));
                 }
             }
             parsed.surf = true;
         }
-        else if (start == "parm") {
+        else if (start == "parm")
+        {
             ssline >> start;
-            if (start == "u") {
-                while (ssline >> token) {
-                    if (token == "\\") {
+            if (start == "u")
+            {
+                while (ssline >> token)
+                {
+                    if (token == "\\")
+                    {
                         ssline.clear();
                         std::getline(file, sline);
                         ssline.str(sline);
                     }
-                    else {
+                    else
+                    {
                         temp_uknots.push_back(std::stof(token));
                     }
                 }
             }
-            else if (start == "v") {
-                while (ssline >> token) {
-                    if (token == "\\") {
+            else if (start == "v")
+            {
+                while (ssline >> token)
+                {
+                    if (token == "\\")
+                    {
                         ssline.clear();
                         std::getline(file, sline);
                         ssline.str(sline);
                     }
-                    else {
+                    else
+                    {
                         temp_vknots.push_back(std::stof(token));
                     }
                 }
             }
             parsed.parm = true;
         }
-        else if (start == "end") {
+        else if (start == "end")
+        {
             break;
         }
         ssline.clear();
@@ -285,16 +340,20 @@ void surfaceReadOBJ(const std::string &filename, unsigned int &deg_u, unsigned i
     file.close();
 
     // Check if necessary data was available in file
-    if (!parsed.cstype) {
+    if (!parsed.cstype)
+    {
         throw std::runtime_error("'cstype bspline / cstype rat bspline' line missing in file");
     }
-    if (!parsed.deg) {
+    if (!parsed.deg)
+    {
         throw std::runtime_error("'deg' line missing/incomplete in file");
     }
-    if (!parsed.surf) {
+    if (!parsed.surf)
+    {
         throw std::runtime_error("'surf' line missing/incomplete in file");
     }
-    if (!parsed.parm) {
+    if (!parsed.parm)
+    {
         throw std::runtime_error("'parm' line missing/incomplete in file");
     }
 
@@ -306,8 +365,10 @@ void surfaceReadOBJ(const std::string &filename, unsigned int &deg_u, unsigned i
     ctrlPts.resize(num_cp_u, num_cp_v);
     weights.resize(num_cp_u, num_cp_v);
     size_t num = 0;
-    for (int j = 0; j < num_cp_v; ++j) {
-        for (int i = 0; i < num_cp_u; ++i) {
+    for (int j = 0; j < num_cp_v; ++j)
+    {
+        for (int i = 0; i < num_cp_u; ++i)
+        {
             assert(i < ctrlPts.rows() && j < ctrlPts.cols());
             ctrlPts(i, j) = ctrl_pts_buf[indices[num] - 1];
             weights(i, j) = weights_buf[indices[num] - 1];
@@ -329,33 +390,39 @@ void surfaceReadOBJ(const std::string &filename, unsigned int &deg_u, unsigned i
  * @param rational Whether rational
  */
 template <typename T>
-void curveSaveOBJ(const std::string &filename, unsigned int degree,
-                  const std::vector<T>& knots, const std::vector<glm::vec<3, T>> &ctrlPts,
-                  const std::vector<T> &weights, bool rational) {
+void curveSaveOBJ(const std::string &filename, unsigned int degree, const std::vector<T> &knots,
+                  const std::vector<glm::vec<3, T>> &ctrlPts, const std::vector<T> &weights,
+                  bool rational)
+{
     using std::endl;
     std::ofstream fout(filename);
 
-    for (int i = 0; i < ctrlPts.size(); ++i) {
-        fout << "v " << ctrlPts[i].x << " " << ctrlPts[i].y << " " << ctrlPts[i].z <<
-             " " << weights[i] << endl;
+    for (int i = 0; i < ctrlPts.size(); ++i)
+    {
+        fout << "v " << ctrlPts[i].x << " " << ctrlPts[i].y << " " << ctrlPts[i].z << " "
+             << weights[i] << endl;
     }
 
     int n_knots = knots.size();
     int n_cp = ctrlPts.size();
 
-    if (!rational) {
+    if (!rational)
+    {
         fout << "cstype bspline" << endl;
     }
-    else {
+    else
+    {
         fout << "cstype rat bspline" << endl;
     }
     fout << "deg " << degree << endl << "curv ";
     fout << knots[degree] << " " << knots[n_knots - degree - 1];
-    for (int i = 0; i < n_cp; ++i) {
+    for (int i = 0; i < n_cp; ++i)
+    {
         fout << " " << i + 1;
     }
     fout << endl << "parm u";
-    for (auto knot : knots) {
+    for (auto knot : knots)
+    {
         fout << " " << knot;
     }
     fout << endl << "end";
@@ -374,19 +441,25 @@ void curveSaveOBJ(const std::string &filename, unsigned int degree,
  * @param rational Whether rational
  */
 template <typename T>
-void surfaceSaveOBJ(const std::string &filename, unsigned int deg_u, unsigned int deg_v, const std::vector<T>& knots_u, const std::vector<T>& knots_v,
-                    const array2<glm::vec<3, T>> &ctrlPts, const array2<T> &weights, bool rational) {
+void surfaceSaveOBJ(const std::string &filename, unsigned int deg_u, unsigned int deg_v,
+                    const std::vector<T> &knots_u, const std::vector<T> &knots_v,
+                    const array2<glm::vec<3, T>> &ctrlPts, const array2<T> &weights, bool rational)
+{
 
     using std::endl;
     std::ofstream fout(filename);
 
-    if (ctrlPts.rows() == 0 || ctrlPts.cols() == 0) {
+    if (ctrlPts.rows() == 0 || ctrlPts.cols() == 0)
+    {
         return;
     }
 
-    for (int j = 0; j < ctrlPts.cols(); j++) {
-        for (int i = 0; i < ctrlPts.rows(); i++) {
-            fout << "v " << ctrlPts(i, j).x << " " << ctrlPts(i, j).y << " " << ctrlPts(i, j).z << " " << weights(i, j) << endl;
+    for (int j = 0; j < ctrlPts.cols(); j++)
+    {
+        for (int i = 0; i < ctrlPts.rows(); i++)
+        {
+            fout << "v " << ctrlPts(i, j).x << " " << ctrlPts(i, j).y << " " << ctrlPts(i, j).z
+                 << " " << weights(i, j) << endl;
         }
     }
 
@@ -396,24 +469,29 @@ void surfaceSaveOBJ(const std::string &filename, unsigned int deg_u, unsigned in
     int nCpU = ctrlPts.rows();
     int nCpV = ctrlPts.cols();
 
-    if (!rational) {
+    if (!rational)
+    {
         fout << "cstype bspline" << endl;
     }
-    else {
+    else
+    {
         fout << "cstype rat bspline" << endl;
     }
     fout << "deg " << deg_u << " " << deg_v << endl << "surf ";
-    fout << knots_u[deg_u] << " " << knots_u[nknots_u - deg_u - 1] << " "
-         << knots_v[deg_v] << " " << knots_v[nknots_v - deg_v - 1];
-    for (int i = 0; i < nCpU*nCpV; i++) {
+    fout << knots_u[deg_u] << " " << knots_u[nknots_u - deg_u - 1] << " " << knots_v[deg_v] << " "
+         << knots_v[nknots_v - deg_v - 1];
+    for (int i = 0; i < nCpU * nCpV; i++)
+    {
         fout << " " << i + 1;
     }
     fout << endl << "parm u";
-    for (auto knot : knots_u) {
+    for (auto knot : knots_u)
+    {
         fout << " " << knot;
     }
     fout << endl << "parm v";
-    for (auto knot : knots_v) {
+    for (auto knot : knots_v)
+    {
         fout << " " << knot;
     }
     fout << endl << "end";
@@ -429,13 +507,12 @@ void surfaceSaveOBJ(const std::string &filename, unsigned int deg_u, unsigned in
  * @param filename Name of the file
  * @return RationalCurve object
  */
-template <typename T>
-RationalCurve<T> curveReadOBJ(const std::string &filename) {
+template <typename T> RationalCurve<T> curveReadOBJ(const std::string &filename)
+{
     RationalCurve<T> crv;
     std::vector<glm::vec<3, T>> control_points;
     bool rat;
-    internal::curveReadOBJ(filename, crv.degree, crv.knots, crv.control_points,
-                           crv.weights, rat);
+    internal::curveReadOBJ(filename, crv.degree, crv.knots, crv.control_points, crv.weights, rat);
     return crv;
 }
 
@@ -444,12 +521,12 @@ RationalCurve<T> curveReadOBJ(const std::string &filename) {
  * @param filename Name of the file
  * @return RationalSurface object
  */
-template <typename T>
-RationalSurface<T> surfaceReadOBJ(const std::string &filename) {
+template <typename T> RationalSurface<T> surfaceReadOBJ(const std::string &filename)
+{
     RationalSurface<T> srf;
     bool rat;
-    internal::surfaceReadOBJ(filename, srf.degree_u, srf.degree_v, srf.knots_u,
-                             srf.knots_v, srf.control_points, srf.weights, rat);
+    internal::surfaceReadOBJ(filename, srf.degree_u, srf.degree_v, srf.knots_u, srf.knots_v,
+                             srf.control_points, srf.weights, rat);
     return srf;
 }
 
@@ -458,8 +535,8 @@ RationalSurface<T> surfaceReadOBJ(const std::string &filename) {
  * @param filename Name of the file
  * @param Curve object to save
  */
-template <typename T>
-void curveSaveOBJ(const std::string &filename, const Curve<T> &crv) {
+template <typename T> void curveSaveOBJ(const std::string &filename, const Curve<T> &crv)
+{
     std::vector<T> w(crv.control_points.size(), T(1));
     internal::curveSaveOBJ(filename, crv.degree, crv.knots, crv.control_points, w, false);
 }
@@ -469,8 +546,8 @@ void curveSaveOBJ(const std::string &filename, const Curve<T> &crv) {
  * @param filename Name of the file
  * @param RationalCurve object to save
  */
-template <typename T>
-void curveSaveOBJ(const std::string &filename, const RationalCurve<T> &crv) {
+template <typename T> void curveSaveOBJ(const std::string &filename, const RationalCurve<T> &crv)
+{
     internal::curveSaveOBJ(filename, crv.degree, crv.knots, crv.control_points, crv.weights, true);
 }
 
@@ -479,8 +556,8 @@ void curveSaveOBJ(const std::string &filename, const RationalCurve<T> &crv) {
  * @param filename Name of the file
  * @param srf Surface object to save
  */
-template <typename T>
-void surfaceSaveOBJ(const std::string &filename, const Surface<T> &srf) {
+template <typename T> void surfaceSaveOBJ(const std::string &filename, const Surface<T> &srf)
+{
     array2<T> w(srf.control_points.rows(), srf.control_points.cols(), T(1));
     internal::surfaceSaveOBJ(filename, srf.degree_u, srf.degree_v, srf.knots_u, srf.knots_v,
                              srf.control_points, w, false);
@@ -492,7 +569,8 @@ void surfaceSaveOBJ(const std::string &filename, const Surface<T> &srf) {
  * @param srf RationalSurface object to save
  */
 template <typename T>
-void surfaceSaveOBJ(const std::string &filename, const RationalSurface<T> &srf) {
+void surfaceSaveOBJ(const std::string &filename, const RationalSurface<T> &srf)
+{
     internal::surfaceSaveOBJ(filename, srf.degree_u, srf.degree_v, srf.knots_u, srf.knots_v,
                              srf.control_points, srf.weights, true);
 }
