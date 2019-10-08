@@ -7,11 +7,11 @@
 
 using namespace std;
 
-tinynurbs::Curve2f getNonrationalBezierCurve() {
-    tinynurbs::Curve2f crv;
-    crv.control_points = {glm::vec2(-1, 0),
-                          glm::vec2(0, 1),
-                          glm::vec2(1, 0)
+tinynurbs::Curve3f getNonrationalBezierCurve() {
+    tinynurbs::Curve3f crv;
+    crv.control_points = {glm::vec3(-1, 0, 0),
+                          glm::vec3(0, 1, 0),
+                          glm::vec3(1, 0, 0)
                          };
     crv.knots = {0, 0, 0, 1, 1, 1};
     crv.degree = 2;
@@ -72,7 +72,7 @@ TEST_CASE("curveSplit (non-rational)", "[curve, non-rational, modify]")
 {
     auto crv = getNonrationalBezierCurve();
     float u = 0.5f;
-    tinynurbs::Curve2f left, right;
+    tinynurbs::Curve3f left, right;
     std::tie(left, right) = tinynurbs::curveSplit(crv, u);
 
     bool is_valid_l = tinynurbs::curveIsValid(left);
@@ -103,7 +103,7 @@ TEST_CASE("curveReadOBJ and curveSaveOBJ (non-rational)", "[curve, non-rational,
 {
     auto crv = getNonrationalBezierCurve();
     tinynurbs::curveSaveOBJ("curve.obj", crv);
-    auto read_crv = tinynurbs::Curve2f(tinynurbs::curveReadOBJ<2, float>("curve.obj"));
+    auto read_crv = tinynurbs::Curve3f(tinynurbs::curveReadOBJ<float>("curve.obj"));
     REQUIRE(crv.degree == read_crv.degree);
     REQUIRE(crv.knots.size() == read_crv.knots.size());
     for (int i = 0; i < crv.knots.size(); ++i) {

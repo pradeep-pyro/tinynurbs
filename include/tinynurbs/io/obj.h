@@ -429,21 +429,13 @@ void surfaceSaveOBJ(const std::string &filename, unsigned int deg_u, unsigned in
  * @param filename Name of the file
  * @return RationalCurve object
  */
-template <int dim, typename T>
-RationalCurve<dim, T> curveReadOBJ(const std::string &filename) {
-    RationalCurve<dim, T> crv;
+template <typename T>
+RationalCurve<T> curveReadOBJ(const std::string &filename) {
+    RationalCurve<T> crv;
     std::vector<glm::vec<3, T>> control_points;
     bool rat;
-    internal::curveReadOBJ(filename, crv.degree, crv.knots, control_points,
+    internal::curveReadOBJ(filename, crv.degree, crv.knots, crv.control_points,
                            crv.weights, rat);
-
-    // Copy 0 to dim - 1 coordinates into crv
-    crv.control_points.resize(control_points.size());
-    for (int i = 0; i < control_points.size(); ++i) {
-        for (int j = 0; j < dim; ++j) {
-            crv.control_points[i][j] = control_points[i][j];
-        }
-    }
     return crv;
 }
 
@@ -452,9 +444,9 @@ RationalCurve<dim, T> curveReadOBJ(const std::string &filename) {
  * @param filename Name of the file
  * @return RationalSurface object
  */
-template <int dim, typename T>
-RationalSurface<3, T> surfaceReadOBJ(const std::string &filename) {
-    RationalSurface<3, T> srf;
+template <typename T>
+RationalSurface<T> surfaceReadOBJ(const std::string &filename) {
+    RationalSurface<T> srf;
     bool rat;
     internal::surfaceReadOBJ(filename, srf.degree_u, srf.degree_v, srf.knots_u,
                              srf.knots_v, srf.control_points, srf.weights, rat);
@@ -466,17 +458,10 @@ RationalSurface<3, T> surfaceReadOBJ(const std::string &filename) {
  * @param filename Name of the file
  * @param Curve object to save
  */
-template <int dim, typename T>
-void curveSaveOBJ(const std::string &filename, const Curve<dim, T> &crv) {
-    std::vector<glm::vec<3, T>> cp;
-    cp.resize(crv.control_points.size(), glm::vec<3, T>(0));
-    for (int i = 0; i < cp.size(); ++i) {
-        for (int j = 0; j < dim; ++j) {
-            cp[i][j] = crv.control_points[i][j];
-        }
-    }
+template <typename T>
+void curveSaveOBJ(const std::string &filename, const Curve<T> &crv) {
     std::vector<T> w(crv.control_points.size(), T(1));
-    internal::curveSaveOBJ(filename, crv.degree, crv.knots, cp, w, false);
+    internal::curveSaveOBJ(filename, crv.degree, crv.knots, crv.control_points, w, false);
 }
 
 /**
@@ -484,16 +469,9 @@ void curveSaveOBJ(const std::string &filename, const Curve<dim, T> &crv) {
  * @param filename Name of the file
  * @param RationalCurve object to save
  */
-template <int dim, typename T>
-void curveSaveOBJ(const std::string &filename, const RationalCurve<dim, T> &crv) {
-    std::vector<glm::vec<3, T>> cp;
-    cp.resize(crv.control_points.size(), glm::vec<3, T>(0));
-    for (int i = 0; i < cp.size(); ++i) {
-        for (int j = 0; j < dim; ++j) {
-            cp[i][j] = crv.control_points[i][j];
-        }
-    }
-    internal::curveSaveOBJ(filename, crv.degree, crv.knots, cp, crv.weights, true);
+template <typename T>
+void curveSaveOBJ(const std::string &filename, const RationalCurve<T> &crv) {
+    internal::curveSaveOBJ(filename, crv.degree, crv.knots, crv.control_points, crv.weights, true);
 }
 
 /**
@@ -501,8 +479,8 @@ void curveSaveOBJ(const std::string &filename, const RationalCurve<dim, T> &crv)
  * @param filename Name of the file
  * @param srf Surface object to save
  */
-template <int dim, typename T>
-void surfaceSaveOBJ(const std::string &filename, const Surface<dim, T> &srf) {
+template <typename T>
+void surfaceSaveOBJ(const std::string &filename, const Surface<T> &srf) {
     array2<T> w(srf.control_points.rows(), srf.control_points.cols(), T(1));
     internal::surfaceSaveOBJ(filename, srf.degree_u, srf.degree_v, srf.knots_u, srf.knots_v,
                              srf.control_points, w, false);
@@ -513,8 +491,8 @@ void surfaceSaveOBJ(const std::string &filename, const Surface<dim, T> &srf) {
  * @param filename Name of the file
  * @param srf RationalSurface object to save
  */
-template <int dim, typename T>
-void surfaceSaveOBJ(const std::string &filename, const RationalSurface<dim, T> &srf) {
+template <typename T>
+void surfaceSaveOBJ(const std::string &filename, const RationalSurface<T> &srf) {
     internal::surfaceSaveOBJ(filename, srf.degree_u, srf.degree_v, srf.knots_u, srf.knots_v,
                              srf.control_points, srf.weights, true);
 }

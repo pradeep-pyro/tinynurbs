@@ -128,7 +128,7 @@ TEST_CASE("curveReadOBJ and curveSaveOBJ (rational)", "[curve, rational, obj]")
 {
     auto crv = getCircle();
     tinynurbs::curveSaveOBJ("curve.obj", crv);
-    auto read_crv = tinynurbs::curveReadOBJ<3, float>("curve.obj");
+    auto read_crv = tinynurbs::curveReadOBJ<float>("curve.obj");
     REQUIRE(crv.degree == read_crv.degree);
     REQUIRE(crv.knots.size() == read_crv.knots.size());
     for (int i = 0; i < crv.knots.size(); ++i) {

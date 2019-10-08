@@ -208,7 +208,7 @@ TEST_CASE("surfaceReadOBJ and surfaceSaveOBJ (non-rational)", "[surface, non-rat
     auto srf = getBilinearPatch();
     
     tinynurbs::surfaceSaveOBJ("surface_nonrational.obj", srf);
-    auto read_srf = tinynurbs::surfaceReadOBJ<3, float>("surface_nonrational.obj");
+    auto read_srf = tinynurbs::surfaceReadOBJ<float>("surface_nonrational.obj");
     
     REQUIRE(srf.degree_u == read_srf.degree_u);
     REQUIRE(srf.degree_v == read_srf.degree_v);

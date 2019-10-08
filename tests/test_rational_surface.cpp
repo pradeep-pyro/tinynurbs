@@ -221,7 +221,7 @@ TEST_CASE("surfaceReadOBJ and surfaceSaveOBJ (rational)", "[surface, obj]")
     auto srf = getHemisphere();
     
     tinynurbs::surfaceSaveOBJ("surface_rational.obj", srf);
-    auto read_srf = tinynurbs::surfaceReadOBJ<3, float>("surface_rational.obj");
+    auto read_srf = tinynurbs::surfaceReadOBJ<float>("surface_rational.obj");
     
     REQUIRE(srf.degree_u == read_srf.degree_u);
     REQUIRE(srf.degree_v == read_srf.degree_v);

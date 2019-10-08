@@ -201,8 +201,8 @@ Evaluate point on a nonrational NURBS curve
 @param[in] u Parameter to evaluate the curve at.
 @return point Resulting point on the curve at parameter u.
 */
-template <int dim, typename T>
-glm::vec<dim, T> curvePoint(const Curve<dim, T> &crv, T u) {
+template <typename T>
+glm::vec<3, T> curvePoint(const Curve<T> &crv, T u) {
     return internal::curvePoint(crv.degree, crv.knots, crv.control_points, u);
 }
 
@@ -212,10 +212,10 @@ Evaluate point on a rational NURBS curve
 @param[in] u Parameter to evaluate the curve at.
 @return point Resulting point on the curve.
 */
-template <int dim, typename T>
-glm::vec<dim, T> curvePoint(const RationalCurve<dim, T> &crv, T u) {
+template <typename T>
+glm::vec<3, T> curvePoint(const RationalCurve<T> &crv, T u) {
 
-    typedef glm::vec<dim + 1, T> tvecnp1;
+    typedef glm::vec<4, T> tvecnp1;
 
     // Compute homogenous coordinates of control points
     std::vector<tvecnp1> Cw;
@@ -240,8 +240,8 @@ Evaluate derivatives of a non-rational NURBS curve
 @return curve_ders Derivatives of the curve at u.
 E.g. curve_ders[n] is the nth derivative at u, where 0 <= n <= num_ders.
 */
-template <int dim, typename T>
-std::vector<glm::vec<dim, T>> curveDerivatives(const Curve<dim, T> &crv, int num_ders, T u) {
+template <typename T>
+std::vector<glm::vec<3, T>> curveDerivatives(const Curve<T> &crv, int num_ders, T u) {
     return internal::curveDerivatives(crv.degree, crv.knots, crv.control_points,
                                       num_ders, u);
 }
@@ -256,38 +256,33 @@ Evaluate derivatives of a rational NURBS curve
 @param[inout] curve_ders Derivatives of the curve at u.
 E.g. curve_ders[n] is the nth derivative at u, where n is between 0 and num_ders-1.
 */
-template <int dim, typename T>
-std::vector<glm::vec<dim, T>> curveDerivatives(const RationalCurve<dim, T> &crv, int num_ders,
+template <typename T>
+std::vector<glm::vec<3, T>> curveDerivatives(const RationalCurve<T> &crv, int num_ders,
                                                T u) {
 
-    typedef glm::vec<dim, T> tvecn;
-    typedef glm::vec<dim + 1, T> tvecnp1;
-    using std::vector;
+    typedef glm::vec<3, T> tvecn;
+    typedef glm::vec<4, T> tvecnp1;
 
-    std::vector<glm::vec<dim, T>> curve_ders;
+    std::vector<tvecn> curve_ders;
     curve_ders.reserve(num_ders + 1);
 
     // Compute homogenous coordinates of control points
-    vector<tvecnp1> Cw;
+    std::vector<tvecnp1> Cw;
     Cw.reserve(crv.control_points.size());
     for (int i = 0; i < crv.control_points.size(); i++) {
-        Cw.push_back(tvecnp1(util::cartesianToHomogenous(crv.control_points[i],
-                             crv.weights[i])));
+        Cw.push_back(util::cartesianToHomogenous(crv.control_points[i],
+                     crv.weights[i]));
     }
 
     // Derivatives of Cw
-    vector<tvecnp1> Cwders = internal::curveDerivatives(crv.degree, crv.knots, Cw, num_ders, u);
+    std::vector<tvecnp1> Cwders = internal::curveDerivatives(crv.degree, crv.knots, Cw, num_ders, u);
 
     // Split Cwders into coordinates and weights
     vector<tvecn> Aders;
     vector<T> wders;
     for (const auto &val : Cwders) {
-        tvecn Aderi;
-        for (int i = 0; i < dim; i++) {
-            Aderi[i] = val[i];
-        }
-        Aders.push_back(Aderi);
-        wders.push_back(val[dim]);
+        Aders.push_back(util::truncateHomogenous(val));
+        wders.push_back(val.w);
     }
 
     // Compute rational derivatives
@@ -306,10 +301,10 @@ Evaluate the tangent of a B-spline curve
 @param[in] crv Curve object
 @return Unit tangent of the curve at u.
 */
-template <int dim, typename T>
-glm::vec<dim, T> curveTangent(const Curve<dim, T> &crv, T u) {
-    std::vector<glm::vec<dim, T>> ders = curveDerivatives(crv, 1, u);
-    glm::vec<dim, T> du = ders[1];
+template <typename T>
+glm::vec<3, T> curveTangent(const Curve<T> &crv, T u) {
+    std::vector<glm::vec<3, T>> ders = curveDerivatives(crv, 1, u);
+    glm::vec<3, T> du = ders[1];
     T du_len = glm::length(du);
     if (!util::close(du_len, T(0))) {
         du /= du_len;
@@ -322,10 +317,10 @@ Evaluate the tangent of a rational B-spline curve
 @param[in] crv RationalCurve object
 @return Unit tangent of the curve at u.
 */
-template <int dim, typename T>
-glm::vec<dim, T> curveTangent(const RationalCurve<dim, T> &crv, T u) {
-    std::vector<glm::vec<dim, T>> ders = curveDerivatives(crv, 1, u);
-    glm::vec<dim, T> du = ders[1];
+template <typename T>
+glm::vec<3, T> curveTangent(const RationalCurve<T> &crv, T u) {
+    std::vector<glm::vec<3, T>> ders = curveDerivatives(crv, 1, u);
+    glm::vec<3, T> du = ders[1];
     T du_len = glm::length(du);
     if (!util::close(du_len, T(0))) {
         du /= du_len;
@@ -340,8 +335,8 @@ Evaluate point on a nonrational NURBS surface
 @param[in] v Parameter to evaluate the surface at.
 @return Resulting point on the surface at (u, v).
 */
-template <int dim, typename T>
-glm::vec<dim, T> surfacePoint(const Surface<dim, T> &srf, T u, T v) {
+template <typename T>
+glm::vec<3, T> surfacePoint(const Surface<T> &srf, T u, T v) {
     return internal::surfacePoint(srf.degree_u, srf.degree_v, srf.knots_u, srf.knots_v,
                                   srf.control_points, u, v);
 }
@@ -353,10 +348,10 @@ Evaluate point on a non-rational NURBS surface
 @param[in] v Parameter to evaluate the surface at.
 @return Resulting point on the surface at (u, v).
 */
-template <int dim, typename T>
-glm::vec<dim, T> surfacePoint(const RationalSurface<dim, T> &srf, T u, T v) {
+template <typename T>
+glm::vec<3, T> surfacePoint(const RationalSurface<T> &srf, T u, T v) {
 
-    typedef glm::vec<dim + 1, T> tvecnp1;
+    typedef glm::vec<4, T> tvecnp1;
 
     // Compute homogenous coordinates of control points
     array2<tvecnp1> Cw;
@@ -388,8 +383,8 @@ Evaluate derivatives on a non-rational NURBS surface
 @param[in] v Parameter to evaluate the surface at.
 @return surf_ders Derivatives of the surface at (u, v).
 */
-template <int dim, typename T>
-array2<glm::vec<dim, T>> surfaceDerivatives(const Surface<dim, T> &srf, int num_ders,
+template <typename T>
+array2<glm::vec<3, T>> surfaceDerivatives(const Surface<T> &srf, int num_ders,
                                             T u, T v) {
     return internal::surfaceDerivatives(srf.degree_u, srf.degree_v, srf.knots_u,
                                         srf.knots_v, srf.control_points, num_ders,
@@ -404,15 +399,15 @@ Evaluate derivatives on a rational NURBS surface
 @param[in] num_ders Number of times to differentiate
 @return Derivatives on the surface at parameter (u, v).
 */
-template <int dim, typename T>
-array2<glm::vec<dim, T>> surfaceDerivatives(const RationalSurface<dim, T> &srf, int num_ders,
+template <typename T>
+array2<glm::vec<3, T>> surfaceDerivatives(const RationalSurface<T> &srf, int num_ders,
                                             T u, T v) {
 
     using namespace std;
     using namespace glm;
 
-    typedef vec<dim, T> tvecn;
-    typedef vec<dim + 1, T> tvecnp1;
+    typedef vec<3, T> tvecn;
+    typedef vec<4, T> tvecnp1;
 
     array2<tvecnp1> homo_cp;
     homo_cp.resize(srf.control_points.rows(), srf.control_points.cols());
@@ -434,27 +429,27 @@ array2<glm::vec<dim, T>> surfaceDerivatives(const RationalSurface<dim, T> &srf, 
         }
     }
 
-    array2<glm::vec<dim, T>> surf_ders(num_ders + 1, num_ders + 1);
+    array2<tvecn> surf_ders(num_ders + 1, num_ders + 1);
     for (int k = 0; k < num_ders + 1; ++k) {
         for (int l = 0; l < num_ders - k + 1; ++l) {
             auto der = Aders(k, l);
 
             for (int j = 1; j < l + 1; ++j) {
-                der -= (T)util::binomial(l, j) * homo_ders(0, j)[dim] * surf_ders(k, l - j);
+                der -= (T)util::binomial(l, j) * homo_ders(0, j).w * surf_ders(k, l - j);
             }
 
             for (int i = 1; i <  k + 1; ++i) {
-                der -= (T)util::binomial(k, i) * homo_ders(i, 0)[dim] * surf_ders(k - i, l);
+                der -= (T)util::binomial(k, i) * homo_ders(i, 0).w * surf_ders(k - i, l);
 
                 tvecn tmp((T)0.0);
                 for (int j = 1; j < l + 1; ++j) {
-                    tmp -= (T)util::binomial(l, j) * homo_ders(i, j)[dim] * surf_ders(k - 1, l - j);
+                    tmp -= (T)util::binomial(l, j) * homo_ders(i, j).w * surf_ders(k - 1, l - j);
                 }
 
                 der -= (T)util::binomial(k, i) * tmp;
             }
 
-            der *= 1 / homo_ders(0, 0)[dim];
+            der *= 1 / homo_ders(0, 0).w;
             surf_ders(k, l) = der;
         }
     }
@@ -468,12 +463,12 @@ Evaluate the two orthogonal tangents of a non-rational surface at the given para
 @param v Parameter in the v-direction
 @return Tuple with unit tangents along u- and v-directions
 */
-template <int dim, typename T>
-std::tuple<glm::vec<dim, T>, glm::vec<dim, T>>
-surfaceTangent(const Surface<dim, T> &srf, T u, T v) {
-    array2<glm::vec<dim, T>> ptder = surfaceDerivatives(srf, 1, u, v);
-    glm::vec<dim, T> du = ptder(1, 0);
-    glm::vec<dim, T> dv = ptder(0, 1);
+template <typename T>
+std::tuple<glm::vec<3, T>, glm::vec<3, T>>
+surfaceTangent(const Surface<T> &srf, T u, T v) {
+    array2<glm::vec<3, T>> ptder = surfaceDerivatives(srf, 1, u, v);
+    glm::vec<3, T> du = ptder(1, 0);
+    glm::vec<3, T> dv = ptder(0, 1);
     T du_len = glm::length(ptder(1, 0));
     T dv_len = glm::length(ptder(0, 1));
     if (!util::close(du_len, T(0))) {
@@ -492,12 +487,12 @@ Evaluate the two orthogonal tangents of a rational surface at the given paramete
 @param v Parameter in the v-direction
 @return Tuple with unit tangents along u- and v-directions
 */
-template <int dim, typename T>
-std::tuple<glm::vec<dim, T>, glm::vec<dim, T>>
-surfaceTangent(const RationalSurface<dim, T> &srf, T u, T v) {
-    array2<glm::vec<dim, T>> ptder = surfaceDerivatives(srf, 1, u, v);
-    glm::vec<dim, T> du = ptder(1, 0);
-    glm::vec<dim, T> dv = ptder(0, 1);
+template <typename T>
+std::tuple<glm::vec<3, T>, glm::vec<3, T>>
+surfaceTangent(const RationalSurface<T> &srf, T u, T v) {
+    array2<glm::vec<3, T>> ptder = surfaceDerivatives(srf, 1, u, v);
+    glm::vec<3, T> du = ptder(1, 0);
+    glm::vec<3, T> dv = ptder(0, 1);
     T du_len = glm::length(ptder(1, 0));
     T dv_len = glm::length(ptder(0, 1));
     if (!util::close(du_len, T(0))) {
@@ -516,10 +511,10 @@ Evaluate the normal a non-rational surface at the given parameters
 @param v Parameter in the v-direction
 @param[inout] normal Unit normal at of the surface at (u, v)
 */
-template <int dim, typename T>
-glm::vec<dim, T> surfaceNormal(const Surface<dim, T> &srf, T u, T v) {
-    array2<glm::vec<dim, T>> ptder = surfaceDerivatives(srf, 1, u, v);
-    glm::vec<dim, T> n = glm::cross(ptder(0, 1), ptder(1, 0));
+template <typename T>
+glm::vec<3, T> surfaceNormal(const Surface<T> &srf, T u, T v) {
+    array2<glm::vec<3, T>> ptder = surfaceDerivatives(srf, 1, u, v);
+    glm::vec<3, T> n = glm::cross(ptder(0, 1), ptder(1, 0));
     T n_len = glm::length(n);
     if (!util::close(n_len, T(0))) {
         n /= n_len;
@@ -534,10 +529,10 @@ Evaluate the normal of a rational surface at the given parameters
 @param v Parameter in the v-direction
 @return Unit normal at of the surface at (u, v)
 */
-template <int dim, typename T>
-glm::vec<dim, T> surfaceNormal(const RationalSurface<dim, T> &srf, T u, T v) {
-    array2<glm::vec<dim, T>> ptder = surfaceDerivatives(srf, 1, u, v);
-    glm::vec<dim, T> n = glm::cross(ptder(0, 1), ptder(1, 0));
+template <typename T>
+glm::vec<3, T> surfaceNormal(const RationalSurface<T> &srf, T u, T v) {
+    array2<glm::vec<3, T>> ptder = surfaceDerivatives(srf, 1, u, v);
+    glm::vec<3, T> n = glm::cross(ptder(0, 1), ptder(1, 0));
     T n_len = glm::length(n);
     if (!util::close(n_len, T(0))) {
         n /= n_len;

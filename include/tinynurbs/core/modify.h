@@ -336,9 +336,9 @@ void surfaceSplit(unsigned int degree, const std::vector<T> &knots,
  * @param repeat Number of times to insert
  * @return New curve with #repeat knots inserted at u
  */
-template <int dim, typename T>
-Curve<dim, T> curveKnotInsert(const Curve<dim, T> &crv, T u, unsigned int repeat=1) {
-    Curve<dim, T> new_crv;
+template <typename T>
+Curve<T> curveKnotInsert(const Curve<T> &crv, T u, unsigned int repeat=1) {
+    Curve<T> new_crv;
     new_crv.degree = crv.degree;
     internal::curveKnotInsert(crv.degree, crv.knots, crv.control_points, u,
                               repeat, new_crv.knots, new_crv.control_points);
@@ -352,21 +352,21 @@ Curve<dim, T> curveKnotInsert(const Curve<dim, T> &crv, T u, unsigned int repeat
  * @param repeat Number of times to insert
  * @return New RationalCurve object with #repeat knots inserted at u
  */
-template <int dim, typename T>
-RationalCurve<dim, T> curveKnotInsert(const RationalCurve<dim, T> &crv, T u,
+template <typename T>
+RationalCurve<T> curveKnotInsert(const RationalCurve<T> &crv, T u,
                                       unsigned int repeat=1) {
-    RationalCurve<dim, T> new_crv;
+    RationalCurve<T> new_crv;
     new_crv.degree = crv.degree;
 
     // Convert to homogenous coordinates
-    std::vector<glm::vec<dim + 1, T>> Cw;
+    std::vector<glm::vec<4, T>> Cw;
     Cw.reserve(crv.control_points.size());
     for (int i = 0; i < crv.control_points.size(); ++i) {
         Cw.push_back(util::cartesianToHomogenous(crv.control_points[i], crv.weights[i]));
     }
 
     // Perform knot insertion and get new knots and control points
-    std::vector<glm::vec<dim + 1, T>> new_Cw;
+    std::vector<glm::vec<4, T>> new_Cw;
     std::vector<T> new_knots;
     internal::curveKnotInsert(crv.degree, crv.knots, Cw, u, repeat, new_crv.knots, new_Cw);
 
@@ -375,7 +375,7 @@ RationalCurve<dim, T> curveKnotInsert(const RationalCurve<dim, T> &crv, T u,
     new_crv.weights.reserve(new_Cw.size());
     for (int i = 0; i < new_Cw.size(); ++i) {
         new_crv.control_points.push_back(util::homogenousToCartesian(new_Cw[i]));
-        new_crv.weights.push_back(new_Cw[i][dim]);
+        new_crv.weights.push_back(new_Cw[i].w);
     }
     return new_crv;
 }
@@ -387,9 +387,9 @@ RationalCurve<dim, T> curveKnotInsert(const RationalCurve<dim, T> &crv, T u,
  * @param repeat Number of times to insert
  * @return New Surface object after knot insertion
  */
-template <int dim, typename T>
-Surface<dim, T> surfaceKnotInsertU(const Surface<dim, T> &srf, T u, unsigned int repeat=1) {
-    Surface<dim, T> new_srf;
+template <typename T>
+Surface<T> surfaceKnotInsertU(const Surface<T> &srf, T u, unsigned int repeat=1) {
+    Surface<T> new_srf;
     new_srf.degree_u = srf.degree_u;
     new_srf.degree_v = srf.degree_v;
     new_srf.knots_v = srf.knots_v;
@@ -405,16 +405,16 @@ Surface<dim, T> surfaceKnotInsertU(const Surface<dim, T> &srf, T u, unsigned int
  * @param repeat Number of times to insert
  * @return New RationalSurface object after knot insertion
  */
-template <int dim, typename T>
-RationalSurface<dim, T> surfaceKnotInsertU(const RationalSurface<dim, T> &srf, T u,
+template <typename T>
+RationalSurface<T> surfaceKnotInsertU(const RationalSurface<T> &srf, T u,
                                            unsigned int repeat=1) {
-    RationalSurface<dim, T> new_srf;
+    RationalSurface<T> new_srf;
     new_srf.degree_u = srf.degree_u;
     new_srf.degree_v = srf.degree_v;
     new_srf.knots_v = srf.knots_v;
 
     // Original control points in homogenous coordinates
-    array2<glm::vec<dim + 1, T>> Cw(srf.control_points.rows(), srf.control_points.cols());
+    array2<glm::vec<4, T>> Cw(srf.control_points.rows(), srf.control_points.cols());
     for (int i = 0; i < srf.control_points.rows(); ++i) {
         for (int j = 0; j < srf.control_points.cols(); ++j) {
             Cw(i, j) = util::cartesianToHomogenous(srf.control_points(i, j), srf.weights(i, j));
@@ -423,7 +423,7 @@ RationalSurface<dim, T> surfaceKnotInsertU(const RationalSurface<dim, T> &srf, T
 
     // New knots and new homogenous control points after knot insertion
     std::vector<T> new_knots_u;
-    array2<glm::vec<dim + 1, T>> new_Cw;
+    array2<glm::vec<4, T>> new_Cw;
     internal::surfaceKnotInsert(srf.degree_u, srf.knots_u, Cw, u, repeat, true,
                                 new_srf.knots_u, new_Cw);
 
@@ -433,7 +433,7 @@ RationalSurface<dim, T> surfaceKnotInsertU(const RationalSurface<dim, T> &srf, T
     for (int i = 0; i < new_Cw.rows(); ++i) {
         for (int j = 0; j < new_Cw.cols(); ++j) {
             new_srf.control_points(i, j) = util::homogenousToCartesian(new_Cw(i, j));
-            new_srf.weights(i, j) = new_Cw(i, j)[dim];
+            new_srf.weights(i, j) = new_Cw(i, j).w;
         }
     }
     return new_srf;
@@ -446,9 +446,9 @@ RationalSurface<dim, T> surfaceKnotInsertU(const RationalSurface<dim, T> &srf, T
  * @param repeat Number of times to insert
  * @return New Surface object after knot insertion
  */
-template <int dim, typename T>
-Surface<dim, T> surfaceKnotInsertV(const Surface<dim, T> &srf, T v, unsigned int repeat=1) {
-    Surface<dim, T> new_srf;
+template <typename T>
+Surface<T> surfaceKnotInsertV(const Surface<T> &srf, T v, unsigned int repeat=1) {
+    Surface<T> new_srf;
     new_srf.degree_u = srf.degree_u;
     new_srf.degree_v = srf.degree_v;
     new_srf.knots_u = srf.knots_u;
@@ -465,15 +465,15 @@ Surface<dim, T> surfaceKnotInsertV(const Surface<dim, T> &srf, T v, unsigned int
  * @param repeat Number of times to insert
  * @return New RationalSurface object after knot insertion
  */
-template <int dim, typename T>
-RationalSurface<dim, T> surfaceKnotInsertV(const RationalSurface<dim, T> &srf, T v,
+template <typename T>
+RationalSurface<T> surfaceKnotInsertV(const RationalSurface<T> &srf, T v,
                                            unsigned int repeat=1) {
-    RationalSurface<dim, T> new_srf;
+    RationalSurface<T> new_srf;
     new_srf.degree_u = srf.degree_u;
     new_srf.degree_v = srf.degree_v;
     new_srf.knots_u = srf.knots_u;
     // Original control points in homogenous coordinates
-    array2<glm::vec<dim + 1, T>> Cw(srf.control_points.rows(), srf.control_points.cols());
+    array2<glm::vec<4, T>> Cw(srf.control_points.rows(), srf.control_points.cols());
     for (int i = 0; i < srf.control_points.rows(); ++i) {
         for (int j = 0; j < srf.control_points.cols(); ++j) {
             Cw(i, j) = util::cartesianToHomogenous(srf.control_points(i, j), srf.weights(i, j));
@@ -482,7 +482,7 @@ RationalSurface<dim, T> surfaceKnotInsertV(const RationalSurface<dim, T> &srf, T
 
     // New knots and new homogenous control points after knot insertion
     std::vector<T> new_knots_v;
-    array2<glm::vec<dim + 1, T>> new_Cw;
+    array2<glm::vec<4, T>> new_Cw;
     internal::surfaceKnotInsert(srf.degree_v, srf.knots_v, Cw, v, repeat, false,
                                 new_srf.knots_v, new_Cw);
 
@@ -492,7 +492,7 @@ RationalSurface<dim, T> surfaceKnotInsertV(const RationalSurface<dim, T> &srf, T
     for (int i = 0; i < new_Cw.rows(); ++i) {
         for (int j = 0; j < new_Cw.cols(); ++j) {
             new_srf.control_points(i, j) = util::homogenousToCartesian(new_Cw(i, j));
-            new_srf.weights(i, j) = new_Cw(i, j)[dim];
+            new_srf.weights(i, j) = new_Cw(i, j).w;
         }
     }
     return new_srf;
@@ -504,10 +504,10 @@ RationalSurface<dim, T> surfaceKnotInsertV(const RationalSurface<dim, T> &srf, T
  * @param u Parameter to split at
  * @return Tuple with first half and second half of the curve
  */
-template <int dim, typename T>
-std::tuple<Curve<dim, T>, Curve<dim,T>>
-curveSplit(const Curve<dim, T> &crv, T u) {
-    Curve<dim, T> left, right;
+template <typename T>
+std::tuple<Curve<T>, Curve<T>>
+curveSplit(const Curve<T> &crv, T u) {
+    Curve<T> left, right;
     left.degree = crv.degree;
     right.degree = crv.degree;
     internal::curveSplit(crv.degree, crv.knots, crv.control_points, u,
@@ -521,14 +521,14 @@ curveSplit(const Curve<dim, T> &crv, T u) {
  * @param u Parameter to split at
  * @return Tuple with first half and second half of the curve
  */
-template <int dim, typename T>
-std::tuple<RationalCurve<dim, T>, RationalCurve<dim, T>>
-curveSplit(const RationalCurve<dim, T> &crv, T u) {
-    RationalCurve<dim, T> left, right;
+template <typename T>
+std::tuple<RationalCurve<T>, RationalCurve<T>>
+curveSplit(const RationalCurve<T> &crv, T u) {
+    RationalCurve<T> left, right;
     left.degree = crv.degree;
     right.degree = crv.degree;
 
-    std::vector<glm::vec<dim + 1, T>> Cw, left_Cw, right_Cw;
+    std::vector<glm::vec<4, T>> Cw, left_Cw, right_Cw;
     Cw.reserve(crv.control_points.size());
     for (int i = 0; i < crv.control_points.size(); ++i) {
         Cw.push_back(util::cartesianToHomogenous(crv.control_points[i], crv.weights[i]));
@@ -543,11 +543,11 @@ curveSplit(const RationalCurve<dim, T> &crv, T u) {
     right.weights.reserve(right_Cw.size());
     for (int i = 0; i < left_Cw.size(); ++i) {
         left.control_points.push_back(util::homogenousToCartesian(left_Cw[i]));
-        left.weights.push_back(left_Cw[i][dim]);
+        left.weights.push_back(left_Cw[i].w);
     }
     for (int i = 0; i < right_Cw.size(); ++i) {
         right.control_points.push_back(util::homogenousToCartesian(right_Cw[i]));
-        right.weights.push_back(right_Cw[i][dim]);
+        right.weights.push_back(right_Cw[i].w);
     }
     return std::make_tuple(std::move(left), std::move(right));
 }
@@ -558,10 +558,10 @@ curveSplit(const RationalCurve<dim, T> &crv, T u) {
  * @param u Parameter along u-direction to split the surface
  * @return Tuple with first and second half of the surfaces
  */
-template <int dim, typename T>
-std::tuple<Surface<dim, T>, Surface<dim, T>>
-surfaceSplitU(const Surface<dim, T> &srf, T u) {
-    Surface<dim, T> left, right;
+template <typename T>
+std::tuple<Surface<T>, Surface<T>>
+surfaceSplitU(const Surface<T> &srf, T u) {
+    Surface<T> left, right;
     left.degree_u = srf.degree_u;
     left.degree_v = srf.degree_v;
     left.knots_v = srf.knots_v;
@@ -579,10 +579,10 @@ surfaceSplitU(const Surface<dim, T> &srf, T u) {
  * @param u Parameter along u-direction to split the surface
  * @return Tuple with first and second half of the surfaces
  */
-template <int dim, typename T>
-std::tuple<RationalSurface<dim, T>, RationalSurface<dim, T>>
-surfaceSplitU(const RationalSurface<dim, T> &srf, T u) {
-    RationalSurface<dim, T> left, right;
+template <typename T>
+std::tuple<RationalSurface<T>, RationalSurface<T>>
+surfaceSplitU(const RationalSurface<T> &srf, T u) {
+    RationalSurface<T> left, right;
     left.degree_u = srf.degree_u;
     left.degree_v = srf.degree_v;
     left.knots_v = srf.knots_v;
@@ -591,10 +591,10 @@ surfaceSplitU(const RationalSurface<dim, T> &srf, T u) {
     right.knots_v = srf.knots_v;
 
     // Compute homogenous coordinates of control points and weights
-    array2<glm::vec<dim + 1, T>> Cw = util::cartesianToHomogenous(srf.control_points, srf.weights);
+    array2<glm::vec<4, T>> Cw = util::cartesianToHomogenous(srf.control_points, srf.weights);
 
     // Split surface with homogenous coordinates
-    array2<glm::vec<dim + 1, T>> left_Cw, right_Cw;
+    array2<glm::vec<4, T>> left_Cw, right_Cw;
     internal::surfaceSplit(srf.degree_u, srf.knots_u, Cw, u, true,
                            left.knots_u, left_Cw, right.knots_u, right_Cw);
     
@@ -611,10 +611,10 @@ surfaceSplitU(const RationalSurface<dim, T> &srf, T u) {
  * @param v Parameter along v-direction to split the surface
  * @return Tuple with first and second half of the surfaces
  */
-template <int dim, typename T>
-std::tuple<Surface<dim, T>, Surface<dim, T>>
-surfaceSplitV(const Surface<dim, T> &srf, T v) {
-    Surface<dim, T> left, right;
+template <typename T>
+std::tuple<Surface<T>, Surface<T>>
+surfaceSplitV(const Surface<T> &srf, T v) {
+    Surface<T> left, right;
     left.degree_u = srf.degree_u;
     left.degree_v = srf.degree_v;
     left.knots_u = srf.knots_u;
@@ -632,10 +632,10 @@ surfaceSplitV(const Surface<dim, T> &srf, T v) {
  * @param v Parameter along v-direction to split the surface
  * @return Tuple with first and second half of the surfaces
  */
-template <int dim, typename T>
-std::tuple<RationalSurface<dim, T>, RationalSurface<dim, T>>
-surfaceSplitV(const RationalSurface<dim, T> &srf, T v) {
-    RationalSurface<dim, T> left, right;
+template <typename T>
+std::tuple<RationalSurface<T>, RationalSurface<T>>
+surfaceSplitV(const RationalSurface<T> &srf, T v) {
+    RationalSurface<T> left, right;
     left.degree_u = srf.degree_u;
     left.degree_v = srf.degree_v;
     left.knots_u = srf.knots_u;
@@ -644,10 +644,10 @@ surfaceSplitV(const RationalSurface<dim, T> &srf, T v) {
     right.knots_u = srf.knots_u;
 
     // Compute homogenous coordinates of control points and weights
-    array2<glm::vec<dim + 1, T>> Cw = util::cartesianToHomogenous(srf.control_points, srf.weights);
+    array2<glm::vec<4, T>> Cw = util::cartesianToHomogenous(srf.control_points, srf.weights);
 
     // Split surface with homogenous coordinates
-    array2<glm::vec<dim + 1, T>> left_Cw, right_Cw;
+    array2<glm::vec<4, T>> left_Cw, right_Cw;
     internal::surfaceSplit(srf.degree_v, srf.knots_v, Cw, v, false,
                            left.knots_v, left_Cw, right.knots_v, right_Cw);
     
