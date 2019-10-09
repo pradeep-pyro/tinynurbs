@@ -1,10 +1,9 @@
 /**
-@file
-@brief Low-level functions for evaluating B-spline basis functions and their derivatives
-
-Use of this source code is governed by a BSD-style license that can be found in
-the LICENSE file.
-*/
+ * Low-level functions for evaluating B-spline basis functions and their derivatives
+ * 
+ * Use of this source code is governed by a BSD-style license that can be found in
+ * the LICENSE file.
+ */
 
 #ifndef TINYNURBS_BASIS_H
 #define TINYNURBS_BASIS_H
@@ -17,11 +16,11 @@ namespace tinynurbs
 {
 
 /**
-Find the span of the given parameter in the knot vector.
-@param[in] degree Degree of the curve.
-@param[in] knots Knot vector of the curve.
-@param[in] u Parameter value.
-@return Span index into the knot vector such that (span - 1) < u <= span
+ * Find the span of the given parameter in the knot vector.
+ * @param[in] degree Degree of the curve.
+ * @param[in] knots Knot vector of the curve.
+ * @param[in] u Parameter value.
+ * @return Span index into the knot vector such that (span - 1) < u <= span
 */
 template <typename T> int findSpan(unsigned int degree, const std::vector<T> &knots, T u)
 {
@@ -64,13 +63,13 @@ template <typename T> int findSpan(unsigned int degree, const std::vector<T> &kn
 }
 
 /**
-Compute a single B-spline basis function
-@param[in] i The ith basis function to compute.
-@param[in] deg Degree of the basis function.
-@param[in] knots Knot vector corresponding to the basis functions.
-@param[in] u Parameter to evaluate the basis functions at.
-@return The value of the ith basis function at u.
-*/
+ * Compute a single B-spline basis function
+ * @param[in] i The ith basis function to compute.
+ * @param[in] deg Degree of the basis function.
+ * @param[in] knots Knot vector corresponding to the basis functions.
+ * @param[in] u Parameter to evaluate the basis functions at.
+ * @return The value of the ith basis function at u.
+ */
 template <typename T> T bsplineOneBasis(int i, unsigned int deg, const std::vector<T> &U, T u)
 {
     int m = static_cast<int>(U.size()) - 1;
@@ -116,13 +115,13 @@ template <typename T> T bsplineOneBasis(int i, unsigned int deg, const std::vect
 }
 
 /**
-Compute all non-zero B-spline basis functions
-@param[in] deg Degree of the basis function.
-@param[in] span Index obtained from findSpan() corresponding the u and knots.
-@param[in] knots Knot vector corresponding to the basis functions.
-@param[in] u Parameter to evaluate the basis functions at.
-@return N Values of (deg+1) non-zero basis functions.
-*/
+ * Compute all non-zero B-spline basis functions
+ * @param[in] deg Degree of the basis function.
+ * @param[in] span Index obtained from findSpan() corresponding the u and knots.
+ * @param[in] knots Knot vector corresponding to the basis functions.
+ * @param[in] u Parameter to evaluate the basis functions at.
+ * @return N Values of (deg+1) non-zero basis functions.
+ */
 template <typename T>
 std::vector<T> bsplineBasis(unsigned int deg, int span, const std::vector<T> &knots, T u)
 {
@@ -152,14 +151,14 @@ std::vector<T> bsplineBasis(unsigned int deg, int span, const std::vector<T> &kn
 }
 
 /**
-// Compute all non-zero derivatives of B-spline basis functions
-@param[in] deg Degree of the basis function.
-@param[in] span Index obtained from findSpan() corresponding the u and knots.
-@param[in] knots Knot vector corresponding to the basis functions.
-@param[in] u Parameter to evaluate the basis functions at.
-@param[in] num_ders Number of derivatives to compute (num_ders <= deg)
-@return ders Values of non-zero derivatives of basis functions.
-*/
+ * Compute all non-zero derivatives of B-spline basis functions
+ * @param[in] deg Degree of the basis function.
+ * @param[in] span Index obtained from findSpan() corresponding the u and knots.
+ * @param[in] knots Knot vector corresponding to the basis functions.
+ * @param[in] u Parameter to evaluate the basis functions at.
+ * @param[in] num_ders Number of derivatives to compute (num_ders <= deg)
+ * @return ders Values of non-zero derivatives of basis functions.
+ */
 template <typename T>
 array2<T> bsplineDerBasis(unsigned int deg, int span, const std::vector<T> &knots, T u,
                           int num_ders)

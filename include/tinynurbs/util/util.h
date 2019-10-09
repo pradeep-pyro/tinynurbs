@@ -1,9 +1,8 @@
 /**
-@file
-@brief Helper functions
-
-Use of this source code is governed by a BSD-style license that can be found in
-the LICENSE file.
+ * Helper functions
+ * 
+ * Use of this source code is governed by a BSD-style license that can be found in
+ * the LICENSE file.
 */
 
 #ifndef TINYNURBS_UTIL
@@ -19,17 +18,24 @@ namespace util
 {
 
 /**
-Convert an nd point in homogenous coordinates to an (n-1)d point in cartesian
-coordinates by perspective division
-@param[in] pt Point in homogenous coordinates
-@return Input point in cartesian coordinates
-*/
+ * Convert an nd point in homogenous coordinates to an (n-1)d point in cartesian
+ * coordinates by perspective division
+ * @param[in] pt Point in homogenous coordinates
+ * @return Point in cartesian coordinates
+ */
 template <int nd, typename T>
 inline glm::vec<nd - 1, T> homogenousToCartesian(const glm::vec<nd, T> &pt)
 {
     return glm::vec<nd - 1, T>(pt / pt[pt.length() - 1]);
 }
 
+/**
+ * Convert a list of nd points in homogenous coordinates to a list of (n-1)d points in cartesian
+ * coordinates by perspective division
+ * @param[in] ptsws Points in homogenous coordinates
+ * @param[out] pts Points in cartesian coordinates
+ * @param[out] ws Homogenous weights
+ */
 template <int nd, typename T>
 inline void homogenousToCartesian(const std::vector<glm::vec<nd, T>> &ptsws,
                                   std::vector<glm::vec<nd - 1, T>> &pts, std::vector<T> &ws)
@@ -46,6 +52,13 @@ inline void homogenousToCartesian(const std::vector<glm::vec<nd, T>> &ptsws,
     }
 }
 
+/**
+ * Convert a 2D list of nd points in homogenous coordinates to cartesian
+ * coordinates by perspective division
+ * @param[in] ptsws Points in homogenous coordinates
+ * @param[out] pts Points in cartesian coordinates
+ * @param[out] ws Homogenous weights
+ */
 template <int nd, typename T>
 inline void homogenousToCartesian(const array2<glm::vec<nd, T>> &ptsws,
                                   array2<glm::vec<nd - 1, T>> &pts, array2<T> &ws)
@@ -65,18 +78,24 @@ inline void homogenousToCartesian(const array2<glm::vec<nd, T>> &ptsws,
 }
 
 /**
-Convert an nd point in cartesian coordinates to an (n+1)d point in homogenous
-coordinates
-@param[in] pt Point in cartesian coordinates
-@param[in] w Weight
-@return Input point in homogenous coordinates
-*/
+ * Convert an nd point in cartesian coordinates to an (n+1)d point in homogenous
+ * coordinates
+ * @param[in] pt Point in cartesian coordinates
+ * @param[in] w Weight
+ * @return Input point in homogenous coordinates
+ */
 template <int nd, typename T>
 inline glm::vec<nd + 1, T> cartesianToHomogenous(const glm::vec<nd, T> &pt, T w)
 {
     return glm::vec<nd + 1, T>(pt * w, w);
 }
 
+/**
+ * Convert list of points in cartesian coordinates to homogenous coordinates
+ * @param[in] pts Points in cartesian coordinates
+ * @param[in] ws Weights
+ * @return Points in homogenous coordinates
+ */
 template <int nd, typename T>
 inline std::vector<glm::vec<nd + 1, T>>
 cartesianToHomogenous(const std::vector<glm::vec<nd, T>> &pts, const std::vector<T> &ws)
@@ -90,6 +109,12 @@ cartesianToHomogenous(const std::vector<glm::vec<nd, T>> &pts, const std::vector
     return Cw;
 }
 
+/**
+ * Convert 2D list of points in cartesian coordinates to homogenous coordinates
+ * @param[in] pts Points in cartesian coordinates
+ * @param[in] ws Weights
+ * @return Points in homogenous coordinates
+ */
 template <int nd, typename T>
 inline array2<glm::vec<nd + 1, T>> cartesianToHomogenous(const array2<glm::vec<nd, T>> &pts,
                                                          const array2<T> &ws)
@@ -106,11 +131,11 @@ inline array2<glm::vec<nd + 1, T>> cartesianToHomogenous(const array2<glm::vec<n
 }
 
 /**
-Convert an (n+1)d point to an nd point without perspective division
-by truncating the last dimension
-@param[in] pt Point in homogenous coordinates
-@return Input point in cartesian coordinates
-*/
+ * Convert an (n+1)d point to an nd point without perspective division
+ * by truncating the last dimension
+ * @param[in] pt Point in homogenous coordinates
+ * @return Input point in cartesian coordinates
+ */
 template <int nd, typename T>
 inline glm::vec<nd - 1, T> truncateHomogenous(const glm::vec<nd, T> &pt)
 {
@@ -118,9 +143,9 @@ inline glm::vec<nd - 1, T> truncateHomogenous(const glm::vec<nd, T> &pt)
 }
 
 /**
-Compute the binomial coefficient (nCk) using the formula
-\product_{i=0}^k (n + 1 - i) / i
-*/
+ * Compute the binomial coefficient (nCk) using the formula
+ * \product_{i=0}^k (n + 1 - i) / i
+ */
 inline unsigned int binomial(unsigned int n, unsigned int k)
 {
     unsigned int result = 1;
@@ -137,16 +162,26 @@ inline unsigned int binomial(unsigned int n, unsigned int k)
 }
 
 /**
-Check if two numbers are close enough within eps
-*/
+ * Check if two numbers are close enough within eps
+ * @param[in] a First number
+ * @param[in] b Second number
+ * @param[in] eps Tolerance for checking closeness
+ * @return Whether the numbers are close w.r.t. the tolerance
+ */
 template <typename T> inline bool close(T a, T b, double eps = std::numeric_limits<T>::epsilon())
 {
     return (std::abs(a - b) < eps) ? true : false;
 }
 
 /**
-Map numbers from one interval to another
-*/
+ * Map numbers from one interval to another
+ * @param[in] val Number to map to another range
+ * @param[in] old_min Minimum value of original range
+ * @param[in] old_max Maximum value of original range
+ * @param[in] new_min Minimum value of new range
+ * @param[in] new_max Maximum value of new range
+ * @return Number mapped to new range
+ */
 template <typename T> inline T mapToRange(T val, T old_min, T old_max, T new_min, T new_max)
 {
     T old_range = old_max - old_min;

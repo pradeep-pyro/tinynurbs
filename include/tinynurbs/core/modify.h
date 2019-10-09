@@ -1,10 +1,9 @@
 /**
-@file
-@brief Functions for modifying NURBS curves and surfaces.
-
-Use of this source code is governed by a BSD-style license that can be found in
-the LICENSE file.
-*/
+ * Functions for modifying NURBS curves and surfaces.
+ * 
+ * Use of this source code is governed by a BSD-style license that can be found in
+ * the LICENSE file.
+ */
 
 #ifndef TINYNURBS_MODIFY_H
 #define TINYNURBS_MODIFY_H
@@ -27,13 +26,13 @@ namespace internal
 
 /**
  * Insert knots in the curve
- * @param deg Degree of the curve
- * @param knots Knot vector of the curve
- * @param cp Control points of the curve
- * @param u Parameter to insert knot(s) at
- * @param r Number of times to insert knot
- * @param[inout] new_knots Updated knot vector
- * @param[inout] new_cp Updated control points
+ * @param[in] deg Degree of the curve
+ * @param[in] knots Knot vector of the curve
+ * @param[in] cp Control points of the curve
+ * @param[in] u Parameter to insert knot(s) at
+ * @param[in] r Number of times to insert knot
+ * @param[out] new_knots Updated knot vector
+ * @param[out] new_cp Updated control points
  */
 template <int dim, typename T>
 void curveKnotInsert(unsigned int deg, const std::vector<T> &knots,
@@ -103,14 +102,14 @@ void curveKnotInsert(unsigned int deg, const std::vector<T> &knots,
 
 /**
  * Insert knots in the surface along one direction
- * @param degree Degree of the surface along which to insert knot
- * @param knots Knot vector
- * @param cp 2D array of control points
- * @param knot Knot value to insert
- * @param r Number of times to insert
- * @param along_u Whether inserting along u-direction
- * @param[inout] new_knots Updated knot vector
- * @param[inout] new_cp Updated control points
+ * @param[in] degree Degree of the surface along which to insert knot
+ * @param[in] knots Knot vector
+ * @param[in] cp 2D array of control points
+ * @param[in] knot Knot value to insert
+ * @param[in] r Number of times to insert
+ * @param[in] along_u Whether inserting along u-direction
+ * @param[out] new_knots Updated knot vector
+ * @param[out] new_cp Updated control points
  */
 template <int dim, typename T>
 void surfaceKnotInsert(unsigned int degree, const std::vector<T> &knots,
@@ -244,14 +243,14 @@ void surfaceKnotInsert(unsigned int degree, const std::vector<T> &knots,
 
 /**
  * Split the curve into two
- * @param degree Degree of curve
- * @param knots Knot vector
- * @param control_points Array of control points
- * @param u Parameter to split curve
- * @param left_knots Knots of the left part of the curve
- * @param left_control_points Control points of the left part of the curve
- * @param right_knots Knots of the right part of the curve
- * @param right_control_points Control points of the right part of the curve
+ * @param[in] degree Degree of curve
+ * @param[in] knots Knot vector
+ * @param[in] control_points Array of control points
+ * @param[in] u Parameter to split curve
+ * @param[out] left_knots Knots of the left part of the curve
+ * @param[out] left_control_points Control points of the left part of the curve
+ * @param[out] right_knots Knots of the right part of the curve
+ * @param[out] right_control_points Control points of the right part of the curve
  */
 template <int dim, typename T>
 void curveSplit(unsigned int degree, const std::vector<T> &knots,
@@ -299,6 +298,18 @@ void curveSplit(unsigned int degree, const std::vector<T> &knots,
     }
 }
 
+/**
+ * Split the surface into two along given parameter direction
+ * @param[in] degree Degree of surface along given direction
+ * @param[in] knots Knot vector of surface along given direction
+ * @param[in] control_points Array of control points
+ * @param[in] param Parameter to split curve
+ * @param[in] along_u Whether the direction to split along is the u-direction
+ * @param[out] left_knots Knots of the left part of the curve
+ * @param[out] left_control_points Control points of the left part of the curve
+ * @param[out] right_knots Knots of the right part of the curve
+ * @param[out] right_control_points Control points of the right part of the curve
+ */
 template <int dim, typename T>
 void surfaceSplit(unsigned int degree, const std::vector<T> &knots,
                   const array2<glm::vec<dim, T>> &control_points, T param, bool along_u,
@@ -383,9 +394,9 @@ void surfaceSplit(unsigned int degree, const std::vector<T> &knots,
 
 /**
  * Insert knots in the curve
- * @param[inout] crv Curve object
- * @param u Parameter to insert knot at
- * @param repeat Number of times to insert
+ * @param[in] crv Curve object
+ * @param[in] u Parameter to insert knot at
+ * @param[in] repeat Number of times to insert
  * @return New curve with #repeat knots inserted at u
  */
 template <typename T> Curve<T> curveKnotInsert(const Curve<T> &crv, T u, unsigned int repeat = 1)
@@ -399,9 +410,9 @@ template <typename T> Curve<T> curveKnotInsert(const Curve<T> &crv, T u, unsigne
 
 /**
  * Insert knots in the rational curve
- * @param[inout] crv RationalCurve object
- * @param u Parameter to insert knot at
- * @param repeat Number of times to insert
+ * @param[in] crv RationalCurve object
+ * @param[in] u Parameter to insert knot at
+ * @param[in] repeat Number of times to insert
  * @return New RationalCurve object with #repeat knots inserted at u
  */
 template <typename T>
@@ -436,9 +447,9 @@ RationalCurve<T> curveKnotInsert(const RationalCurve<T> &crv, T u, unsigned int 
 
 /**
  * Insert knots in the surface along u-direction
- * @param srf Surface object
- * @param u Knot value to insert
- * @param repeat Number of times to insert
+ * @param[in] srf Surface object
+ * @param[in] u Knot value to insert
+ * @param[in] repeat Number of times to insert
  * @return New Surface object after knot insertion
  */
 template <typename T>
@@ -455,9 +466,9 @@ Surface<T> surfaceKnotInsertU(const Surface<T> &srf, T u, unsigned int repeat = 
 
 /**
  * Insert knots in the rational surface along u-direction
- * @param srf RationalSurface object
- * @param u Knot value to insert
- * @param repeat Number of times to insert
+ * @param[in] srf RationalSurface object
+ * @param[in] u Knot value to insert
+ * @param[in] repeat Number of times to insert
  * @return New RationalSurface object after knot insertion
  */
 template <typename T>
@@ -500,9 +511,9 @@ RationalSurface<T> surfaceKnotInsertU(const RationalSurface<T> &srf, T u, unsign
 
 /**
  * Insert knots in the surface along v-direction
- * @param srf Surface object
- * @param v Knot value to insert
- * @param repeat Number of times to insert
+ * @param[in] srf Surface object
+ * @param[in] v Knot value to insert
+ * @param[in] repeat Number of times to insert
  * @return New Surface object after knot insertion
  */
 template <typename T>
@@ -520,9 +531,9 @@ Surface<T> surfaceKnotInsertV(const Surface<T> &srf, T v, unsigned int repeat = 
 
 /**
  * Insert knots in the rational surface along v-direction
- * @param srf RationalSurface object
- * @param v Knot value to insert
- * @param repeat Number of times to insert
+ * @param[in] srf RationalSurface object
+ * @param[in] v Knot value to insert
+ * @param[in] repeat Number of times to insert
  * @return New RationalSurface object after knot insertion
  */
 template <typename T>
@@ -564,8 +575,8 @@ RationalSurface<T> surfaceKnotInsertV(const RationalSurface<T> &srf, T v, unsign
 
 /**
  * Split a curve into two
- * @param crv Curve object
- * @param u Parameter to split at
+ * @param[in] crv Curve object
+ * @param[in] u Parameter to split at
  * @return Tuple with first half and second half of the curve
  */
 template <typename T> std::tuple<Curve<T>, Curve<T>> curveSplit(const Curve<T> &crv, T u)
@@ -580,8 +591,8 @@ template <typename T> std::tuple<Curve<T>, Curve<T>> curveSplit(const Curve<T> &
 
 /**
  * Split a rational curve into two
- * @param crv RationalCurve object
- * @param u Parameter to split at
+ * @param[in] crv RationalCurve object
+ * @param[in] u Parameter to split at
  * @return Tuple with first half and second half of the curve
  */
 template <typename T>
@@ -619,8 +630,8 @@ std::tuple<RationalCurve<T>, RationalCurve<T>> curveSplit(const RationalCurve<T>
 
 /**
  * Split a surface into two along u-direction
- * @param srf Surface object
- * @param u Parameter along u-direction to split the surface
+ * @param[in] srf Surface object
+ * @param[in] u Parameter along u-direction to split the surface
  * @return Tuple with first and second half of the surfaces
  */
 template <typename T> std::tuple<Surface<T>, Surface<T>> surfaceSplitU(const Surface<T> &srf, T u)
@@ -639,8 +650,8 @@ template <typename T> std::tuple<Surface<T>, Surface<T>> surfaceSplitU(const Sur
 
 /**
  * Split a rational surface into two along u-direction
- * @param srf RationalSurface object
- * @param u Parameter along u-direction to split the surface
+ * @param[in] srf RationalSurface object
+ * @param[in] u Parameter along u-direction to split the surface
  * @return Tuple with first and second half of the surfaces
  */
 template <typename T>
@@ -671,8 +682,8 @@ std::tuple<RationalSurface<T>, RationalSurface<T>> surfaceSplitU(const RationalS
 
 /**
  * Split a surface into two along v-direction
- * @param srf Surface object
- * @param v Parameter along v-direction to split the surface
+ * @param[in] srf Surface object
+ * @param[in] v Parameter along v-direction to split the surface
  * @return Tuple with first and second half of the surfaces
  */
 template <typename T> std::tuple<Surface<T>, Surface<T>> surfaceSplitV(const Surface<T> &srf, T v)
@@ -691,8 +702,8 @@ template <typename T> std::tuple<Surface<T>, Surface<T>> surfaceSplitV(const Sur
 
 /**
  * Split a rational surface into two along v-direction
- * @param srf RationalSurface object
- * @param v Parameter along v-direction to split the surface
+ * @param[in] srf RationalSurface object
+ * @param[in] v Parameter along v-direction to split the surface
  * @return Tuple with first and second half of the surfaces
  */
 template <typename T>

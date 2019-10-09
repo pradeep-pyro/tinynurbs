@@ -1,10 +1,9 @@
 /**
-@file
-@brief Wavefront OBJ realted I/O functionality for curves and surfaces.
-
-Use of this source code is governed by a BSD-style license that can be found in
-the LICENSE file.
-*/
+ * Wavefront OBJ realted I/O functionality for curves and surfaces.
+ * 
+ * Use of this source code is governed by a BSD-style license that can be found in
+ * the LICENSE file.
+ */
 
 #ifndef TINYNURBS_OBJ_H
 #define TINYNURBS_OBJ_H

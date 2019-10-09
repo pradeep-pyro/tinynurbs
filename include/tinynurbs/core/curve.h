@@ -1,11 +1,10 @@
 /**
-@file
-@brief The Curve class represents a non-uniform polynomial B-spline curve, while the RationalCurve
-class represents a non-uniform rational B-spline (NURBS) curve.
-
-Use of this source code is governed by a BSD-style license that can be found in
-the LICENSE file.
-*/
+ * The Curve class represents a non-uniform polynomial B-spline curve, while the
+ * RationalCurve class represents a non-uniform rational B-spline (NURBS) curve.
+ *
+ * Use of this source code is governed by a BSD-style license that can be found in
+ * the LICENSE file.
+ */
 
 #ifndef TINYNURBS_CURVE_H
 #define TINYNURBS_CURVE_H

@@ -1,11 +1,10 @@
 /**
-@file
-@brief Core functionality for evaluating points, derivatives and related
-quantities on NURBS curves and surfaces.
-
-Use of this source code is governed by a BSD-style license that can be found in
-the LICENSE file.
-*/
+ * Core functionality for evaluating points, derivatives and related
+ * quantities on NURBS curves and surfaces.
+ *
+ * Use of this source code is governed by a BSD-style license that can be found in
+ * the LICENSE file.
+ */
 
 #ifndef TINYNURBS_EVALUATE_H
 #define TINYNURBS_EVALUATE_H
@@ -28,13 +27,13 @@ namespace internal
 {
 
 /**
-Evaluate point on a nonrational NURBS curve
-@param[in] degree Degree of the given curve.
-@param[in] knots Knot vector of the curve.
-@param[in] control_points Control points of the curve.
-@param[in] u Parameter to evaluate the curve at.
-@return point Resulting point on the curve at parameter u.
-*/
+ * Evaluate point on a nonrational NURBS curve
+ * @param[in] degree Degree of the given curve.
+ * @param[in] knots Knot vector of the curve.
+ * @param[in] control_points Control points of the curve.
+ * @param[in] u Parameter to evaluate the curve at.
+ * @return point Resulting point on the curve at parameter u.
+ */
 template <int dim, typename T>
 glm::vec<dim, T> curvePoint(unsigned int degree, const std::vector<T> &knots,
                             const std::vector<glm::vec<dim, T>> &control_points, T u)
@@ -55,15 +54,15 @@ glm::vec<dim, T> curvePoint(unsigned int degree, const std::vector<T> &knots,
 }
 
 /**
-Evaluate derivatives of a non-rational NURBS curve
-@param[in] degree Degree of the curve
-@param[in] knots Knot vector of the curve.
-@param[in] control_points Control points of the curve.
-@param[in] num_ders Number of times to derivate.
-@param[in] u Parameter to evaluate the derivatives at.
-@return curve_ders Derivatives of the curve at u.
-E.g. curve_ders[n] is the nth derivative at u, where 0 <= n <= num_ders.
-*/
+ * Evaluate derivatives of a non-rational NURBS curve
+ * @param[in] degree Degree of the curve
+ * @param[in] knots Knot vector of the curve.
+ * @param[in] control_points Control points of the curve.
+ * @param[in] num_ders Number of times to derivate.
+ * @param[in] u Parameter to evaluate the derivatives at.
+ * @return curve_ders Derivatives of the curve at u.
+ * E.g. curve_ders[n] is the nth derivative at u, where 0 <= n <= num_ders.
+ */
 template <int dim, typename T>
 std::vector<glm::vec<dim, T>> curveDerivatives(unsigned int degree, const std::vector<T> &knots,
                                                const std::vector<glm::vec<dim, T>> &control_points,
@@ -100,16 +99,16 @@ std::vector<glm::vec<dim, T>> curveDerivatives(unsigned int degree, const std::v
 }
 
 /**
-Evaluate point on a nonrational NURBS surface
-@param[in] degree_u Degree of the given surface in u-direction.
-@param[in] degree_v Degree of the given surface in v-direction.
-@param[in] knots_u Knot vector of the surface in u-direction.
-@param[in] knots_v Knot vector of the surface in v-direction.
-@param[in] control_points Control points of the surface in a 2d array.
-@param[in] u Parameter to evaluate the surface at.
-@param[in] v Parameter to evaluate the surface at.
-@return point Resulting point on the surface at (u, v).
-*/
+ * Evaluate point on a nonrational NURBS surface
+ * @param[in] degree_u Degree of the given surface in u-direction.
+ * @param[in] degree_v Degree of the given surface in v-direction.
+ * @param[in] knots_u Knot vector of the surface in u-direction.
+ * @param[in] knots_v Knot vector of the surface in v-direction.
+ * @param[in] control_points Control points of the surface in a 2d array.
+ * @param[in] u Parameter to evaluate the surface at.
+ * @param[in] v Parameter to evaluate the surface at.
+ * @return point Resulting point on the surface at (u, v).
+ */
 template <int dim, typename T>
 glm::vec<dim, T> surfacePoint(unsigned int degree_u, unsigned int degree_v,
                               const std::vector<T> &knots_u, const std::vector<T> &knots_v,
@@ -140,17 +139,17 @@ glm::vec<dim, T> surfacePoint(unsigned int degree_u, unsigned int degree_v,
 }
 
 /**
-Evaluate derivatives on a non-rational NURBS surface
-@param[in] degree_u Degree of the given surface in u-direction.
-@param[in] degree_v Degree of the given surface in v-direction.
-@param[in] knots_u Knot vector of the surface in u-direction.
-@param[in] knots_v Knot vector of the surface in v-direction.
-@param[in] control_points Control points of the surface in a 2D array.
-@param[in] num_ders Number of times to differentiate
-@param[in] u Parameter to evaluate the surface at.
-@param[in] v Parameter to evaluate the surface at.
-@param[inout] surf_ders Derivatives of the surface at (u, v).
-*/
+ * Evaluate derivatives on a non-rational NURBS surface
+ * @param[in] degree_u Degree of the given surface in u-direction.
+ * @param[in] degree_v Degree of the given surface in v-direction.
+ * @param[in] knots_u Knot vector of the surface in u-direction.
+ * @param[in] knots_v Knot vector of the surface in v-direction.
+ * @param[in] control_points Control points of the surface in a 2D array.
+ * @param[in] num_ders Number of times to differentiate
+ * @param[in] u Parameter to evaluate the surface at.
+ * @param[in] v Parameter to evaluate the surface at.
+ * @param[out] surf_ders Derivatives of the surface at (u, v).
+ */
 template <int dim, typename T>
 array2<glm::vec<dim, T>>
 surfaceDerivatives(unsigned int degree_u, unsigned int degree_v, const std::vector<T> &knots_u,
@@ -223,11 +222,11 @@ template <typename T> glm::vec<3, T> curvePoint(const Curve<T> &crv, T u)
 }
 
 /**
-Evaluate point on a rational NURBS curve
-@param[in] crv RationalCurve object
-@param[in] u Parameter to evaluate the curve at.
-@return point Resulting point on the curve.
-*/
+ * Evaluate point on a rational NURBS curve
+ * @param[in] crv RationalCurve object
+ * @param[in] u Parameter to evaluate the curve at.
+ * @return point Resulting point on the curve.
+ */
 template <typename T> glm::vec<3, T> curvePoint(const RationalCurve<T> &crv, T u)
 {
 
@@ -249,13 +248,13 @@ template <typename T> glm::vec<3, T> curvePoint(const RationalCurve<T> &crv, T u
 }
 
 /**
-Evaluate derivatives of a non-rational NURBS curve
-@param[in] crv Curve object
-@param[in] num_ders Number of times to derivate.
-@param[in] u Parameter to evaluate the derivatives at.
-@return curve_ders Derivatives of the curve at u.
-E.g. curve_ders[n] is the nth derivative at u, where 0 <= n <= num_ders.
-*/
+ * Evaluate derivatives of a non-rational NURBS curve
+ * @param[in] crv Curve object
+ * @param[in] num_ders Number of times to derivate.
+ * @param[in] u Parameter to evaluate the derivatives at.
+ * @return curve_ders Derivatives of the curve at u.
+ * E.g. curve_ders[n] is the nth derivative at u, where 0 <= n <= num_ders.
+ */
 template <typename T>
 std::vector<glm::vec<3, T>> curveDerivatives(const Curve<T> &crv, int num_ders, T u)
 {
@@ -263,16 +262,16 @@ std::vector<glm::vec<3, T>> curveDerivatives(const Curve<T> &crv, int num_ders, 
 }
 
 /**
-Evaluate derivatives of a rational NURBS curve
-@param[in] u Parameter to evaluate the derivatives at.
-@param[in] knots Knot vector of the curve.
-@param[in] control_points Control points of the curve.
-@param[in] weights Weights corresponding to each control point.
-@param[in] num_ders Number of times to differentiate.
-@param[inout] curve_ders Derivatives of the curve at u.
-E.g. curve_ders[n] is the nth derivative at u, where n is between 0 and
-num_ders-1.
-*/
+ * Evaluate derivatives of a rational NURBS curve
+ * @param[in] u Parameter to evaluate the derivatives at.
+ * @param[in] knots Knot vector of the curve.
+ * @param[in] control_points Control points of the curve.
+ * @param[in] weights Weights corresponding to each control point.
+ * @param[in] num_ders Number of times to differentiate.
+ * @param[inout] curve_ders Derivatives of the curve at u.
+ * E.g. curve_ders[n] is the nth derivative at u, where n is between 0 and
+ * num_ders-1.
+ */
 template <typename T>
 std::vector<glm::vec<3, T>> curveDerivatives(const RationalCurve<T> &crv, int num_ders, T u)
 {
@@ -318,10 +317,10 @@ std::vector<glm::vec<3, T>> curveDerivatives(const RationalCurve<T> &crv, int nu
 }
 
 /**
-Evaluate the tangent of a B-spline curve
-@param[in] crv Curve object
-@return Unit tangent of the curve at u.
-*/
+ * Evaluate the tangent of a B-spline curve
+ * @param[in] crv Curve object
+ * @return Unit tangent of the curve at u.
+ */
 template <typename T> glm::vec<3, T> curveTangent(const Curve<T> &crv, T u)
 {
     std::vector<glm::vec<3, T>> ders = curveDerivatives(crv, 1, u);
@@ -335,10 +334,10 @@ template <typename T> glm::vec<3, T> curveTangent(const Curve<T> &crv, T u)
 }
 
 /**
-Evaluate the tangent of a rational B-spline curve
-@param[in] crv RationalCurve object
-@return Unit tangent of the curve at u.
-*/
+ * Evaluate the tangent of a rational B-spline curve
+ * @param[in] crv RationalCurve object
+ * @return Unit tangent of the curve at u.
+ */
 template <typename T> glm::vec<3, T> curveTangent(const RationalCurve<T> &crv, T u)
 {
     std::vector<glm::vec<3, T>> ders = curveDerivatives(crv, 1, u);
@@ -352,12 +351,12 @@ template <typename T> glm::vec<3, T> curveTangent(const RationalCurve<T> &crv, T
 }
 
 /**
-Evaluate point on a nonrational NURBS surface
-@param[in] srf Surface object
-@param[in] u Parameter to evaluate the surface at.
-@param[in] v Parameter to evaluate the surface at.
-@return Resulting point on the surface at (u, v).
-*/
+ * Evaluate point on a nonrational NURBS surface
+ * @param[in] srf Surface object
+ * @param[in] u Parameter to evaluate the surface at.
+ * @param[in] v Parameter to evaluate the surface at.
+ * @return Resulting point on the surface at (u, v).
+ */
 template <typename T> glm::vec<3, T> surfacePoint(const Surface<T> &srf, T u, T v)
 {
     return internal::surfacePoint(srf.degree_u, srf.degree_v, srf.knots_u, srf.knots_v,
@@ -365,12 +364,12 @@ template <typename T> glm::vec<3, T> surfacePoint(const Surface<T> &srf, T u, T 
 }
 
 /**
-Evaluate point on a non-rational NURBS surface
-@param[in] srf RationalSurface object
-@param[in] u Parameter to evaluate the surface at.
-@param[in] v Parameter to evaluate the surface at.
-@return Resulting point on the surface at (u, v).
-*/
+ * Evaluate point on a non-rational NURBS surface
+ * @param[in] srf RationalSurface object
+ * @param[in] u Parameter to evaluate the surface at.
+ * @param[in] v Parameter to evaluate the surface at.
+ * @return Resulting point on the surface at (u, v).
+ */
 template <typename T> glm::vec<3, T> surfacePoint(const RationalSurface<T> &srf, T u, T v)
 {
 
@@ -397,17 +396,17 @@ template <typename T> glm::vec<3, T> surfacePoint(const RationalSurface<T> &srf,
 }
 
 /**
-Evaluate derivatives on a non-rational NURBS surface
-@param[in] degree_u Degree of the given surface in u-direction.
-@param[in] degree_v Degree of the given surface in v-direction.
-@param[in] knots_u Knot vector of the surface in u-direction.
-@param[in] knots_v Knot vector of the surface in v-direction.
-@param[in] control_points Control points of the surface in a 2D array.
-@param[in] num_ders Number of times to differentiate
-@param[in] u Parameter to evaluate the surface at.
-@param[in] v Parameter to evaluate the surface at.
-@return surf_ders Derivatives of the surface at (u, v).
-*/
+ * Evaluate derivatives on a non-rational NURBS surface
+ * @param[in] degree_u Degree of the given surface in u-direction.
+ * @param[in] degree_v Degree of the given surface in v-direction.
+ * @param[in] knots_u Knot vector of the surface in u-direction.
+ * @param[in] knots_v Knot vector of the surface in v-direction.
+ * @param[in] control_points Control points of the surface in a 2D array.
+ * @param[in] num_ders Number of times to differentiate
+ * @param[in] u Parameter to evaluate the surface at.
+ * @param[in] v Parameter to evaluate the surface at.
+ * @return surf_ders Derivatives of the surface at (u, v).
+ */
 template <typename T>
 array2<glm::vec<3, T>> surfaceDerivatives(const Surface<T> &srf, int num_ders, T u, T v)
 {
@@ -416,13 +415,13 @@ array2<glm::vec<3, T>> surfaceDerivatives(const Surface<T> &srf, int num_ders, T
 }
 
 /**
-Evaluate derivatives on a rational NURBS surface
-@param[in] srf RationalSurface object
-@param[in] u Parameter to evaluate the surface at.
-@param[in] v Parameter to evaluate the surface at.
-@param[in] num_ders Number of times to differentiate
-@return Derivatives on the surface at parameter (u, v).
-*/
+ * Evaluate derivatives on a rational NURBS surface
+ * @param[in] srf RationalSurface object
+ * @param[in] u Parameter to evaluate the surface at.
+ * @param[in] v Parameter to evaluate the surface at.
+ * @param[in] num_ders Number of times to differentiate
+ * @return Derivatives on the surface at parameter (u, v).
+ */
 template <typename T>
 array2<glm::vec<3, T>> surfaceDerivatives(const RationalSurface<T> &srf, int num_ders, T u, T v)
 {
@@ -490,13 +489,13 @@ array2<glm::vec<3, T>> surfaceDerivatives(const RationalSurface<T> &srf, int num
 }
 
 /**
-Evaluate the two orthogonal tangents of a non-rational surface at the given
-parameters
-@param[in] srf Surface object
-@param u Parameter in the u-direction
-@param v Parameter in the v-direction
-@return Tuple with unit tangents along u- and v-directions
-*/
+ * Evaluate the two orthogonal tangents of a non-rational surface at the given
+ * parameters
+ * @param[in] srf Surface object
+ * @param u Parameter in the u-direction
+ * @param v Parameter in the v-direction
+ * @return Tuple with unit tangents along u- and v-directions
+ */
 template <typename T>
 std::tuple<glm::vec<3, T>, glm::vec<3, T>> surfaceTangent(const Surface<T> &srf, T u, T v)
 {
@@ -517,13 +516,13 @@ std::tuple<glm::vec<3, T>, glm::vec<3, T>> surfaceTangent(const Surface<T> &srf,
 }
 
 /**
-Evaluate the two orthogonal tangents of a rational surface at the given
-parameters
-@param[in] srf Rational Surface object
-@param u Parameter in the u-direction
-@param v Parameter in the v-direction
-@return Tuple with unit tangents along u- and v-directions
-*/
+ * Evaluate the two orthogonal tangents of a rational surface at the given
+ * parameters
+ * @param[in] srf Rational Surface object
+ * @param u Parameter in the u-direction
+ * @param v Parameter in the v-direction
+ * @return Tuple with unit tangents along u- and v-directions
+ */
 template <typename T>
 std::tuple<glm::vec<3, T>, glm::vec<3, T>> surfaceTangent(const RationalSurface<T> &srf, T u, T v)
 {
@@ -544,12 +543,12 @@ std::tuple<glm::vec<3, T>, glm::vec<3, T>> surfaceTangent(const RationalSurface<
 }
 
 /**
-Evaluate the normal a non-rational surface at the given parameters
-@param[in] srf Surface object
-@param u Parameter in the u-direction
-@param v Parameter in the v-direction
-@param[inout] normal Unit normal at of the surface at (u, v)
-*/
+ * Evaluate the normal a non-rational surface at the given parameters
+ * @param[in] srf Surface object
+ * @param u Parameter in the u-direction
+ * @param v Parameter in the v-direction
+ * @param[inout] normal Unit normal at of the surface at (u, v)
+ */
 template <typename T> glm::vec<3, T> surfaceNormal(const Surface<T> &srf, T u, T v)
 {
     array2<glm::vec<3, T>> ptder = surfaceDerivatives(srf, 1, u, v);
@@ -563,12 +562,12 @@ template <typename T> glm::vec<3, T> surfaceNormal(const Surface<T> &srf, T u, T
 }
 
 /**
-Evaluate the normal of a rational surface at the given parameters
-@param[in] srf Rational Surface object
-@param u Parameter in the u-direction
-@param v Parameter in the v-direction
-@return Unit normal at of the surface at (u, v)
-*/
+ * Evaluate the normal of a rational surface at the given parameters
+ * @param[in] srf Rational Surface object
+ * @param u Parameter in the u-direction
+ * @param v Parameter in the v-direction
+ * @return Unit normal at of the surface at (u, v)
+ */
 template <typename T> glm::vec<3, T> surfaceNormal(const RationalSurface<T> &srf, T u, T v)
 {
     array2<glm::vec<3, T>> ptder = surfaceDerivatives(srf, 1, u, v);
