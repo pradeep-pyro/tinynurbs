@@ -295,8 +295,8 @@ std::vector<glm::vec<3, T>> curveDerivatives(const RationalCurve<T> &crv, int nu
         internal::curveDerivatives(crv.degree, crv.knots, Cw, num_ders, u);
 
     // Split Cwders into coordinates and weights
-    vector<tvecn> Aders;
-    vector<T> wders;
+    std::vector<tvecn> Aders;
+    std::vector<T> wders;
     for (const auto &val : Cwders)
     {
         Aders.push_back(util::truncateHomogenous(val));
