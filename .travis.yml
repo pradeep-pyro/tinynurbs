@@ -21,6 +21,6 @@ before_script:
 script: 
   - mkdir build
   - cd build
-  - cmake -DCMAKE_CXX_COMPILER=$COMPILER -DTINYNURBS_USE_OWN_GLM OFF -DGLM_ROOT_DIR=/tmp/glm ..
+  - cmake -DCMAKE_CXX_COMPILER=$COMPILER -DTINYNURBS_USE_OWN_GLM=OFF -DGLM_ROOT_DIR=/tmp/glm ..
   - make
   - make test
