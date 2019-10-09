@@ -6,7 +6,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mo
 
 set(BUILD_TESTS ON CACHE BOOL "Build unit tests")
 set(GLM_ROOT_DIR "" CACHE STRING "Root directory of GLM (>=0.9.9)")
-set(TINYNURBS_USE_OWN_GLM ON CACHE BOOL "Use own gml from submodule")
+set(TINYNURBS_USE_OWN_GLM ON CACHE BOOL "Use own GLM library from submodule")
 message(STATUS "Variable from cache: ${GLM_ROOT_DIR}")
 
 if(NOT TINYNURBS_USE_OWN_GLM)
