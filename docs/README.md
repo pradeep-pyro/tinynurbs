@@ -7,12 +7,11 @@ This is a lightweight header-only C++14 library for Non-Uniform Rational B-Splin
 Some of the main features include:
 
 - Supports non-rational and rational curves and surfaces of any order
-- Supports planar and space curves
 - Evaluate point and derivatives of any order
 - Knot insertion, splitting without affecting the original shape
 - Wavefront OBJ format I/O
 
-The library is under active development.
+The library is under development.
 
 ## Dependencies
 
@@ -24,12 +23,12 @@ The library is under active development.
 The entire API consists of free functions named `curve*` and `surface*` which accept a `Curve` / `RationalCurve` and `Surface` / `RationalSurface` object, respectively.
 Some example usage is given below.
 
-Create a non-rational 2D curve:
+Create a non-rational planar curve:
 ```cpp
-tinynurbs::Curve<2, float> crv; // Planar curve using float32
-crv.control_points = {glm::vec2(-1, 0), // std::vector of 2D points
-                      glm::vec2(0, 1),
-                      glm::vec2(1, 0)
+tinynurbs::Curve<float> crv; // Planar curve using float32
+crv.control_points = {glm::vec3(-1, 0, 0), // std::vector of 3D points
+                      glm::vec3(0, 1, 0),
+                      glm::vec3(1, 0, 0)
                      };
 crv.knots = {0, 0, 0, 1, 1, 1}; // std::vector of floats
 crv.degree = 2;
@@ -45,9 +44,9 @@ if (!tinynurbs::curveIsValid(crv)) {
 
 Evaluate point and tangent on curve:
 ```cpp
-glm::vec2 pt = tinynurbs::curvePoint(crv, 0.f);
+glm::vec3 pt = tinynurbs::curvePoint(crv, 0.f);
 // Outputs a point [-1, 0]
-glm::vec2 tgt = tinynurbs::curveTangent(crv, 0.5f);
+glm::vec3 tgt = tinynurbs::curveTangent(crv, 0.5f);
 // Outputs a vector [1, 0]
 ```
 
@@ -82,7 +81,7 @@ end
 Create a rational surface shaped like a hemisphere:
 
 ```cpp
-tinynurbs::RationalSurface<3, float> srf;
+tinynurbs::RationalSurface<float> srf;
 srf.degree_u = 3;
 srf.degree_v = 3;
 srf.knots_u = {0, 0, 0, 0, 1, 1, 1, 1};
@@ -107,8 +106,8 @@ srf.weights = {4, 4,
 ```
 
 Split the surface into two along v=0.25:
-```
-tinynurbs::RationalSurface<3, float> left, right;
+```cpp
+tinynurbs::RationalSurface<float> left, right;
 std::tie(left, right) = tinynurbs::surfaceSplitV(srf, 0.25);
 ```
 Left: original surface, Right: after splitting
@@ -116,7 +115,7 @@ Left: original surface, Right: after splitting
 ![split surface](split-surface.png)
 
 Write the surface to an OBJ file:
-```
+```cpp
 tinynurbs::surfaceSaveOBJ("output_surface.obj", srf);
 ```
 creates a file with the following contents:
