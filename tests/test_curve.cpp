@@ -49,6 +49,15 @@ TEST_CASE("curveIsValid (non-rational)", "[curve, glm::vec2, check]")
     REQUIRE(is_valid == false);
 }
 
+TEST_CASE("curveKnotMultiplicity (non-rational)", "[curve, glm::vec2, basis]")
+{
+    auto crv = getNonrationalBezierCurve();
+    unsigned int knotMult0 = tinynurbs::knotMultiplicity(crv.knots, 0.0);
+    REQUIRE(knotMult0 == 3);
+    unsigned int knotMult1 = tinynurbs::knotMultiplicity(crv.knots, 1.0);
+    REQUIRE(knotMult1 == 3);
+}
+
 TEST_CASE("curveInsertKnot (non-rational)", "[curve, non-rational, modify]")
 {
     auto crv = getNonrationalBezierCurve();
