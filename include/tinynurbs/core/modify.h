@@ -40,7 +40,8 @@ void curveKnotInsert(unsigned int deg, const std::vector<T> &knots,
                      std::vector<T> &new_knots, std::vector<glm::vec<dim, T>> &new_cp)
 {
     int k = findSpan(deg, knots, u);
-    unsigned int s = knotMultiplicity(knots, k);
+    unsigned int s = knotMultiplicity(knots, u);
+    assert(s <= deg); // Multiplicity cannot be greater than degree
     if (s == deg)
     {
         return;
@@ -50,7 +51,7 @@ void curveKnotInsert(unsigned int deg, const std::vector<T> &knots,
         r = deg - s;
     }
 
-    // Insert new knots between span and (span + 1)
+    // Insert new knots between k and (k + 1)
     new_knots.resize(knots.size() + r);
     for (int i = 0; i < k + 1; ++i)
     {
@@ -117,7 +118,8 @@ void surfaceKnotInsert(unsigned int degree, const std::vector<T> &knots,
                        std::vector<T> &new_knots, array2<glm::vec<dim, T>> &new_cp)
 {
     int span = findSpan(degree, knots, knot);
-    unsigned int s = knotMultiplicity(knots, span);
+    unsigned int s = knotMultiplicity(knots, knot);
+    assert(s <= degree);  // Knot multiplicity cannot be greater than degree
     if (s == degree)
     {
         return;
@@ -262,7 +264,7 @@ void curveSplit(unsigned int degree, const std::vector<T> &knots,
     std::vector<glm::vec<dim, T>> tmp_cp;
 
     int span = findSpan(degree, knots, u);
-    int r = degree - knotMultiplicity(knots, span);
+    int r = degree - knotMultiplicity(knots, u);
 
     internal::curveKnotInsert(degree, knots, control_points, u, r, tmp_knots, tmp_cp);
 
@@ -320,7 +322,7 @@ void surfaceSplit(unsigned int degree, const std::vector<T> &knots,
     array2<glm::vec<dim, T>> tmp_cp;
 
     int span = findSpan(degree, knots, param);
-    unsigned int r = degree - knotMultiplicity(knots, span);
+    unsigned int r = degree - knotMultiplicity(knots, param);
     internal::surfaceKnotInsert(degree, knots, control_points, param, r, along_u, tmp_knots,
                                 tmp_cp);
 
