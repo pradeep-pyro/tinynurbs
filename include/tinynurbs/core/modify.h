@@ -44,6 +44,8 @@ void curveKnotInsert(unsigned int deg, const std::vector<T> &knots,
     assert(s <= deg); // Multiplicity cannot be greater than degree
     if (s == deg)
     {
+        new_knots = knots;
+        new_cp = cp;
         return;
     }
     if ((r + s) > deg)
@@ -122,6 +124,8 @@ void surfaceKnotInsert(unsigned int degree, const std::vector<T> &knots,
     assert(s <= degree);  // Knot multiplicity cannot be greater than degree
     if (s == degree)
     {
+        new_cp = cp;
+        new_knots = knots;
         return;
     }
     if ((r + s) > degree)
