@@ -29,7 +29,7 @@ TEST_CASE("curvePoint (non-rational)", "[curve, non-rational, evaluate]")
     REQUIRE(pt2.y == Approx(0));
 }
 
-TEST_CASE("curveTangent (glm::vec2)", "[curve, glm::vec2, evaluate]")
+TEST_CASE("curveTangent (glm::vec2)", "[curve, non-rational, evaluate]")
 {
     auto crv = getNonrationalBezierCurve();
     glm::vec2 tgt1 = tinynurbs::curveTangent(crv, 0.5f);
@@ -37,7 +37,7 @@ TEST_CASE("curveTangent (glm::vec2)", "[curve, glm::vec2, evaluate]")
     REQUIRE(tgt1.y == Approx(0));
 }
 
-TEST_CASE("curveIsValid (non-rational)", "[curve, glm::vec2, check]")
+TEST_CASE("curveIsValid (non-rational)", "[curve, non-rational, check]")
 {
     auto crv = getNonrationalBezierCurve();
     bool is_valid = tinynurbs::curveIsValid(crv);
@@ -47,6 +47,31 @@ TEST_CASE("curveIsValid (non-rational)", "[curve, glm::vec2, check]")
     crv.degree = 4;
     is_valid = tinynurbs::curveIsValid(crv);
     REQUIRE(is_valid == false);
+}
+
+TEST_CASE("curveKnotMultiplicity (non-rational)", "[knots, check]")
+{
+    {
+        const std::vector<double> knots{0.0, 0.0, 0.0, 1.0, 1.0};
+        unsigned int knotMult0 = tinynurbs::knotMultiplicity(knots, 0.0);
+        REQUIRE(knotMult0 == 3);
+        unsigned int knotMult1 = tinynurbs::knotMultiplicity(knots, 1.0);
+        REQUIRE(knotMult1 == 2);
+    }
+    {
+        const std::vector<double> knots{0.0, 1.0};
+        unsigned int knotMult0 = tinynurbs::knotMultiplicity(knots, 0.0);
+        REQUIRE(knotMult0 == 1);
+        unsigned int knotMult1 = tinynurbs::knotMultiplicity(knots, 1.0);
+        REQUIRE(knotMult1 == 1);
+    }
+    {
+        const std::vector<double> knots{0.0, 0.0001, 0.0002, 1.0, 1.0001};
+        unsigned int knotMult0 = tinynurbs::knotMultiplicity(knots, 0.0);
+        REQUIRE(knotMult0 == 1);
+        unsigned int knotMult1 = tinynurbs::knotMultiplicity(knots, 1.0);
+        REQUIRE(knotMult1 == 1);
+    }
 }
 
 TEST_CASE("curveInsertKnot (non-rational)", "[curve, non-rational, modify]")
