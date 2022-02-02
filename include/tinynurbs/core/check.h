@@ -247,11 +247,11 @@ template <typename T> bool isArray2ClosedV(unsigned int degree_v, const array2<T
 /////////////////////////////////////////////////////////////////////
 
 /**
- * Returns the mulitplicity of the knot at index
+ * Returns the multiplicity of the knot at index
  * @tparam Type of knot values
  * @param[in] knots Knot vector
- * @param[in] index Index of knot of interest
- * @return Multiplicity (>= 1)
+ * @param[in] knot_val Knot of interest
+ * @return Multiplicity (>= 0)
  */
 template <typename T> unsigned int knotMultiplicity(const std::vector<T> &knots, T knot_val)
 {
