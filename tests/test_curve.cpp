@@ -52,21 +52,21 @@ TEST_CASE("curveIsValid (non-rational)", "[curve, non-rational, check]")
 TEST_CASE("curveKnotMultiplicity (non-rational)", "[knots, check]")
 {
     {
-        const std::vector<float> knots{0.0, 0.0, 0.0, 1.0, 1.0};
+        const std::vector<double> knots{0.0, 0.0, 0.0, 1.0, 1.0};
         unsigned int knotMult0 = tinynurbs::knotMultiplicity(knots, 0.0);
         REQUIRE(knotMult0 == 3);
         unsigned int knotMult1 = tinynurbs::knotMultiplicity(knots, 1.0);
         REQUIRE(knotMult1 == 2);
     }
     {
-        const std::vector<float> knots{0.0, 1.0};
+        const std::vector<double> knots{0.0, 1.0};
         unsigned int knotMult0 = tinynurbs::knotMultiplicity(knots, 0.0);
         REQUIRE(knotMult0 == 1);
         unsigned int knotMult1 = tinynurbs::knotMultiplicity(knots, 1.0);
         REQUIRE(knotMult1 == 1);
     }
     {
-        const std::vector<float> knots{0.0, 0.0001, 0.0002, 1.0, 1.0001};
+        const std::vector<double> knots{0.0, 0.0001, 0.0002, 1.0, 1.0001};
         unsigned int knotMult0 = tinynurbs::knotMultiplicity(knots, 0.0);
         REQUIRE(knotMult0 == 1);
         unsigned int knotMult1 = tinynurbs::knotMultiplicity(knots, 1.0);
