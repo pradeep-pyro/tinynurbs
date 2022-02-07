@@ -247,20 +247,43 @@ template <typename T> bool isArray2ClosedV(unsigned int degree_v, const array2<T
 /////////////////////////////////////////////////////////////////////
 
 /**
+ * Returns the multiplicity of the knot at index
+ * @tparam Type of knot values
+ * @param[in] knots Knot vector
+ * @param[in] knot_val Knot of interest
+ * @return Multiplicity (>= 0)
+ */
+template <typename T> unsigned int knotMultiplicity(const std::vector<T> &knots, T knot_val)
+{
+    T eps = std::numeric_limits<T>::epsilon();
+    unsigned int mult = 0;
+    for (const T knot : knots)
+    {
+        if (std::abs(knot_val - knot) < eps)
+        {
+            ++mult;
+        }
+    }
+    return mult;
+}
+
+/**
  * Returns the mulitplicity of the knot at index
  * @tparam Type of knot values
  * @param[in] knots Knot vector
  * @param[in] index Index of knot of interest
  * @return Multiplicity (>= 1)
  */
-template <typename T> unsigned int knotMultiplicity(const std::vector<T> &knots, unsigned int index)
+template <typename T>
+[[deprecated("Use knotMultiplicity(knots, param).")]]
+unsigned int knotMultiplicity(const std::vector<T> &knots, unsigned int index)
 {
-    T u = knots[index];
+    T curr_knot_val = knots[index];
     T eps = std::numeric_limits<T>::epsilon();
-    unsigned int mult = 1;
-    for (unsigned int i = index; i < knots.size() - 1; ++i)
+    unsigned int mult = 0;
+    for (const T knot : knots)
     {
-        if (std::abs(u - knots[i + 1]) < eps)
+        if (std::abs(curr_knot_val - knot) < eps)
         {
             ++mult;
         }
