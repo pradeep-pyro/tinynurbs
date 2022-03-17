@@ -530,7 +530,7 @@ Surface<T> surfaceKnotInsertV(const Surface<T> &srf, T v, unsigned int repeat = 
     new_srf.degree_v = srf.degree_v;
     new_srf.knots_u = srf.knots_u;
     // New knots and new control points after knot insertion
-    internal::surfaceKnotInsert(srf.degree_u, srf.knots_u, srf.control_points, v, repeat, false,
+    internal::surfaceKnotInsert(srf.degree_v, srf.knots_v, srf.control_points, v, repeat, false,
                                 new_srf.knots_v, new_srf.control_points);
     return new_srf;
 }
