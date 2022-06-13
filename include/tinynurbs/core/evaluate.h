@@ -86,11 +86,11 @@ std::vector<glm::vec<dim, T>> curveDerivatives(unsigned int degree, const std::v
     array2<T> ders = bsplineDerBasis<T>(degree, span, knots, u, num_ders);
 
     // Compute first num_ders derivatives
-    int du = num_ders < degree ? num_ders : degree;
+    int du = num_ders < static_cast<int>(degree) ? num_ders : static_cast<int>(degree);
     for (int k = 0; k <= du; k++)
     {
         curve_ders[k] = tvecn(0.0);
-        for (int j = 0; j <= degree; j++)
+        for (int j = 0; j <= static_cast<int>(degree); j++)
         {
             curve_ders[k] += static_cast<T>(ders(k, j)) * control_points[span - degree + j];
         }
@@ -235,7 +235,7 @@ template <typename T> glm::vec<3, T> curvePoint(const RationalCurve<T> &crv, T u
     // Compute homogenous coordinates of control points
     std::vector<tvecnp1> Cw;
     Cw.reserve(crv.control_points.size());
-    for (int i = 0; i < crv.control_points.size(); i++)
+    for (size_t i = 0; i < crv.control_points.size(); i++)
     {
         Cw.push_back(tvecnp1(util::cartesianToHomogenous(crv.control_points[i], crv.weights[i])));
     }
@@ -285,7 +285,7 @@ std::vector<glm::vec<3, T>> curveDerivatives(const RationalCurve<T> &crv, int nu
     // Compute homogenous coordinates of control points
     std::vector<tvecnp1> Cw;
     Cw.reserve(crv.control_points.size());
-    for (int i = 0; i < crv.control_points.size(); i++)
+    for (size_t i = 0; i < crv.control_points.size(); i++)
     {
         Cw.push_back(util::cartesianToHomogenous(crv.control_points[i], crv.weights[i]));
     }

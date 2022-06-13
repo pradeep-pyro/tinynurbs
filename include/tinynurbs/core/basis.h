@@ -87,15 +87,15 @@ template <typename T> T bsplineOneBasis(int i, unsigned int deg, const std::vect
     // Initialize zeroth-degree functions
     std::vector<double> N;
     N.resize(deg + 1);
-    for (int j = 0; j <= deg; j++)
+    for (int j = 0; j <= static_cast<int>(deg); j++)
     {
         N[j] = (u >= U[i + j] && u < U[i + j + 1]) ? 1.0 : 0.0;
     }
     // Compute triangular table
-    for (int k = 1; k <= deg; k++)
+    for (int k = 1; k <= static_cast<int>(deg); k++)
     {
         T saved = (util::close(N[0], 0.0)) ? 0.0 : ((u - U[i]) * N[0]) / (U[i + k] - U[i]);
-        for (int j = 0; j < deg - k + 1; j++)
+        for (int j = 0; j < static_cast<int>(deg) - k + 1; j++)
         {
             T Uleft = U[i + j + 1];
             T Uright = U[i + j + k + 1];
@@ -135,7 +135,7 @@ std::vector<T> bsplineBasis(unsigned int deg, int span, const std::vector<T> &kn
 
     N[0] = 1.0;
 
-    for (int j = 1; j <= deg; j++)
+    for (int j = 1; j <= static_cast<int>(deg); j++)
     {
         left[j] = (u - knots[span + 1 - j]);
         right[j] = knots[span + j] - u;
@@ -172,7 +172,7 @@ array2<T> bsplineDerBasis(unsigned int deg, int span, const std::vector<T> &knot
     array2<T> ndu(deg + 1, deg + 1);
     ndu(0, 0) = 1.0;
 
-    for (int j = 1; j <= deg; j++)
+    for (int j = 1; j <= static_cast<int>(deg); j++)
     {
         left[j] = u - knots[span + 1 - j];
         right[j] = knots[span + j] - u;
@@ -193,14 +193,14 @@ array2<T> bsplineDerBasis(unsigned int deg, int span, const std::vector<T> &knot
 
     array2<T> ders(num_ders + 1, deg + 1, T(0));
 
-    for (int j = 0; j <= deg; j++)
+    for (int j = 0; j <= static_cast<int>(deg); j++)
     {
         ders(0, j) = ndu(j, deg);
     }
 
     array2<T> a(2, deg + 1);
 
-    for (int r = 0; r <= deg; r++)
+    for (int r = 0; r <= static_cast<int>(deg); r++)
     {
         int s1 = 0;
         int s2 = 1;
@@ -261,7 +261,7 @@ array2<T> bsplineDerBasis(unsigned int deg, int span, const std::vector<T> &knot
     T fac = static_cast<T>(deg);
     for (int k = 1; k <= num_ders; k++)
     {
-        for (int j = 0; j <= deg; j++)
+        for (int j = 0; j <= static_cast<int>(deg); j++)
         {
             ders(k, j) *= fac;
         }
