@@ -27,18 +27,13 @@ template <typename T> int findSpan(unsigned int degree, const std::vector<T> &kn
     // index of last control point
     int n = static_cast<int>(knots.size()) - degree - 2;
     assert(n >= 0);
-    /*
-        // For u that is equal to last knot value
-        if (util::close(u, knots[n + 1])) {
-            return n;
-        }
-    */
+
     // For values of u that lies outside the domain
-    if (u > (knots[n + 1] - std::numeric_limits<T>::epsilon()))
+    if (u >= knots[n + 1])
     {
         return n;
     }
-    if (u < (knots[degree] + std::numeric_limits<T>::epsilon()))
+    if (u <= knots[degree])
     {
         return degree;
     }
